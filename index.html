@@ -1,1 +1,384 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تبدیل رهن به اجاره - با فاصله هزارگان و حروف</title>
+<style>
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+font-family: 'Segoe UI', Tahoma, sans-serif;
+}
+body {
+background: linear-gradient(135deg, #0f3443, #34e89e);
+min-height: 100vh;
+display: flex;
+justify-content: center;
+align-items: center;
+padding: 20px;
+}
+.container {
+max-width: 650px;
+width: 100%;
+background: white;
+border-radius: 32px;
+padding: 30px 25px;
+box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+h1 {
+text-align: center;
+color: #0f3443;
+margin-bottom: 8px;
+font-size: 1.8rem;
+}
+.sub {
+text-align: center;
+color: #2c7a5e;
+margin-bottom: 30px;
+font-size: 0.85rem;
+border-bottom: 1px solid #ddd;
+padding-bottom: 12px;
+}
+.card {
+background: #f9fafc;
+border-radius: 24px;
+padding: 20px;
+margin-bottom: 25px;
+border: 1px solid #e0e7e9;
+}
+.card-title {
+font-size: 1.4rem;
+font-weight: bold;
+color: #1e5a4a;
+margin-bottom: 20px;
+border-right: 5px solid #34e89e;
+padding-right: 12px;
+}
+.input-group {
+margin-bottom: 18px;
+}
+label {
+display: block;
+font-weight: 600;
+margin-bottom: 8px;
+color: #1f5e4d;
+}
+input {
+width: 100%;
+padding: 14px 16px;
+font-size: 1rem;
+border: 2px solid #d0dfdd;
+border-radius: 40px;
+outline: none;
+transition: 0.2s;
+background: white;
+direction: ltr;
+text-align: right;
+font-family: monospace;
+font-size: 1.1rem;
+}
+input:focus {
+border-color: #34e89e;
+box-shadow: 0 0 0 3px rgba(52,232,158,0.2);
+}
+button {
+width: 100%;
+background: #0f3443;
+color: white;
+border: none;
+padding: 14px;
+font-size: 1rem;
+font-weight: bold;
+border-radius: 40px;
+cursor: pointer;
+transition: 0.2s;
+margin-top: 10px;
+}
+button:hover {
+background: #1f6e58;
+transform: scale(0.97);
+}
+.result {
+background: #eef7f2;
+padding: 18px;
+border-radius: 24px;
+margin-top: 20px;
+text-align: center;
+border-right: 6px solid #34e89e;
+}
+.result .number {
+font-size: 1.6rem;
+font-weight: 800;
+color: #0a5c48;
+display: block;
+margin-top: 8px;
+word-break: break-word;
+}
+.result .persian-text {
+font-size: 0.9rem;
+color: #2c7a5e;
+margin-top: 8px;
+font-weight: 500;
+background: #e0f0ea;
+display: inline-block;
+padding: 5px 12px;
+border-radius: 30px;
+}
+.info {
+background: #fef7e0;
+border-radius: 20px;
+padding: 14px;
+font-size: 0.8rem;
+color: #a16600;
+text-align: center;
+}
+footer {
+text-align: center;
+font-size: 0.7rem;
+color: #5e8b7c;
+margin-top: 20px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🏠 تبدیل رهن به اجاره</h1>
+<div class="sub">بر اساس عرف ایران (هر ۱۰۰ میلیون رهن = ۳ میلیون اجاره)</div>
 
+<!-- بخش تبدیل رهن به اجاره -->
+<div class="card">
+<div class="card-title">🔁 رهن → اجاره ماهانه</div>
+<div class="input-group">
+<label>💰 مبلغ رهن (تومان)</label>
+<input type="text" id="rahnAmount" placeholder="مثال: 200,000,000" value="200,000,000">
+</div>
+<button id="convertToRentBtn">محاسبه اجاره ماهانه</button>
+<div class="result">
+📌 اجاره ماهانه معادل:
+<span class="number" id="monthlyRentNumber">-- تومان</span>
+<div class="persian-text" id="monthlyRentText">---</div>
+</div>
+</div>
+
+<!-- بخش تبدیل اجاره به رهن -->
+<div class="card">
+<div class="card-title">🔄 اجاره ماهانه → رهن (ودیعه)</div>
+<div class="input-group">
+<label>🏷️ مبلغ اجاره ماهانه (تومان)</label>
+<input type="text" id="rentAmount" placeholder="مثال: 12,000,000" value="12,000,000">
+</div>
+<button id="convertToRahnBtn">محاسبه مبلغ رهن</button>
+<div class="result">
+🏦 مبلغ ودیعه (رهن) معادل:
+<span class="number" id="rahnResultNumber">-- تومان</span>
+<div class="persian-text" id="rahnResultText">---</div>
+</div>
+</div>
+
+<div class="info">
+⚡ فرمول: مبلغ رهن × ۰.۰۳ = اجاره ماهانه   |   اجاره ÷ ۰.۰۳ = رهن
+</div>
+<footer>
+عدد را تایپ کنید - خودکار جدا می‌شود و معادل حروف نمایش داده می‌شود
+</footer>
+</div>
+
+<script>
+(function() {
+const RATIO = 0.03;
+
+const rahnInput = document.getElementById('rahnAmount');
+const rentInput = document.getElementById('rentAmount');
+const convertToRentBtn = document.getElementById('convertToRentBtn');
+const convertToRahnBtn = document.getElementById('convertToRahnBtn');
+const monthlyRentNumber = document.getElementById('monthlyRentNumber');
+const monthlyRentText = document.getElementById('monthlyRentText');
+const rahnResultNumber = document.getElementById('rahnResultNumber');
+const rahnResultText = document.getElementById('rahnResultText');
+
+// تبدیل عدد به فرمت با کاما (هزارگان)
+function formatWithComma(num) {
+if (num === null || num === undefined || isNaN(num)) return '';
+return Math.round(num).toLocaleString('en-US');
+}
+
+// تبدیل عدد به حروف (تا ۱۰۰ میلیارد)
+function numberToPersianWords(num) {
+if (isNaN(num) || num === 0) return 'صفر تومان';
+
+num = Math.round(num);
+
+const ones = ['', 'یک', 'دو', 'سه', 'چهار', 'پنج', 'شش', 'هفت', 'هشت', 'نه'];
+const tens = ['', '', 'بیست', 'سی', 'چهل', 'پنجاه', 'شصت', 'هفتاد', 'هشتاد', 'نود'];
+const teens = ['ده', 'یازده', 'دوازده', 'سیزده', 'چهارده', 'پانزده', 'شانزده', 'هفده', 'هجده', 'نوزده'];
+
+function convertLessThanThousand(n) {
+if (n === 0) return '';
+let result = '';
+if (n >= 100) {
+result += ones[Math.floor(n / 100)] + 'صد';
+n %= 100;
+if (n > 0) result += ' و ';
+}
+if (n >= 20) {
+result += tens[Math.floor(n / 10)];
+n %= 10;
+if (n > 0) result += ' و ' + ones[n];
+} else if (n >= 10) {
+result += teens[n - 10];
+} else if (n > 0) {
+result += ones[n];
+}
+return result;
+}
+
+const units = [
+{ name: 'میلیارد', value: 1000000000 },
+{ name: 'میلیون', value: 1000000 },
+{ name: 'هزار', value: 1000 },
+{ name: '', value: 1 }
+ ];
+
+let parts = [];
+let remaining = num;
+
+for (let unit of units) {
+if (remaining >= unit.value) {
+let amount = Math.floor(remaining / unit.value);
+if (amount > 0) {
+let amountText = convertLessThanThousand(amount);
+if (unit.name) {
+parts.push(amountText + ' ' + unit.name);
+} else if (amountText) {
+parts.push(amountText);
+}
+}
+remaining %= unit.value;
+}
+}
+
+if (parts.length === 0) return 'صفر تومان';
+return parts.join(' و ') + ' تومان';
+}
+
+// گرفتن عدد خالص از ورودی (با پشتیبانی از کاما و فاصله)
+function getRawNumberFromInput(inputElement) {
+let raw = inputElement.value;
+// حذف همه چیز بجز ارقام
+let numericOnly = raw.replace(/[^0-9]/g, '');
+if (numericOnly === '') return NaN;
+return parseInt(numericOnly, 10);
+}
+
+// تنظیم مقدار ورودی با فرمت کاما (بدون ایجاد لوپ)
+function setInputFormatted(inputElement, numericValue) {
+if (isNaN(numericValue) || numericValue === 0) {
+inputElement.value = '';
+} else {
+inputElement.value = formatWithComma(numericValue);
+}
+}
+
+// تابع به‌روز رسانی همه نمایش‌ها
+function updateAll() {
+let rahnVal = getRawNumberFromInput(rahnInput);
+let rentVal = getRawNumberFromInput(rentInput);
+
+// محاسبه رهن به اجاره
+if (!isNaN(rahnVal) && rahnVal > 0) {
+let monthlyRent = rahnVal * RATIO;
+monthlyRentNumber.innerHTML = formatWithComma(monthlyRent) + ' تومان';
+monthlyRentText.innerHTML = numberToPersianWords(monthlyRent);
+} else {
+monthlyRentNumber.innerHTML = '-- تومان';
+monthlyRentText.innerHTML = '---';
+}
+
+// محاسبه اجاره به رهن
+if (!isNaN(rentVal) && rentVal > 0) {
+let rahnAmount = rentVal / RATIO;
+rahnResultNumber.innerHTML = formatWithComma(rahnAmount) + ' تومان';
+rahnResultText.innerHTML = numberToPersianWords(rahnAmount);
+} else {
+rahnResultNumber.innerHTML = '-- تومان';
+rahnResultText.innerHTML = '---';
+}
+}
+
+// هندل تایپ در اینپوت رهن
+rahnInput.addEventListener('input', function(e) {
+let raw = this.value;
+// حذف همه چیز بجز عدد
+let numericOnly = raw.replace(/[^0-9]/g, '');
+let num = numericOnly === '' ? NaN : parseInt(numericOnly, 10);
+
+if (!isNaN(num)) {
+// تنظیم مجدد با فرمت کاما
+this.value = formatWithComma(num);
+} else {
+this.value = '';
+}
+
+updateAll();
+});
+
+// هندل تایپ در اینپوت اجاره
+rentInput.addEventListener('input', function(e) {
+let raw = this.value;
+let numericOnly = raw.replace(/[^0-9]/g, '');
+let num = numericOnly === '' ? NaN : parseInt(numericOnly, 10);
+
+if (!isNaN(num)) {
+this.value = formatWithComma(num);
+} else {
+this.value = '';
+}
+
+updateAll();
+});
+
+// دکمه‌ها
+convertToRentBtn.addEventListener('click', function() {
+let rahnVal = getRawNumberFromInput(rahnInput);
+if (!isNaN(rahnVal)) {
+setInputFormatted(rahnInput, rahnVal);
+updateAll();
+}
+});
+
+convertToRahnBtn.addEventListener('click', function() {
+let rentVal = getRawNumberFromInput(rentInput);
+if (!isNaN(rentVal)) {
+setInputFormatted(rentInput, rentVal);
+updateAll();
+}
+});
+
+// مقداردهی اولیه
+let initRahn = getRawNumberFromInput(rahnInput);
+if (!isNaN(initRahn)) setInputFormatted(rahnInput, initRahn);
+let initRent = getRawNumberFromInput(rentInput);
+if (!isNaN(initRent)) setInputFormatted(rentInput, initRent);
+updateAll();
+
+// Enter
+rahnInput.addEventListener('keypress', function(e) {
+if (e.key === 'Enter') {
+let val = getRawNumberFromInput(rahnInput);
+if (!isNaN(val)) setInputFormatted(rahnInput, val);
+updateAll();
+}
+});
+rentInput.addEventListener('keypress', function(e) {
+if (e.key === 'Enter') {
+let val = getRawNumberFromInput(rentInput);
+if (!isNaN(val)) setInputFormatted(rentInput, val);
+updateAll();
+}
+});
+})();
+</script>
+</body>
+</html>
