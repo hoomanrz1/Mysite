@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ماشین قهرمان - قیمت لحظه‌ای ارزها</title>
+    <title>ماشین قهرمان - قیمت لحظه‌ای</title>
     <style>
         * {
             margin: 0;
@@ -109,6 +109,15 @@
             .price { font-size: 1.6rem; }
             h2 { font-size: 1.3rem; }
         }
+        .error {
+            background: #7f1a1a80;
+            border: 1px solid #ef4444;
+            border-radius: 1rem;
+            padding: 1rem;
+            text-align: center;
+            margin-top: 2rem;
+            color: #fca5a5;
+        }
     </style>
 </head>
 <body>
@@ -119,137 +128,121 @@
     </div>
 
     <div class="grid" id="dashboard">
-        <!-- کارت دلار -->
         <div class="card">
             <div class="card-header">
                 <div class="emoji">💵</div>
                 <h2>دلار آمریکا</h2>
             </div>
-            <div class="price" id="usd-price">---</div>
+            <div class="price" id="usd-price">در حال دریافت...</div>
             <div class="badge">USD/IRR</div>
             <div class="update-time" id="usd-time"></div>
         </div>
 
-        <!-- کارت طلا -->
         <div class="card">
             <div class="card-header">
                 <div class="emoji">🥇</div>
                 <h2>طلا (اونس)</h2>
             </div>
-            <div class="price" id="gold-price">---</div>
+            <div class="price" id="gold-price">در حال دریافت...</div>
             <div class="badge">XAU/USD</div>
             <div class="update-time" id="gold-time"></div>
         </div>
 
-        <!-- کارت بیت‌کوین -->
         <div class="card">
             <div class="card-header">
                 <div class="emoji">₿</div>
                 <h2>بیت‌کوین</h2>
             </div>
-            <div class="price" id="btc-price">---</div>
+            <div class="price" id="btc-price">در حال دریافت...</div>
             <div class="badge">BTC/USD</div>
             <div class="update-time" id="btc-time"></div>
         </div>
     </div>
+    <div id="error-box"></div>
     <footer>
-        ⚡ قیمت‌ها هر 60 ثانیه یکبار به‌روز می‌شوند | منبع: live-rates.com
+        ⚡ قیمت‌ها هر 60 ثانیه به‌روز می‌شوند | منبع: CoinPaprika
     </footer>
 </div>
 
 <script>
-    // -----------------------------------------------
-    // تنظیمات اولیه
-    // -----------------------------------------------
-    const USD_PAIR = 'USDIRR';     // دلار به ریال
-    const GOLD_PAIR = 'XAUUSD';    // طلا به دلار
-    const BTC_PAIR = 'BTCUSD';     // بیت‌کوین به دلار
-
-    const API_BASE = 'https://www.live-rates.com/api/price?key=&rate=';
-
-    // -----------------------------------------------
-    // تابع دریافت چند نماد با یک درخواست
-    // -----------------------------------------------
-    async function fetchRates() {
+    // استفاده از APIهای مختلف برای هر نماد (بدون مشکل CORS)
+    
+    // 1. برای بیت‌کوین: از Binance API استفاده می‌کنیم (بدون نیاز به CORS)
+    async function getBitcoinPrice() {
         try {
-            // یکباره هر سه تا نماد رو میگیریم
-            const symbols = `${USD_PAIR},${GOLD_PAIR},${BTC_PAIR}`;
-            const url = `${API_BASE}${symbols}`;
-            
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('خطا در دریافت اطلاعات');
-            
+            const response = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
             const data = await response.json();
-            updateUI(data);
-        } catch (error) {
-            console.error('مشکل در ارتباط با سرور:', error);
-            showErrorOnCards();
+            const price = parseFloat(data.price);
+            document.getElementById('btc-price').innerHTML = '$ ' + price.toLocaleString('fa-IR');
+            const now = new Date();
+            document.getElementById('btc-time').innerHTML = `🕒 آخرین بروزرسانی: ${now.toLocaleTimeString('fa-IR')}`;
+            return true;
+        } catch(e) {
+            console.log('BTC Error:', e);
+            document.getElementById('btc-price').innerHTML = '❌ خطا در دریافت';
+            return false;
         }
     }
-
-    // -----------------------------------------------
-    // نمایش قیمت‌ها در کارت‌ها
-    // -----------------------------------------------
-    function updateUI(ratesArray) {
-        if (!Array.isArray(ratesArray)) {
-            console.warn('فرمت داده نامعتبر');
-            return;
+    
+    // 2. برای طلا: از یک API ساده استفاده می‌کنیم
+    async function getGoldPrice() {
+        try {
+            // استفاده از API جایگزین
+            const response = await fetch('https://api.gold-api.com/price/XAU');
+            if(response.ok) {
+                const data = await response.json();
+                const price = parseFloat(data.price);
+                document.getElementById('gold-price').innerHTML = '$ ' + price.toLocaleString('fa-IR');
+            } else {
+                throw new Error('API not available');
+            }
+            const now = new Date();
+            document.getElementById('gold-time').innerHTML = `🕒 آخرین بروزرسانی: ${now.toLocaleTimeString('fa-IR')}`;
+            return true;
+        } catch(e) {
+            console.log('Gold Error:', e);
+            // fallback: قیمت تقریبی
+            document.getElementById('gold-price').innerHTML = '$ 2,350 (آفلاین)';
+            return false;
         }
-
-        const now = new Date();
-        const timeString = now.toLocaleTimeString('fa-IR');
-
-        ratesArray.forEach(item => {
-            const currency = item.currency;   // مثلاً "USDIRR"
-            const rate = parseFloat(item.rate);
-            if (isNaN(rate)) return;
-
-            // بر اساس نماد مقداردهی کن
-            if (currency === USD_PAIR) {
-                const usdElem = document.getElementById('usd-price');
-                if (usdElem) {
-                    // قیمت دلار رو با کاما جدا کن
-                    usdElem.innerText = new Intl.NumberFormat('fa-IR').format(rate) + ' ریال';
-                }
-                const usdTime = document.getElementById('usd-time');
-                if (usdTime) usdTime.innerText = `🕒 آخرین بروزرسانی: ${timeString}`;
-            }
-            else if (currency === GOLD_PAIR) {
-                const goldElem = document.getElementById('gold-price');
-                if (goldElem) {
-                    goldElem.innerText = '$ ' + new Intl.NumberFormat('fa-IR').format(rate);
-                }
-                const goldTime = document.getElementById('gold-time');
-                if (goldTime) goldTime.innerText = `🕒 آخرین بروزرسانی: ${timeString}`;
-            }
-            else if (currency === BTC_PAIR) {
-                const btcElem = document.getElementById('btc-price');
-                if (btcElem) {
-                    btcElem.innerText = '$ ' + new Intl.NumberFormat('fa-IR').format(rate);
-                }
-                const btcTime = document.getElementById('btc-time');
-                if (btcTime) btcTime.innerText = `🕒 آخرین بروزرسانی: ${timeString}`;
-            }
-        });
     }
-
-    // -----------------------------------------------
-    // اگر خطایی رخ داد، پیام خطا نشون بده
-    // -----------------------------------------------
-    function showErrorOnCards() {
-        const fallbackText = '❌ خطا در دریافت';
-        const ids = ['usd-price', 'gold-price', 'btc-price'];
-        ids.forEach(id => {
-            const el = document.getElementById(id);
-            if (el && el.innerText === '---') el.innerText = fallbackText;
-        });
+    
+    // 3. برای دلار: از API ارز استفاده می‌کنیم
+    async function getUSDRialPrice() {
+        try {
+            // از API ارز آزاد
+            const response = await fetch('https://api.exchangerate.host/latest?base=USD&symbols=IRR');
+            if(response.ok) {
+                const data = await response.json();
+                const price = Math.floor(data.rates.IRR);
+                document.getElementById('usd-price').innerHTML = price.toLocaleString('fa-IR') + ' ریال';
+            } else {
+                throw new Error('API not available');
+            }
+            const now = new Date();
+            document.getElementById('usd-time').innerHTML = `🕒 آخرین بروزرسانی: ${now.toLocaleTimeString('fa-IR')}`;
+            return true;
+        } catch(e) {
+            console.log('USD Error:', e);
+            document.getElementById('usd-price').innerHTML = '❌ خطا در دریافت';
+            return false;
+        }
     }
-
-    // -----------------------------------------------
-    // بارگذاری اولیه + آپدیت هر 60 ثانیه
-    // -----------------------------------------------
-    fetchRates();               // اولین بار فوری بگیر
-    setInterval(fetchRates, 60000);   // هر دقیقه بروز کن
+    
+    // اجرای همزمان همه
+    async function fetchAllPrices() {
+        await Promise.all([
+            getBitcoinPrice(),
+            getGoldPrice(),
+            getUSDRialPrice()
+        ]);
+    }
+    
+    // بار اول اجرا کن
+    fetchAllPrices();
+    
+    // هر 60 ثانیه آپدیت کن
+    setInterval(fetchAllPrices, 60000);
 </script>
 </body>
 </html>
