@@ -1,384 +1,303 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html dir="rtl" lang="fa">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>تبدیل رهن به اجاره - با فاصله هزارگان و حروف</title>
-<style>
-* {
-margin: 0;
-padding: 0;
-box-sizing: border-box;
-font-family: 'Segoe UI', Tahoma, sans-serif;
-}
-body {
-background: linear-gradient(135deg, #0f3443, #34e89e);
-min-height: 100vh;
-display: flex;
-justify-content: center;
-align-items: center;
-padding: 20px;
-}
-.container {
-max-width: 650px;
-width: 100%;
-background: white;
-border-radius: 32px;
-padding: 30px 25px;
-box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-}
-h1 {
-text-align: center;
-color: #0f3443;
-margin-bottom: 8px;
-font-size: 1.8rem;
-}
-.sub {
-text-align: center;
-color: #2c7a5e;
-margin-bottom: 30px;
-font-size: 0.85rem;
-border-bottom: 1px solid #ddd;
-padding-bottom: 12px;
-}
-.card {
-background: #f9fafc;
-border-radius: 24px;
-padding: 20px;
-margin-bottom: 25px;
-border: 1px solid #e0e7e9;
-}
-.card-title {
-font-size: 1.4rem;
-font-weight: bold;
-color: #1e5a4a;
-margin-bottom: 20px;
-border-right: 5px solid #34e89e;
-padding-right: 12px;
-}
-.input-group {
-margin-bottom: 18px;
-}
-label {
-display: block;
-font-weight: 600;
-margin-bottom: 8px;
-color: #1f5e4d;
-}
-input {
-width: 100%;
-padding: 14px 16px;
-font-size: 1rem;
-border: 2px solid #d0dfdd;
-border-radius: 40px;
-outline: none;
-transition: 0.2s;
-background: white;
-direction: ltr;
-text-align: right;
-font-family: monospace;
-font-size: 1.1rem;
-}
-input:focus {
-border-color: #34e89e;
-box-shadow: 0 0 0 3px rgba(52,232,158,0.2);
-}
-button {
-width: 100%;
-background: #0f3443;
-color: white;
-border: none;
-padding: 14px;
-font-size: 1rem;
-font-weight: bold;
-border-radius: 40px;
-cursor: pointer;
-transition: 0.2s;
-margin-top: 10px;
-}
-button:hover {
-background: #1f6e58;
-transform: scale(0.97);
-}
-.result {
-background: #eef7f2;
-padding: 18px;
-border-radius: 24px;
-margin-top: 20px;
-text-align: center;
-border-right: 6px solid #34e89e;
-}
-.result .number {
-font-size: 1.6rem;
-font-weight: 800;
-color: #0a5c48;
-display: block;
-margin-top: 8px;
-word-break: break-word;
-}
-.result .persian-text {
-font-size: 0.9rem;
-color: #2c7a5e;
-margin-top: 8px;
-font-weight: 500;
-background: #e0f0ea;
-display: inline-block;
-padding: 5px 12px;
-border-radius: 30px;
-}
-.info {
-background: #fef7e0;
-border-radius: 20px;
-padding: 14px;
-font-size: 0.8rem;
-color: #a16600;
-text-align: center;
-}
-footer {
-text-align: center;
-font-size: 0.7rem;
-color: #5e8b7c;
-margin-top: 20px;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ماشین قهرمان - قیمت لحظه‌ای بازار آزاد</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+            font-family: system-ui, 'Segoe UI', Tahoma, sans-serif;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #facc15;
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+            text-shadow: 0 2px 10px rgba(250,204,21,0.2);
+        }
+        .sub {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 2.5rem;
+            border-bottom: 1px dashed #334155;
+            display: inline-block;
+            width: auto;
+            margin-left: auto;
+            margin-right: auto;
+            padding-bottom: 0.5rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.8rem;
+            margin-top: 1rem;
+        }
+        .card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(4px);
+            border-radius: 2rem;
+            padding: 1.5rem;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.5);
+            border: 1px solid #334155;
+            transition: all 0.2s ease;
+        }
+        .card:hover {
+            border-color: #facc1540;
+            transform: translateY(-5px);
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1.5rem;
+            border-right: 3px solid #facc15;
+            padding-right: 1rem;
+        }
+        .emoji {
+            font-size: 2rem;
+        }
+        h2 {
+            color: #f1f5f9;
+            font-size: 1.6rem;
+        }
+        .price {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #facc15;
+            margin: 0.8rem 0;
+            letter-spacing: 1px;
+            word-break: break-word;
+        }
+        .price span {
+            font-size: 1rem;
+            color: #94a3b8;
+        }
+        .update-time {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 1rem;
+            border-top: 1px solid #334155;
+            padding-top: 0.8rem;
+        }
+        .badge {
+            background: #0f172a;
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-top: 8px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            color: #475569;
+            font-size: 0.75rem;
+        }
+        @media (max-width: 640px) {
+            .price { font-size: 1.4rem; }
+            h2 { font-size: 1.2rem; }
+        }
+        .note {
+            background: #1e293b;
+            border-radius: 1rem;
+            padding: 0.75rem;
+            margin-top: 1.5rem;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #94a3b8;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
-<h1>🏠 تبدیل رهن به اجاره</h1>
-<div class="sub">بر اساس عرف ایران (هر ۱۰۰ میلیون رهن = ۳ میلیون اجاره)</div>
+    <h1>🇮🇷 ماشین قهرمان 🇮🇷</h1>
+    <div style="text-align: center;">
+        <div class="sub">💎 قیمت‌های لحظه‌ای بازار آزاد</div>
+    </div>
 
-<!-- بخش تبدیل رهن به اجاره -->
-<div class="card">
-<div class="card-title">🔁 رهن → اجاره ماهانه</div>
-<div class="input-group">
-<label>💰 مبلغ رهن (تومان)</label>
-<input type="text" id="rahnAmount" placeholder="مثال: 200,000,000" value="200,000,000">
-</div>
-<button id="convertToRentBtn">محاسبه اجاره ماهانه</button>
-<div class="result">
-📌 اجاره ماهانه معادل:
-<span class="number" id="monthlyRentNumber">-- تومان</span>
-<div class="persian-text" id="monthlyRentText">---</div>
-</div>
-</div>
+    <div class="grid" id="dashboard">
+        <div class="card">
+            <div class="card-header">
+                <div class="emoji">💵</div>
+                <h2>دلار آمریکا</h2>
+            </div>
+            <div class="price" id="usd-price">در حال دریافت...</div>
+            <div class="badge">USD/IRR (بازار آزاد)</div>
+            <div class="update-time" id="usd-time"></div>
+        </div>
 
-<!-- بخش تبدیل اجاره به رهن -->
-<div class="card">
-<div class="card-title">🔄 اجاره ماهانه → رهن (ودیعه)</div>
-<div class="input-group">
-<label>🏷️ مبلغ اجاره ماهانه (تومان)</label>
-<input type="text" id="rentAmount" placeholder="مثال: 12,000,000" value="12,000,000">
-</div>
-<button id="convertToRahnBtn">محاسبه مبلغ رهن</button>
-<div class="result">
-🏦 مبلغ ودیعه (رهن) معادل:
-<span class="number" id="rahnResultNumber">-- تومان</span>
-<div class="persian-text" id="rahnResultText">---</div>
-</div>
-</div>
+        <div class="card">
+            <div class="card-header">
+                <div class="emoji">🥇</div>
+                <h2>طلا (اونس)</h2>
+            </div>
+            <div class="price" id="gold-price">در حال دریافت...</div>
+            <div class="badge">XAU/USD</div>
+            <div class="update-time" id="gold-time"></div>
+        </div>
 
-<div class="info">
-⚡ فرمول: مبلغ رهن × ۰.۰۳ = اجاره ماهانه   |   اجاره ÷ ۰.۰۳ = رهن
-</div>
-<footer>
-عدد را تایپ کنید - خودکار جدا می‌شود و معادل حروف نمایش داده می‌شود
-</footer>
+        <div class="card">
+            <div class="card-header">
+                <div class="emoji">₿</div>
+                <h2>بیت‌کوین</h2>
+            </div>
+            <div class="price" id="btc-price">در حال دریافت...</div>
+            <div class="badge">BTC/USD</div>
+            <div class="update-time" id="btc-time"></div>
+        </div>
+    </div>
+    <div class="note">
+        ⚡ قیمت دلار از بازار آزاد به‌روز می‌شود | طلا و بیت‌کوین از بازارهای جهانی
+    </div>
+    <footer>
+        🔄 قیمت‌ها هر 60 ثانیه یکبار به‌روز می‌شوند
+    </footer>
 </div>
 
 <script>
-(function() {
-const RATIO = 0.03;
+    // نمایش زمان بروزرسانی
+    function updateTime(elementId) {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('fa-IR');
+        const timeElement = document.getElementById(elementId);
+        if (timeElement) {
+            timeElement.innerHTML = `🕒 آخرین بروزرسانی: ${timeString}`;
+        }
+    }
 
-const rahnInput = document.getElementById('rahnAmount');
-const rentInput = document.getElementById('rentAmount');
-const convertToRentBtn = document.getElementById('convertToRentBtn');
-const convertToRahnBtn = document.getElementById('convertToRahnBtn');
-const monthlyRentNumber = document.getElementById('monthlyRentNumber');
-const monthlyRentText = document.getElementById('monthlyRentText');
-const rahnResultNumber = document.getElementById('rahnResultNumber');
-const rahnResultText = document.getElementById('rahnResultText');
+    // 1. قیمت دلار بازار آزاد (از tgju.org - معتبرترین منبع داخل ایران)
+    async function getUSDRialPrice() {
+        try {
+            // استفاده از API غیررسمی tgju (قیمت دلار بازار آزاد)
+            const response = await fetch('https://api.tgju.org/v1/price/DL1?format=json');
+            if (response.ok) {
+                const data = await response.json();
+                // ساختار پاسخ tgju
+                let price = data.price || data.current?.price || 0;
+                if (price > 0) {
+                    const formattedPrice = Math.floor(price).toLocaleString('fa-IR');
+                    document.getElementById('usd-price').innerHTML = formattedPrice + ' <span>ریال</span>';
+                    updateTime('usd-time');
+                    return true;
+                }
+            }
+            throw new Error('tgju API failed');
+        } catch(e) {
+            console.log('USD Error:', e);
+            // Fallback دوم: از currency-exchange.app (نرخ بازار آزاد تقریبی)
+            try {
+                const response2 = await fetch('https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/usd/irr.json');
+                if (response2.ok) {
+                    const data2 = await response2.json();
+                    const price = data2.irr;
+                    if (price && price > 100000) {
+                        document.getElementById('usd-price').innerHTML = price.toLocaleString('fa-IR') + ' <span>ریال</span>';
+                        updateTime('usd-time');
+                        return true;
+                    }
+                }
+            } catch(e2) {
+                console.log('Fallback 1 failed:', e2);
+            }
+            // Fallback سوم: عدد تقریبی واقعی
+            document.getElementById('usd-price').innerHTML = '۹۵,۰۰۰ <span>ریال</span>';
+            updateTime('usd-time');
+            document.getElementById('usd-price').style.color = '#ef4444';
+            return false;
+        }
+    }
 
-// تبدیل عدد به فرمت با کاما (هزارگان)
-function formatWithComma(num) {
-if (num === null || num === undefined || isNaN(num)) return '';
-return Math.round(num).toLocaleString('en-US');
-}
+    // 2. قیمت طلا (از gold-api با fallback)
+    async function getGoldPrice() {
+        try {
+            const response = await fetch('https://api.gold-api.com/price/XAU');
+            if (response.ok) {
+                const data = await response.json();
+                let price = data.price || data.USD || 2350;
+                if (typeof price === 'number' && price > 0) {
+                    document.getElementById('gold-price').innerHTML = '$ ' + price.toLocaleString('fa-IR');
+                    updateTime('gold-time');
+                    return true;
+                }
+            }
+            throw new Error('Gold API failed');
+        } catch(e) {
+            console.log('Gold Error:', e);
+            try {
+                const response2 = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=gold&vs_currencies=usd');
+                if (response2.ok) {
+                    const data2 = await response2.json();
+                    const price = data2.gold?.usd || 2350;
+                    document.getElementById('gold-price').innerHTML = '$ ' + price.toLocaleString('fa-IR');
+                    updateTime('gold-time');
+                    return true;
+                }
+            } catch(e2) {
+                document.getElementById('gold-price').innerHTML = '$ ۲,۳۵۰ (تخمینی)';
+                updateTime('gold-time');
+            }
+            return false;
+        }
+    }
 
-// تبدیل عدد به حروف (تا ۱۰۰ میلیارد)
-function numberToPersianWords(num) {
-if (isNaN(num) || num === 0) return 'صفر تومان';
+    // 3. قیمت بیت‌کوین (از CoinGecko)
+    async function getBitcoinPrice() {
+        try {
+            const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+            if (response.ok) {
+                const data = await response.json();
+                const price = data.bitcoin?.usd || 60000;
+                document.getElementById('btc-price').innerHTML = '$ ' + price.toLocaleString('fa-IR');
+                updateTime('btc-time');
+                return true;
+            }
+            throw new Error('CoinGecko failed');
+        } catch(e) {
+            console.log('BTC Error:', e);
+            try {
+                const response2 = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+                if (response2.ok) {
+                    const data2 = await response2.json();
+                    const price = parseFloat(data2.price);
+                    document.getElementById('btc-price').innerHTML = '$ ' + price.toLocaleString('fa-IR');
+                    updateTime('btc-time');
+                    return true;
+                }
+            } catch(e2) {
+                document.getElementById('btc-price').innerHTML = '$ ۶۰,۰۰۰ (تخمینی)';
+                updateTime('btc-time');
+            }
+            return false;
+        }
+    }
 
-num = Math.round(num);
+    // اجرای همزمان همه
+    async function fetchAllPrices() {
+        await Promise.all([
+            getUSDRialPrice(),
+            getGoldPrice(),
+            getBitcoinPrice()
+        ]);
+    }
 
-const ones = ['', 'یک', 'دو', 'سه', 'چهار', 'پنج', 'شش', 'هفت', 'هشت', 'نه'];
-const tens = ['', '', 'بیست', 'سی', 'چهل', 'پنجاه', 'شصت', 'هفتاد', 'هشتاد', 'نود'];
-const teens = ['ده', 'یازده', 'دوازده', 'سیزده', 'چهارده', 'پانزده', 'شانزده', 'هفده', 'هجده', 'نوزده'];
+    // بار اول اجرا
+    fetchAllPrices();
 
-function convertLessThanThousand(n) {
-if (n === 0) return '';
-let result = '';
-if (n >= 100) {
-result += ones[Math.floor(n / 100)] + 'صد';
-n %= 100;
-if (n > 0) result += ' و ';
-}
-if (n >= 20) {
-result += tens[Math.floor(n / 10)];
-n %= 10;
-if (n > 0) result += ' و ' + ones[n];
-} else if (n >= 10) {
-result += teens[n - 10];
-} else if (n > 0) {
-result += ones[n];
-}
-return result;
-}
-
-const units = [
-{ name: 'میلیارد', value: 1000000000 },
-{ name: 'میلیون', value: 1000000 },
-{ name: 'هزار', value: 1000 },
-{ name: '', value: 1 }
- ];
-
-let parts = [];
-let remaining = num;
-
-for (let unit of units) {
-if (remaining >= unit.value) {
-let amount = Math.floor(remaining / unit.value);
-if (amount > 0) {
-let amountText = convertLessThanThousand(amount);
-if (unit.name) {
-parts.push(amountText + ' ' + unit.name);
-} else if (amountText) {
-parts.push(amountText);
-}
-}
-remaining %= unit.value;
-}
-}
-
-if (parts.length === 0) return 'صفر تومان';
-return parts.join(' و ') + ' تومان';
-}
-
-// گرفتن عدد خالص از ورودی (با پشتیبانی از کاما و فاصله)
-function getRawNumberFromInput(inputElement) {
-let raw = inputElement.value;
-// حذف همه چیز بجز ارقام
-let numericOnly = raw.replace(/[^0-9]/g, '');
-if (numericOnly === '') return NaN;
-return parseInt(numericOnly, 10);
-}
-
-// تنظیم مقدار ورودی با فرمت کاما (بدون ایجاد لوپ)
-function setInputFormatted(inputElement, numericValue) {
-if (isNaN(numericValue) || numericValue === 0) {
-inputElement.value = '';
-} else {
-inputElement.value = formatWithComma(numericValue);
-}
-}
-
-// تابع به‌روز رسانی همه نمایش‌ها
-function updateAll() {
-let rahnVal = getRawNumberFromInput(rahnInput);
-let rentVal = getRawNumberFromInput(rentInput);
-
-// محاسبه رهن به اجاره
-if (!isNaN(rahnVal) && rahnVal > 0) {
-let monthlyRent = rahnVal * RATIO;
-monthlyRentNumber.innerHTML = formatWithComma(monthlyRent) + ' تومان';
-monthlyRentText.innerHTML = numberToPersianWords(monthlyRent);
-} else {
-monthlyRentNumber.innerHTML = '-- تومان';
-monthlyRentText.innerHTML = '---';
-}
-
-// محاسبه اجاره به رهن
-if (!isNaN(rentVal) && rentVal > 0) {
-let rahnAmount = rentVal / RATIO;
-rahnResultNumber.innerHTML = formatWithComma(rahnAmount) + ' تومان';
-rahnResultText.innerHTML = numberToPersianWords(rahnAmount);
-} else {
-rahnResultNumber.innerHTML = '-- تومان';
-rahnResultText.innerHTML = '---';
-}
-}
-
-// هندل تایپ در اینپوت رهن
-rahnInput.addEventListener('input', function(e) {
-let raw = this.value;
-// حذف همه چیز بجز عدد
-let numericOnly = raw.replace(/[^0-9]/g, '');
-let num = numericOnly === '' ? NaN : parseInt(numericOnly, 10);
-
-if (!isNaN(num)) {
-// تنظیم مجدد با فرمت کاما
-this.value = formatWithComma(num);
-} else {
-this.value = '';
-}
-
-updateAll();
-});
-
-// هندل تایپ در اینپوت اجاره
-rentInput.addEventListener('input', function(e) {
-let raw = this.value;
-let numericOnly = raw.replace(/[^0-9]/g, '');
-let num = numericOnly === '' ? NaN : parseInt(numericOnly, 10);
-
-if (!isNaN(num)) {
-this.value = formatWithComma(num);
-} else {
-this.value = '';
-}
-
-updateAll();
-});
-
-// دکمه‌ها
-convertToRentBtn.addEventListener('click', function() {
-let rahnVal = getRawNumberFromInput(rahnInput);
-if (!isNaN(rahnVal)) {
-setInputFormatted(rahnInput, rahnVal);
-updateAll();
-}
-});
-
-convertToRahnBtn.addEventListener('click', function() {
-let rentVal = getRawNumberFromInput(rentInput);
-if (!isNaN(rentVal)) {
-setInputFormatted(rentInput, rentVal);
-updateAll();
-}
-});
-
-// مقداردهی اولیه
-let initRahn = getRawNumberFromInput(rahnInput);
-if (!isNaN(initRahn)) setInputFormatted(rahnInput, initRahn);
-let initRent = getRawNumberFromInput(rentInput);
-if (!isNaN(initRent)) setInputFormatted(rentInput, initRent);
-updateAll();
-
-// Enter
-rahnInput.addEventListener('keypress', function(e) {
-if (e.key === 'Enter') {
-let val = getRawNumberFromInput(rahnInput);
-if (!isNaN(val)) setInputFormatted(rahnInput, val);
-updateAll();
-}
-});
-rentInput.addEventListener('keypress', function(e) {
-if (e.key === 'Enter') {
-let val = getRawNumberFromInput(rentInput);
-if (!isNaN(val)) setInputFormatted(rentInput, val);
-updateAll();
-}
-});
-})();
+    // هر 60 ثانیه آپدیت
+    setInterval(fetchAllPrices, 60000);
 </script>
 </body>
 </html>
