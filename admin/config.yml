@@ -2,11 +2,10 @@ backend:
   name: git-gateway
   branch: main
 
-media_folder: "public/images"
+media_folder: "images"
 public_folder: "/images"
 
 collections:
-  # املاک فروش
   - name: "sell"
     label: "املاک فروش"
     folder: "content/sell"
@@ -17,9 +16,7 @@ collections:
       - { label: "قیمت", name: "price", widget: "string" }
       - { label: "تصویر", name: "image", widget: "image" }
       - { label: "ویژگی‌ها", name: "features", widget: "list", field: { label: "ویژگی", name: "feature", widget: "string" } }
-      - { label: "توضیحات", name: "description", widget: "markdown", required: false }
 
-  # املاک اجاره
   - name: "rent"
     label: "املاک اجاره"
     folder: "content/rent"
@@ -30,34 +27,11 @@ collections:
       - { label: "قیمت", name: "price", widget: "string" }
       - { label: "تصویر", name: "image", widget: "image" }
       - { label: "ویژگی‌ها", name: "features", widget: "list", field: { label: "ویژگی", name: "feature", widget: "string" } }
-      - { label: "توضیحات", name: "description", widget: "markdown", required: false }
 
-  # محاسبه‌گر (تنظیمات)
   - name: "calculator"
     label: "تنظیمات محاسبه‌گر"
     folder: "content/calculator"
     create: false
     fields:
-      - { label: "قیمت هر متر (تومان)", name: "pricePerMeter", widget: "number" }
-      - { label: "درصد مالیات", name: "taxPercent", widget: "number", default: 9 }
+      - { label: "قیمت هر متر (تومان)", name: "pricePerMeter", widget: "number", default: 150000000 }
       - { label: "درصد کمیسیون", name: "commissionPercent", widget: "number", default: 2.5 }
-
-  # درباره ما
-  - name: "about"
-    label: "درباره ما"
-    folder: "content/about"
-    create: false
-    fields:
-      - { label: "عنوان", name: "title", widget: "string" }
-      - { label: "متن", name: "body", widget: "markdown" }
-      - { label: "تصویر", name: "image", widget: "image", required: false }
-
-  # صفحات جدید (هر وقت خواستی اضافه کن)
-  - name: "pages"
-    label: "صفحات جدید"
-    folder: "content/pages"
-    create: true
-    fields:
-      - { label: "عنوان صفحه", name: "title", widget: "string" }
-      - { label: "آدرس صفحه (مثلا commission)", name: "slug", widget: "string" }
-      - { label: "محتوا", name: "body", widget: "markdown" }
