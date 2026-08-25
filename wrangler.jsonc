@@ -1,0 +1,16 @@
+{
+  "name": "mysite",
+  "compatibility_date": "2026-08-24",
+  "main": "worker.js",
+  "assets": {
+    "directory": "./",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "kv_namespaces": [
+    {
+      "binding": "PROPERTIES_KV",
+      "id": "c926437ca9d2487eb94439fbeb439486"
+    }
+  ]
+}
