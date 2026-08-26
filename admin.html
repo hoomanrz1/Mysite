@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پنل مدیریت | املاک راد</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+body { font-family: 'Vazirmatn', system-ui, sans-serif; }
+</style>
+</head>
+<body class="bg-zinc-950 text-zinc-200 min-h-screen">
+
+<!-- Login Screen -->
+<div id="loginScreen" class="min-h-screen flex items-center justify-center px-6">
+  <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-10 w-full max-w-md">
+    <div class="text-center mb-8">
+      <div class="w-16 h-16 mx-auto bg-gradient-to-br from-amber-400 to-yellow-600 rounded-2xl flex items-center justify-center text-4xl font-black text-black mb-4">ر</div>
+      <h1 class="text-2xl font-bold">ورود به پنل مدیریت</h1>
+      <p class="text-zinc-400 mt-2">املاک راد</p>
+    </div>
+    <input id="passwordInput" type="password" placeholder="رمز عبور"
+      class="w-full bg-zinc-950 border border-zinc-700 rounded-2xl py-4 px-6 mb-4 focus:outline-none focus:border-amber-400">
+    <button onclick="login()" class="w-full bg-amber-400 hover:bg-amber-300 text-black font-bold py-4 rounded-2xl transition">
+      ورود
+    </button>
+    <p id="loginError" class="text-red-400 text-sm mt-4 text-center hidden">رمز اشتباه است</p>
+  </div>
+</div>
+
+<!-- Admin Dashboard -->
+<div id="dashboard" class="hidden max-w-5xl mx-auto px-6 py-12">
+  <div class="flex justify-between items-center mb-10">
+    <h1 class="text-3xl font-bold">پنل مدیریت املاک</h1>
+    <a href="index.html" class="text-amber-400 hover:text-amber-300">بازگشت به سایت</a>
+  </div>
+
+  <!-- Add Property Form -->
+  <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 mb-10">
+    <h2 class="text-xl font-bold mb-6">افزودن ملک جدید</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">نوع معامله</label>
+        <select id="p_type" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+          <option value="sale">فروش</option>
+          <option value="rent">اجاره</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">برچسب (مثلا: مستغلات فروش)</label>
+        <input id="p_badge" type="text" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">عنوان ملک</label>
+        <input id="p_title" type="text" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">منطقه / آدرس کوتاه</label>
+        <input id="p_location" type="text" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">قیمت (میلیارد تومان)</label>
+        <input id="p_price" type="text" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">لینک عکس</label>
+        <input id="p_image" type="text" placeholder="https://..." class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">تعداد واحد</label>
+        <input id="p_units" type="text" placeholder="مثلا: 2واحدی" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">متراژ هر طبقه</label>
+        <input id="p_floor" type="text" placeholder="مثلا: هر طبقه 500 متر" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">پارکینگ</label>
+        <input id="p_parking" type="text" placeholder="مثلا: 90 پارکینگ" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+    </div>
+    <button onclick="addProperty()" class="mt-6 bg-amber-400 hover:bg-amber-300 text-black font-bold py-3 px-8 rounded-2xl transition">
+      <i class="fas fa-plus ml-2"></i> افزودن ملک
+    </button>
+    <p id="addMessage" class="mt-4 text-sm"></p>
+  </div>
+
+  <!-- Properties List -->
+  <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
+    <h2 class="text-xl font-bold mb-6">لیست املاک ثبت‌شده</h2>
+    <div id="propertiesList" class="space-y-4">
+      <p class="text-zinc-500">در حال بارگذاری...</p>
+    </div>
+  </div>
+</div>
+
+<script>
+async function checkAuth() {
+  const res = await fetch('/api/check-auth');
+  const data = await res.json();
+  if (data.authed) {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
+    loadProperties();
+  }
+}
+
+async function login() {
+  const password = document.getElementById('passwordInput').value;
+  const res = await fetch('/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password })
+  });
+  const data = await res.json();
+  if (data.success) {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
+    loadProperties();
+  } else {
+    document.getElementById('loginError').classList.remove('hidden');
+  }
+}
+
+async function addProperty() {
+  const property = {
+    type: document.getElementById('p_type').value,
+    badge: document.getElementById('p_badge').value,
+    title: document.getElementById('p_title').value,
+    location: document.getElementById('p_location').value,
+    price: document.getElementById('p_price').value,
+    image: document.getElementById('p_image').value,
+    units: document.getElementById('p_units').value,
+    floor: document.getElementById('p_floor').value,
+    parking: document.getElementById('p_parking').value
+  };
+
+  if (!property.title || !property.price) {
+    document.getElementById('addMessage').innerHTML = '<span class="text-red-400">لطفا حداقل عنوان و قیمت را وارد کنید</span>';
+    return;
+  }
+
+  const res = await fetch('/api/properties', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(property)
+  });
+  const data = await res.json();
+  if (data.success) {
+    document.getElementById('addMessage').innerHTML = '<span class="text-green-400">ملک با موفقیت اضافه شد</span>';
+    document.querySelectorAll('#dashboard input').forEach(i => i.value = '');
+    loadProperties();
+  } else {
+    document.getElementById('addMessage').innerHTML = '<span class="text-red-400">' + (data.error || 'خطا در ثبت') + '</span>';
+  }
+}
+
+async function deleteProperty(id) {
+  if (!confirm('آیا از حذف این ملک مطمئن هستید؟')) return;
+  await fetch('/api/properties/' + id, { method: 'DELETE' });
+  loadProperties();
+}
+
+async function loadProperties() {
+  const res = await fetch('/api/properties');
+  const properties = await res.json();
+  const list = document.getElementById('propertiesList');
+
+  if (properties.length === 0) {
+    list.innerHTML = '<p class="text-zinc-500">هنوز ملکی ثبت نشده</p>';
+    return;
+  }
+
+  list.innerHTML = properties.map(p => `
+    <div class="flex justify-between items-center bg-zinc-950 border border-zinc-800 rounded-2xl p-5">
+      <div>
+        <span class="text-xs text-amber-400">${p.type === 'sale' ? 'فروش' : 'اجاره'}</span>
+        <h3 class="font-semibold">${p.title}</h3>
+        <p class="text-zinc-500 text-sm">${p.location || ''} — ${p.price} میلیارد تومان</p>
+      </div>
+      <button onclick="deleteProperty('${p.id}')" class="text-red-400 hover:text-red-300">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>
+  `).join('');
+}
+
+checkAuth();
+</script>
+
+</body>
+</html>
