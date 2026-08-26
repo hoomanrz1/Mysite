@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="جزئیات کامل ملک - املاک راد">
+<title>جزئیات ملک | املاک راد</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+body { font-family: 'Vazirmatn', system-ui, sans-serif; }
+.gold-gradient {
+  background: linear-gradient(135deg, #d4af37, #f5e8c7, #d4af37);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.nav-link { position: relative; }
+.nav-link:after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -6px;
+  right: 0;
+  background: linear-gradient(to left, #d4af37, #f5e8c7);
+  transition: all 0.3s ease;
+}
+.nav-link:hover:after { width: 100%; right: auto; left: 0; }
+.luxury-btn { transition: all 0.4s ease; }
+.luxury-btn:hover { background: #d4af37; color: #111827; transform: translateY(-3px); }
+.modal-overlay {
+  background: rgba(0,0,0,0.8);
+}
+</style>
+</head>
+<body class="bg-zinc-950 text-zinc-200">
+
+<!-- Navbar -->
+<nav class="bg-black/90 backdrop-blur-lg border-b border-zinc-800 fixed w-full z-50">
+<div class="max-w-7xl mx-auto px-8">
+<div class="flex justify-between items-center py-6">
+<div class="flex items-center gap-4">
+<div class="w-11 h-11 bg-gradient-to-br from-amber-400 to-yellow-600 rounded-2xl flex items-center justify-center text-3xl font-black text-black">ر</div>
+<div><span class="text-3xl font-bold tracking-tighter">املاک راد</span></div>
+</div>
+<div class="hidden md:flex items-center gap-10 text-lg">
+<a href="index.html" class="nav-link font-medium hover:text-amber-400">خانه</a>
+<a href="sale.html" class="nav-link font-medium hover:text-amber-400">فروش</a>
+<a href="rent.html" class="nav-link font-medium hover:text-amber-400">اجاره</a>
+<a href="calculator.html" class="nav-link font-medium hover:text-amber-400">محاسبه گر املاک</a>
+<a href="about.html" class="nav-link font-medium hover:text-amber-400">درباره ما</a>
+</div>
+<div class="flex items-center gap-4">
+<a href="tel:09124096970" class="hidden sm:flex luxury-btn bg-amber-400 text-black px-8 py-3.5 rounded-2xl font-semibold items-center gap-2">
+<i class="fas fa-phone"></i> تماس با رضایی
+</a>
+<button onclick="document.getElementById('mobileMenu').classList.toggle('hidden')" class="md:hidden w-11 h-11 flex items-center justify-center rounded-full border border-zinc-700 text-xl">
+<i class="fas fa-bars"></i>
+</button>
+</div>
+</div>
+</div>
+<div id="mobileMenu" class="hidden md:hidden flex flex-col gap-1 pb-6 px-2 text-lg">
+<a href="index.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">خانه</a>
+<a href="sale.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">فروش</a>
+<a href="rent.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">اجاره</a>
+<a href="calculator.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">محاسبه گر املاک</a>
+<a href="about.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">درباره ما</a>
+<a href="tel:09124096970" class="mt-2 bg-amber-400 text-black text-center py-3 rounded-xl font-semibold">
+<i class="fas fa-phone ml-2"></i> تماس با رضایی
+</a>
+</div>
+</nav>
+
+<!-- Property Detail -->
+<section class="pt-32 pb-24 px-6">
+<div id="propertyContent" class="max-w-5xl mx-auto">
+<p class="text-zinc-500 text-center py-20">در حال بارگذاری اطلاعات ملک...</p>
+</div>
+</section>
+
+<!-- Visit Request Modal -->
+<div id="visitModal" class="hidden fixed inset-0 modal-overlay z-[100] flex items-center justify-center p-4">
+<div class="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-lg w-full max-h-[85vh] overflow-y-auto p-8">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-xl font-bold text-amber-400">هماهنگی برای بازدید ملک</h3>
+<button onclick="document.getElementById('visitModal').classList.add('hidden')" class="text-zinc-400 hover:text-white text-2xl">&times;</button>
+</div>
+<textarea id="visitTemplateText" readonly class="w-full bg-zinc-950 border border-zinc-700 rounded-2xl p-4 text-sm leading-loose h-72 resize-none"></textarea>
+<div class="flex gap-3 mt-4">
+<button onclick="copyVisitText()" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-semibold py-3 rounded-2xl">
+<i class="fas fa-copy ml-2"></i> کپی متن
+</button>
+</div>
+<p id="copyMsg" class="text-green-400 text-sm text-center mt-2 hidden">متن کپی شد ✓</p>
+<div class="border-t border-zinc-800 mt-6 pt-6 text-center">
+<p class="text-zinc-400 mb-3">به واتساپ ارسال فرمایید</p>
+<a id="whatsappVisitLink" href="#" target="_blank" class="inline-flex items-center gap-3 bg-green-600 hover:bg-green-500 text-white font-bold px-8 py-4 rounded-2xl">
+<i class="fab fa-whatsapp text-2xl"></i> ۰۹۱۲۴۰۹۶۹۷۰
+</a>
+</div>
+</div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-black py-20 border-t border-zinc-900">
+<div class="max-w-7xl mx-auto px-8">
+<div class="flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-gradient-to-br from-amber-400 to-yellow-600 rounded-2xl flex items-center justify-center text-4xl font-black text-black">ر</div>
+<div class="text-3xl font-bold">املاک راد</div>
+</div>
+<div class="text-center md:text-right">
+<p>تلفن تماس: <span class="text-amber-400">۰۹۱۲۴۰۹۶۹۷۰</span></p>
+<p class="text-zinc-500 text-sm mt-2">© ۱۴۰۵ املاک راد - تمامی حقوق محفوظ است</p>
+</div>
+</div>
+</div>
+</footer>
+
+<script>
+function getIdFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('id');
+}
+
+function buildVisitTemplate(title) {
+  return `موضوع: درخواست بازدید از ${title}
+
+با سلام و احترام
+بدین‌وسیله به استحضار می‌رساند، شرکت ............... در نظر دارد به‌منظور بررسی و ارزیابی ملک معرفی‌شده بازدید به عمل بیاوریم.
+لذا خواهشمند است در صورت صلاحدید، هماهنگی‌های لازم جهت فراهم شدن امکان بازدید کارشناسان این شرکت در تاریخ و ساعت مورد توافق انجام پذیرد.
+پیشاپیش از همکاری و حسن توجه جنابعالی کمال تشکر و قدردانی را داریم.
+
+با احترام
+نام و سمت نماینده شرکت: ..........................
+تعداد بازدید کننده‌ها و اسامی: ..........................
+شماره تماس: ..........................
+تاریخ: ..........................
+مهر و امضا`;
+}
+
+function openVisitModal(title) {
+  const text = buildVisitTemplate(title);
+  document.getElementById('visitTemplateText').value = text;
+  document.getElementById('whatsappVisitLink').href = 'https://wa.me/989124096970?text=' + encodeURIComponent(text);
+  document.getElementById('visitModal').classList.remove('hidden');
+}
+
+function copyVisitText() {
+  const textarea = document.getElementById('visitTemplateText');
+  textarea.select();
+  navigator.clipboard.writeText(textarea.value).then(() => {
+    const msg = document.getElementById('copyMsg');
+    msg.classList.remove('hidden');
+    setTimeout(() => msg.classList.add('hidden'), 2000);
+  });
+}
+
+async function loadProperty() {
+  const id = getIdFromUrl();
+  const container = document.getElementById('propertyContent');
+
+  if (!id) {
+    container.innerHTML = '<p class="text-red-400 text-center py-20">آدرس ملک نامعتبر است.</p>';
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/properties/' + id);
+    if (!res.ok) {
+      container.innerHTML = '<p class="text-red-400 text-center py-20">این ملک پیدا نشد یا حذف شده است.</p>';
+      return;
+    }
+    const p = await res.json();
+    document.title = p.title + ' | املاک راد';
+
+    const priceBlock = p.type === 'sale'
+      ? `<span class="text-4xl font-bold text-amber-400">${p.price}</span><span class="text-lg block text-zinc-400">میلیارد تومان</span>`
+      : `<span class="text-2xl font-bold text-amber-400">ودیعه ${p.deposit}</span><span class="text-lg block text-zinc-400">اجاره ${p.rentAmount}</span>`;
+
+    let extraHtml = '';
+    if (p.extraFields && p.extraFields.length > 0) {
+      extraHtml = p.extraFields.filter(f => f.label && f.value).map(f => `
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+          <div class="text-amber-400 text-sm mb-1">${f.label}</div>
+          <div class="text-lg">${f.value}</div>
+        </div>
+      `).join('');
+    }
+
+    container.innerHTML = `
+      <a href="${p.type === 'sale' ? 'sale.html' : 'rent.html'}" class="inline-flex items-center gap-2 text-amber-400 hover:text-amber-300 mb-8">
+        <i class="fas fa-arrow-right"></i> بازگشت به لیست ${p.type === 'sale' ? 'فروش' : 'اجاره'}
+      </a>
+      <div class="rounded-3xl overflow-hidden mb-8 border border-zinc-800">
+        <img src="${p.image || 'https://via.placeholder.com/1000x600?text=بدون+عکس'}" class="w-full h-96 object-cover" alt="${p.title}">
+      </div>
+      <div class="flex flex-col md:flex-row justify-between md:items-center gap-6 mb-10">
+        <div>
+          <span class="text-xs font-bold bg-amber-400/10 text-amber-400 px-4 py-2 rounded-2xl">${p.badge || (p.type === 'sale' ? 'فروش' : 'اجاره')}</span>
+          <h1 class="text-4xl font-bold mt-4">${p.title}</h1>
+          <p class="text-zinc-400 text-lg mt-2"><i class="fas fa-location-dot ml-1"></i> ${p.location || ''}</p>
+        </div>
+        <div class="text-left">${priceBlock}</div>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-5 mb-10">
+        ${p.units ? `<div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 text-center"><i class="fas fa-building text-amber-400 mb-2"></i><div>${p.units}</div></div>` : ''}
+        ${p.area ? `<div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 text-center"><i class="fas fa-vector-square text-amber-400 mb-2"></i><div>${p.area} متر</div></div>` : ''}
+        ${p.floor ? `<div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 text-center"><i class="fas fa-layer-group text-amber-400 mb-2"></i><div>${p.floor}</div></div>` : ''}
+        ${p.parking ? `<div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 text-center"><i class="fas fa-square-parking text-amber-400 mb-2"></i><div>${p.parking}</div></div>` : ''}
+      </div>
+      ${extraHtml ? `<div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">${extraHtml}</div>` : ''}
+      <button onclick="openVisitModal('${(p.title || '').replace(/'/g, "\\'")}')"
+        class="w-full luxury-btn bg-amber-400 hover:bg-amber-300 text-black font-bold text-lg py-5 rounded-2xl">
+        <i class="fas fa-calendar-check ml-2"></i> هماهنگی برای بازدید این ملک
+      </button>
+    `;
+  } catch (err) {
+    container.innerHTML = '<p class="text-red-400 text-center py-20">خطا در بارگذاری اطلاعات ملک.</p>';
+  }
+}
+
+loadProperty();
+</script>
+
+</body>
+</html>
