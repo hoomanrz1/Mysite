@@ -43,7 +43,7 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
       <div>
         <label class="block text-amber-400 text-sm mb-2">نوع معامله</label>
-        <select id="p_type" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+        <select id="p_type" onchange="toggleFields()" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
           <option value="sale">فروش</option>
           <option value="rent">اجاره</option>
         </select>
@@ -60,10 +60,23 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
         <label class="block text-amber-400 text-sm mb-2">منطقه / آدرس کوتاه</label>
         <input id="p_location" type="text" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
       </div>
-      <div>
+
+      <!-- Sale-only field -->
+      <div id="saleFields">
         <label class="block text-amber-400 text-sm mb-2">قیمت (میلیارد تومان)</label>
         <input id="p_price" type="text" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
       </div>
+
+      <!-- Rent-only fields -->
+      <div id="rentFields1" class="hidden">
+        <label class="block text-amber-400 text-sm mb-2">ودیعه (تومان)</label>
+        <input id="p_deposit" type="text" placeholder="مثلا: 500 میلیون" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+      <div id="rentFields2" class="hidden">
+        <label class="block text-amber-400 text-sm mb-2">اجاره ماهانه (تومان)</label>
+        <input id="p_rentAmount" type="text" placeholder="مثلا: 15 میلیون" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+
       <div>
         <label class="block text-amber-400 text-sm mb-2">لینک عکس</label>
         <input id="p_image" type="text" placeholder="https://..." class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
@@ -97,6 +110,23 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 </div>
 
 <script>
+function toggleFields() {
+  const type = document.getElementById('p_type').value;
+  const saleFields = document.getElementById('saleFields');
+  const rentFields1 = document.getElementById('rentFields1');
+  const rentFields2 = document.getElementById('rentFields2');
+
+  if (type === 'sale') {
+    saleFields.classList.remove('hidden');
+    rentFields1.classList.add('hidden');
+    rentFields2.classList.add('hidden');
+  } else {
+    saleFields.classList.add('hidden');
+    rentFields1.classList.remove('hidden');
+    rentFields2.classList.remove('hidden');
+  }
+}
+
 async function checkAuth() {
   const res = await fetch('/api/check-auth');
   const data = await res.json();
@@ -125,20 +155,31 @@ async function login() {
 }
 
 async function addProperty() {
+  const type = document.getElementById('p_type').value;
   const property = {
-    type: document.getElementById('p_type').value,
+    type: type,
     badge: document.getElementById('p_badge').value,
     title: document.getElementById('p_title').value,
     location: document.getElementById('p_location').value,
     price: document.getElementById('p_price').value,
+    deposit: document.getElementById('p_deposit').value,
+    rentAmount: document.getElementById('p_rentAmount').value,
     image: document.getElementById('p_image').value,
     units: document.getElementById('p_units').value,
     floor: document.getElementById('p_floor').value,
     parking: document.getElementById('p_parking').value
   };
 
-  if (!property.title || !property.price) {
-    document.getElementById('addMessage').innerHTML = '<span class="text-red-400">لطفا حداقل عنوان و قیمت را وارد کنید</span>';
+  if (!property.title) {
+    document.getElementById('addMessage').innerHTML = '<span class="text-red-400">لطفا حداقل عنوان ملک را وارد کنید</span>';
+    return;
+  }
+  if (type === 'sale' && !property.price) {
+    document.getElementById('addMessage').innerHTML = '<span class="text-red-400">لطفا قیمت را وارد کنید</span>';
+    return;
+  }
+  if (type === 'rent' && (!property.deposit || !property.rentAmount)) {
+    document.getElementById('addMessage').innerHTML = '<span class="text-red-400">لطفا ودیعه و اجاره را وارد کنید</span>';
     return;
   }
 
@@ -178,7 +219,7 @@ async function loadProperties() {
       <div>
         <span class="text-xs text-amber-400">${p.type === 'sale' ? 'فروش' : 'اجاره'}</span>
         <h3 class="font-semibold">${p.title}</h3>
-        <p class="text-zinc-500 text-sm">${p.location || ''} — ${p.price} میلیارد تومان</p>
+        <p class="text-zinc-500 text-sm">${p.location || ''} — ${p.type === 'sale' ? (p.price + ' میلیارد تومان') : ('ودیعه ' + p.deposit + ' / اجاره ' + p.rentAmount)}</p>
       </div>
       <button onclick="deleteProperty('${p.id}')" class="text-red-400 hover:text-red-300">
         <i class="fas fa-trash"></i>
