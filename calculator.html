@@ -3,187 +3,250 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>تبدیل رهن به اجاره - با فاصله هزارگان و حروف</title>
+<title>محاسبه‌گر تبدیل رهن به اجاره | املاک راد</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
-* {
-margin: 0;
-padding: 0;
-box-sizing: border-box;
-font-family: 'Segoe UI', Tahoma, sans-serif;
-}
 body {
-background: linear-gradient(135deg, #0f3443, #34e89e);
-min-height: 100vh;
-display: flex;
-justify-content: center;
-align-items: center;
-padding: 20px;
+  font-family: 'Vazirmatn', system-ui, sans-serif;
 }
-.container {
-max-width: 650px;
-width: 100%;
-background: white;
-border-radius: 32px;
-padding: 30px 25px;
-box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+.gold-gradient {
+  background: linear-gradient(135deg, #d4af37, #f5e8c7, #d4af37);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
-h1 {
-text-align: center;
-color: #0f3443;
-margin-bottom: 8px;
-font-size: 1.8rem;
+.nav-link {
+  position: relative;
 }
-.sub {
-text-align: center;
-color: #2c7a5e;
-margin-bottom: 30px;
-font-size: 0.85rem;
-border-bottom: 1px solid #ddd;
-padding-bottom: 12px;
+.nav-link:after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -6px;
+  right: 0;
+  background: linear-gradient(to left, #d4af37, #f5e8c7);
+  transition: all 0.3s ease;
 }
-.card {
-background: #f9fafc;
-border-radius: 24px;
-padding: 20px;
-margin-bottom: 25px;
-border: 1px solid #e0e7e9;
+.nav-link:hover:after {
+  width: 100%;
+  right: auto;
+  left: 0;
 }
-.card-title {
-font-size: 1.4rem;
-font-weight: bold;
-color: #1e5a4a;
-margin-bottom: 20px;
-border-right: 5px solid #34e89e;
-padding-right: 12px;
+.luxury-btn {
+  transition: all 0.4s ease;
 }
-.input-group {
-margin-bottom: 18px;
+.luxury-btn:hover {
+  background: #d4af37;
+  color: #111827;
+  transform: translateY(-3px);
 }
-label {
-display: block;
-font-weight: 600;
-margin-bottom: 8px;
-color: #1f5e4d;
+
+/* ---- استایل اصلی خود محاسبه‌گر (بدون تغییر منطق) ---- */
+.calc-wrapper {
+  max-width: 650px;
+  width: 100%;
+  margin: 0 auto;
 }
-input {
-width: 100%;
-padding: 14px 16px;
-font-size: 1rem;
-border: 2px solid #d0dfdd;
-border-radius: 40px;
-outline: none;
-transition: 0.2s;
-background: white;
-direction: ltr;
-text-align: right;
-font-family: monospace;
-font-size: 1.1rem;
+.calc-card {
+  background: #18181b;
+  border: 1px solid #3f3f46;
+  border-radius: 24px;
+  padding: 20px;
+  margin-bottom: 25px;
 }
-input:focus {
-border-color: #34e89e;
-box-shadow: 0 0 0 3px rgba(52,232,158,0.2);
+.calc-card-title {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #d4af37;
+  margin-bottom: 20px;
+  border-right: 5px solid #d4af37;
+  padding-right: 12px;
 }
-button {
-width: 100%;
-background: #0f3443;
-color: white;
-border: none;
-padding: 14px;
-font-size: 1rem;
-font-weight: bold;
-border-radius: 40px;
-cursor: pointer;
-transition: 0.2s;
-margin-top: 10px;
+.calc-input-group {
+  margin-bottom: 18px;
 }
-button:hover {
-background: #1f6e58;
-transform: scale(0.97);
+.calc-input-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #e4e4e7;
 }
-.result {
-background: #eef7f2;
-padding: 18px;
-border-radius: 24px;
-margin-top: 20px;
-text-align: center;
-border-right: 6px solid #34e89e;
+.calc-input-group input {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 1.1rem;
+  border: 2px solid #3f3f46;
+  border-radius: 40px;
+  outline: none;
+  transition: 0.2s;
+  background: #09090b;
+  color: #fafafa;
+  direction: ltr;
+  text-align: right;
+  font-family: monospace;
 }
-.result .number {
-font-size: 1.6rem;
-font-weight: 800;
-color: #0a5c48;
-display: block;
-margin-top: 8px;
-word-break: break-word;
+.calc-input-group input:focus {
+  border-color: #d4af37;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
 }
-.result .persian-text {
-font-size: 0.9rem;
-color: #2c7a5e;
-margin-top: 8px;
-font-weight: 500;
-background: #e0f0ea;
-display: inline-block;
-padding: 5px 12px;
-border-radius: 30px;
+.calc-btn {
+  width: 100%;
+  background: #d4af37;
+  color: #111827;
+  border: none;
+  padding: 14px;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 40px;
+  cursor: pointer;
+  transition: 0.2s;
+  margin-top: 10px;
 }
-.info {
-background: #fef7e0;
-border-radius: 20px;
-padding: 14px;
-font-size: 0.8rem;
-color: #a16600;
-text-align: center;
+.calc-btn:hover {
+  background: #f5e8c7;
+  transform: scale(0.97);
 }
-footer {
-text-align: center;
-font-size: 0.7rem;
-color: #5e8b7c;
-margin-top: 20px;
+.calc-result {
+  background: #09090b;
+  padding: 18px;
+  border-radius: 24px;
+  margin-top: 20px;
+  text-align: center;
+  border-right: 6px solid #d4af37;
+}
+.calc-result .number {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #d4af37;
+  display: block;
+  margin-top: 8px;
+  word-break: break-word;
+}
+.calc-result .persian-text {
+  font-size: 0.9rem;
+  color: #e4e4e7;
+  margin-top: 8px;
+  font-weight: 500;
+  background: #27272a;
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 30px;
+}
+.calc-info {
+  background: #27272a;
+  border-radius: 20px;
+  padding: 14px;
+  font-size: 0.85rem;
+  color: #d4af37;
+  text-align: center;
+}
+.calc-footer-note {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #71717a;
+  margin-top: 20px;
 }
 </style>
 </head>
-<body>
-<div class="container">
-<h1>🏠 تبدیل رهن به اجاره</h1>
-<div class="sub">بر اساس عرف ایران (هر ۱۰۰ میلیون رهن = ۳ میلیون اجاره)</div>
+<body class="bg-zinc-950 text-zinc-200">
 
-<!-- بخش تبدیل رهن به اجاره -->
-<div class="card">
-<div class="card-title">🔁 رهن → اجاره ماهانه</div>
-<div class="input-group">
+<!-- Navbar -->
+<nav class="bg-black/90 backdrop-blur-lg border-b border-zinc-800 fixed w-full z-50">
+<div class="max-w-7xl mx-auto px-8">
+<div class="flex justify-between items-center py-6">
+<div class="flex items-center gap-4">
+<div class="w-11 h-11 bg-gradient-to-br from-amber-400 to-yellow-600 rounded-2xl flex items-center justify-center text-3xl font-black text-black">ر</div>
+<div>
+<span class="text-3xl font-bold tracking-tighter">املاک راد</span>
+</div>
+</div>
+<div class="hidden md:flex items-center gap-10 text-lg">
+<a href="index.html" class="nav-link font-medium hover:text-amber-400">خانه</a>
+<a href="sale.html" class="nav-link font-medium hover:text-amber-400">فروش</a>
+<a href="rent.html" class="nav-link font-medium hover:text-amber-400">اجاره</a>
+<a href="calculator.html" class="nav-link font-medium hover:text-amber-400">محاسبه گر املاک</a>
+<a href="about.html" class="nav-link font-medium hover:text-amber-400">درباره ما</a>
+</div>
+<div class="flex items-center gap-4">
+<a href="tel:۰۹۱۲۴۰۹۶۹۷۰"
+class="luxury-btn bg-amber-400 text-black px-8 py-3.5 rounded-2xl font-semibold flex items-center gap-2">
+<i class="fas fa-phone"></i>
+تماس با رضایی
+</a>
+</div>
+</div>
+</div>
+</nav>
+
+<!-- Page Header -->
+<section class="pt-40 pb-12 bg-zinc-950 text-center">
+<h1 class="text-5xl md:text-6xl font-black mb-4">
+محاسبه‌گر <span class="gold-gradient">تبدیل رهن به اجاره</span>
+</h1>
+<p class="text-xl text-zinc-400 max-w-2xl mx-auto">
+بر اساس عرف بازار (هر ۱۰۰ میلیون رهن = ۳ میلیون اجاره)
+</p>
+</section>
+
+<!-- Calculator -->
+<section class="pb-24 bg-zinc-950 px-6">
+<div class="calc-wrapper">
+
+<div class="calc-card">
+<div class="calc-card-title">🔁 رهن → اجاره ماهانه</div>
+<div class="calc-input-group">
 <label>💰 مبلغ رهن (تومان)</label>
 <input type="text" id="rahnAmount" placeholder="مثال: 200,000,000" value="200,000,000">
 </div>
-<button id="convertToRentBtn">محاسبه اجاره ماهانه</button>
-<div class="result">
+<button id="convertToRentBtn" class="calc-btn">محاسبه اجاره ماهانه</button>
+<div class="calc-result">
 📌 اجاره ماهانه معادل:
 <span class="number" id="monthlyRentNumber">-- تومان</span>
 <div class="persian-text" id="monthlyRentText">---</div>
 </div>
 </div>
 
-<!-- بخش تبدیل اجاره به رهن -->
-<div class="card">
-<div class="card-title">🔄 اجاره ماهانه → رهن (ودیعه)</div>
-<div class="input-group">
+<div class="calc-card">
+<div class="calc-card-title">🔄 اجاره ماهانه → رهن (ودیعه)</div>
+<div class="calc-input-group">
 <label>🏷️ مبلغ اجاره ماهانه (تومان)</label>
 <input type="text" id="rentAmount" placeholder="مثال: 12,000,000" value="12,000,000">
 </div>
-<button id="convertToRahnBtn">محاسبه مبلغ رهن</button>
-<div class="result">
+<button id="convertToRahnBtn" class="calc-btn">محاسبه مبلغ رهن</button>
+<div class="calc-result">
 🏦 مبلغ ودیعه (رهن) معادل:
 <span class="number" id="rahnResultNumber">-- تومان</span>
 <div class="persian-text" id="rahnResultText">---</div>
 </div>
 </div>
 
-<div class="info">
-⚡ فرمول: مبلغ رهن × ۰.۰۳ = اجاره ماهانه   |   اجاره ÷ ۰.۰۳ = رهن
+<div class="calc-info">
+⚡ فرمول: مبلغ رهن × ۰.۰۳ = اجاره ماهانه &nbsp;|&nbsp; اجاره ÷ ۰.۰۳ = رهن
 </div>
-<footer>
+<div class="calc-footer-note">
 عدد را تایپ کنید - خودکار جدا می‌شود و معادل حروف نمایش داده می‌شود
-</footer>
 </div>
+
+</div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-black py-20 border-t border-zinc-900">
+<div class="max-w-7xl mx-auto px-8">
+<div class="flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-gradient-to-br from-amber-400 to-yellow-600 rounded-2xl flex items-center justify-center text-4xl font-black text-black">ر</div>
+<div class="text-3xl font-bold">املاک راد</div>
+</div>
+<div class="text-center md:text-right">
+<p>تلفن تماس: <span class="text-amber-400">۰۹۱۲۴۰۹۶۹۷۰</span></p>
+<p class="text-zinc-500 text-sm mt-2">© ۱۴۰۵ املاک راد - تمامی حقوق محفوظ است</p>
+</div>
+</div>
+</div>
+</footer>
 
 <script>
 (function() {
@@ -198,13 +261,11 @@ const monthlyRentText = document.getElementById('monthlyRentText');
 const rahnResultNumber = document.getElementById('rahnResultNumber');
 const rahnResultText = document.getElementById('rahnResultText');
 
-// تبدیل عدد به فرمت با کاما (هزارگان)
 function formatWithComma(num) {
 if (num === null || num === undefined || isNaN(num)) return '';
 return Math.round(num).toLocaleString('en-US');
 }
 
-// تبدیل عدد به حروف (تا ۱۰۰ میلیارد)
 function numberToPersianWords(num) {
 if (isNaN(num) || num === 0) return 'صفر تومان';
 
@@ -263,16 +324,13 @@ if (parts.length === 0) return 'صفر تومان';
 return parts.join(' و ') + ' تومان';
 }
 
-// گرفتن عدد خالص از ورودی (با پشتیبانی از کاما و فاصله)
 function getRawNumberFromInput(inputElement) {
 let raw = inputElement.value;
-// حذف همه چیز بجز ارقام
 let numericOnly = raw.replace(/[^0-9]/g, '');
 if (numericOnly === '') return NaN;
 return parseInt(numericOnly, 10);
 }
 
-// تنظیم مقدار ورودی با فرمت کاما (بدون ایجاد لوپ)
 function setInputFormatted(inputElement, numericValue) {
 if (isNaN(numericValue) || numericValue === 0) {
 inputElement.value = '';
@@ -281,12 +339,10 @@ inputElement.value = formatWithComma(numericValue);
 }
 }
 
-// تابع به‌روز رسانی همه نمایش‌ها
 function updateAll() {
 let rahnVal = getRawNumberFromInput(rahnInput);
 let rentVal = getRawNumberFromInput(rentInput);
 
-// محاسبه رهن به اجاره
 if (!isNaN(rahnVal) && rahnVal > 0) {
 let monthlyRent = rahnVal * RATIO;
 monthlyRentNumber.innerHTML = formatWithComma(monthlyRent) + ' تومان';
@@ -296,7 +352,6 @@ monthlyRentNumber.innerHTML = '-- تومان';
 monthlyRentText.innerHTML = '---';
 }
 
-// محاسبه اجاره به رهن
 if (!isNaN(rentVal) && rentVal > 0) {
 let rahnAmount = rentVal / RATIO;
 rahnResultNumber.innerHTML = formatWithComma(rahnAmount) + ' تومان';
@@ -307,15 +362,12 @@ rahnResultText.innerHTML = '---';
 }
 }
 
-// هندل تایپ در اینپوت رهن
 rahnInput.addEventListener('input', function(e) {
 let raw = this.value;
-// حذف همه چیز بجز عدد
 let numericOnly = raw.replace(/[^0-9]/g, '');
 let num = numericOnly === '' ? NaN : parseInt(numericOnly, 10);
 
 if (!isNaN(num)) {
-// تنظیم مجدد با فرمت کاما
 this.value = formatWithComma(num);
 } else {
 this.value = '';
@@ -324,7 +376,6 @@ this.value = '';
 updateAll();
 });
 
-// هندل تایپ در اینپوت اجاره
 rentInput.addEventListener('input', function(e) {
 let raw = this.value;
 let numericOnly = raw.replace(/[^0-9]/g, '');
@@ -339,7 +390,6 @@ this.value = '';
 updateAll();
 });
 
-// دکمه‌ها
 convertToRentBtn.addEventListener('click', function() {
 let rahnVal = getRawNumberFromInput(rahnInput);
 if (!isNaN(rahnVal)) {
@@ -356,14 +406,12 @@ updateAll();
 }
 });
 
-// مقداردهی اولیه
 let initRahn = getRawNumberFromInput(rahnInput);
 if (!isNaN(initRahn)) setInputFormatted(rahnInput, initRahn);
 let initRent = getRawNumberFromInput(rentInput);
 if (!isNaN(initRent)) setInputFormatted(rentInput, initRent);
 updateAll();
 
-// Enter
 rahnInput.addEventListener('keypress', function(e) {
 if (e.key === 'Enter') {
 let val = getRawNumberFromInput(rahnInput);
@@ -380,5 +428,6 @@ updateAll();
 });
 })();
 </script>
+
 </body>
 </html>
