@@ -47,6 +47,17 @@ async function handleApi(request, env, url) {
     return new Response(JSON.stringify(filtered), { headers: cors });
   }
 
+  // دریافت یک ملک با شناسه (برای صفحه اختصاصی آگهی)
+  if (url.pathname.startsWith('/api/properties/') && request.method === 'GET') {
+    const id = url.pathname.split('/').pop();
+    const data = (await env.PROPERTIES_KV.get('properties', 'json')) || [];
+    const property = data.find(p => p.id === id);
+    if (!property) {
+      return new Response(JSON.stringify({ error: 'ملک پیدا نشد' }), { status: 404, headers: cors });
+    }
+    return new Response(JSON.stringify(property), { headers: cors });
+  }
+
   // افزودن ملک جدید (فقط ادمین)
   if (url.pathname === '/api/properties' && request.method === 'POST') {
     if (!isAuthed(request, env)) {
