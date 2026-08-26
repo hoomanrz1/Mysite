@@ -17,6 +17,24 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+        .nav-link {
+            position: relative;
+        }
+        .nav-link:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -6px;
+            right: 0;
+            background: linear-gradient(to left, #d4af37, #f5e8c7);
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover:after {
+            width: 100%;
+            right: auto;
+            left: 0;
+        }
         .luxury-btn {
             transition: all 0.4s ease;
         }
@@ -40,13 +58,13 @@
 
                 <div class="hidden md:flex items-center gap-10 text-lg">
                     <a href="index.html" class="nav-link font-medium hover:text-amber-400">خانه</a>
-                    <a href="index.html#properties" class="nav-link font-medium hover:text-amber-400">املاک لوکس</a>
-                    <a href="#" class="nav-link font-medium hover:text-amber-400">فروش</a>
-                    <a href="#" class="nav-link font-medium hover:text-amber-400">اجاره</a>
+                    <a href="sale.html" class="nav-link font-medium hover:text-amber-400">فروش</a>
+                    <a href="rent.html" class="nav-link font-medium hover:text-amber-400">اجاره</a>
+                    <a href="calculator.html" class="nav-link font-medium hover:text-amber-400">محاسبه گر املاک</a>
                     <a href="about.html" class="nav-link font-medium text-amber-400">درباره ما</a>
                 </div>
 
-                <a href="tel:09124096970" 
+                <a href="tel:۰۹۱۲۴۰۹۶۹۷۰" 
                    class="luxury-btn bg-amber-400 text-black px-8 py-3.5 rounded-2xl font-semibold flex items-center gap-2">
                     <i class="fas fa-phone"></i>
                     تماس فوری
@@ -117,9 +135,9 @@
         <div class="max-w-xl mx-auto px-6">
             <h2 class="text-4xl font-bold mb-8">برای مشاوره اختصاصی تماس بگیرید</h2>
             
-            <a href="tel:09124096970" 
+            <a href="tel:۰۹۱۲۴۰۹۶۹۷۰" 
                class="luxury-btn inline-flex items-center gap-4 bg-amber-400 text-black text-2xl font-bold px-12 py-6 rounded-3xl mb-6">
-                📞 09124096970
+                📞 ۰۹۱۲۴۰۹۶۹۷۰
             </a>
             
             <p class="text-zinc-400">یا از طریق واتساپ پیام دهید</p>
