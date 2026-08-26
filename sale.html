@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="مشاهده لیست کامل املاک لوکس آماده فروش در املاک راد. مشاوره تخصصی خرید ملک با آقای رضایی.">
 <title>املاک برای فروش | املاک راد</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
@@ -71,13 +72,26 @@ body {
 <a href="about.html" class="nav-link font-medium hover:text-amber-400">درباره ما</a>
 </div>
 <div class="flex items-center gap-4">
-<a href="tel:۰۹۱۲۴۰۹۶۹۷۰"
-class="luxury-btn bg-amber-400 text-black px-8 py-3.5 rounded-2xl font-semibold flex items-center gap-2">
+<a href="tel:09124096970"
+class="hidden sm:flex luxury-btn bg-amber-400 text-black px-8 py-3.5 rounded-2xl font-semibold items-center gap-2">
 <i class="fas fa-phone"></i>
 تماس با رضایی
 </a>
+<button onclick="document.getElementById('mobileMenu').classList.toggle('hidden')"
+class="md:hidden w-11 h-11 flex items-center justify-center rounded-full border border-zinc-700 text-xl">
+<i class="fas fa-bars"></i>
+</button>
 </div>
 </div>
+<div id="mobileMenu" class="hidden md:hidden flex flex-col gap-1 pb-6 px-2 text-lg">
+<a href="index.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">خانه</a>
+<a href="sale.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">فروش</a>
+<a href="rent.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">اجاره</a>
+<a href="calculator.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">محاسبه گر املاک</a>
+<a href="about.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">درباره ما</a>
+<a href="tel:09124096970" class="mt-2 bg-amber-400 text-black text-center py-3 rounded-xl font-semibold">
+<i class="fas fa-phone ml-2"></i> تماس با رضایی
+</a>
 </div>
 </nav>
 
