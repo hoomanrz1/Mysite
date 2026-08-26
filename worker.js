@@ -60,6 +60,23 @@ async function handleApi(request, env, url) {
     return new Response(JSON.stringify({ success: true, id: newProperty.id }), { headers: cors });
   }
 
+  // ویرایش ملک (فقط ادمین)
+  if (url.pathname.startsWith('/api/properties/') && request.method === 'PUT') {
+    if (!isAuthed(request, env)) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const id = url.pathname.split('/').pop();
+    const updates = await request.json();
+    let data = (await env.PROPERTIES_KV.get('properties', 'json')) || [];
+    const index = data.findIndex(p => p.id === id);
+    if (index === -1) {
+      return new Response(JSON.stringify({ error: 'ملک پیدا نشد' }), { status: 404, headers: cors });
+    }
+    data[index] = { ...data[index], ...updates, id };
+    await env.PROPERTIES_KV.put('properties', JSON.stringify(data));
+    return new Response(JSON.stringify({ success: true }), { headers: cors });
+  }
+
   // حذف ملک (فقط ادمین)
   if (url.pathname.startsWith('/api/properties/') && request.method === 'DELETE') {
     if (!isAuthed(request, env)) {
