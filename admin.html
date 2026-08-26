@@ -37,9 +37,9 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
     <a href="index.html" class="text-amber-400 hover:text-amber-300">بازگشت به سایت</a>
   </div>
 
-  <!-- Add Property Form -->
+  <!-- Add / Edit Property Form -->
   <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 mb-10">
-    <h2 class="text-xl font-bold mb-6">افزودن ملک جدید</h2>
+    <h2 id="formTitle" class="text-xl font-bold mb-6">افزودن ملک جدید</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
       <div>
         <label class="block text-amber-400 text-sm mb-2">نوع معامله</label>
@@ -94,9 +94,14 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
         <input id="p_parking" type="text" placeholder="مثلا: 90 پارکینگ" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
       </div>
     </div>
-    <button onclick="addProperty()" class="mt-6 bg-amber-400 hover:bg-amber-300 text-black font-bold py-3 px-8 rounded-2xl transition">
-      <i class="fas fa-plus ml-2"></i> افزودن ملک
-    </button>
+    <div class="flex gap-4 mt-6">
+      <button id="submitBtn" onclick="submitProperty()" class="bg-amber-400 hover:bg-amber-300 text-black font-bold py-3 px-8 rounded-2xl transition">
+        <i class="fas fa-plus ml-2"></i> افزودن ملک
+      </button>
+      <button id="cancelBtn" onclick="cancelEdit()" class="hidden bg-zinc-700 hover:bg-zinc-600 text-white font-bold py-3 px-8 rounded-2xl transition">
+        لغو ویرایش
+      </button>
+    </div>
     <p id="addMessage" class="mt-4 text-sm"></p>
   </div>
 
@@ -110,6 +115,9 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 </div>
 
 <script>
+let editingId = null;
+let allProperties = [];
+
 function toggleFields() {
   const type = document.getElementById('p_type').value;
   const saleFields = document.getElementById('saleFields');
@@ -154,9 +162,50 @@ async function login() {
   }
 }
 
-async function addProperty() {
+function fillForm(p) {
+  document.getElementById('p_type').value = p.type;
+  document.getElementById('p_badge').value = p.badge || '';
+  document.getElementById('p_title').value = p.title || '';
+  document.getElementById('p_location').value = p.location || '';
+  document.getElementById('p_price').value = p.price || '';
+  document.getElementById('p_deposit').value = p.deposit || '';
+  document.getElementById('p_rentAmount').value = p.rentAmount || '';
+  document.getElementById('p_image').value = p.image || '';
+  document.getElementById('p_units').value = p.units || '';
+  document.getElementById('p_floor').value = p.floor || '';
+  document.getElementById('p_parking').value = p.parking || '';
+  toggleFields();
+}
+
+function clearForm() {
+  document.querySelectorAll('#dashboard input').forEach(i => i.value = '');
+  document.getElementById('p_type').value = 'sale';
+  toggleFields();
+}
+
+function startEdit(id) {
+  const p = allProperties.find(x => x.id === id);
+  if (!p) return;
+  editingId = id;
+  fillForm(p);
+  document.getElementById('formTitle').textContent = 'ویرایش ملک';
+  document.getElementById('submitBtn').innerHTML = '<i class="fas fa-check ml-2"></i> ذخیره تغییرات';
+  document.getElementById('cancelBtn').classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function cancelEdit() {
+  editingId = null;
+  clearForm();
+  document.getElementById('formTitle').textContent = 'افزودن ملک جدید';
+  document.getElementById('submitBtn').innerHTML = '<i class="fas fa-plus ml-2"></i> افزودن ملک';
+  document.getElementById('cancelBtn').classList.add('hidden');
+  document.getElementById('addMessage').innerHTML = '';
+}
+
+function buildPropertyObject() {
   const type = document.getElementById('p_type').value;
-  const property = {
+  return {
     type: type,
     badge: document.getElementById('p_badge').value,
     title: document.getElementById('p_title').value,
@@ -169,29 +218,43 @@ async function addProperty() {
     floor: document.getElementById('p_floor').value,
     parking: document.getElementById('p_parking').value
   };
+}
+
+async function submitProperty() {
+  const property = buildPropertyObject();
 
   if (!property.title) {
     document.getElementById('addMessage').innerHTML = '<span class="text-red-400">لطفا حداقل عنوان ملک را وارد کنید</span>';
     return;
   }
-  if (type === 'sale' && !property.price) {
+  if (property.type === 'sale' && !property.price) {
     document.getElementById('addMessage').innerHTML = '<span class="text-red-400">لطفا قیمت را وارد کنید</span>';
     return;
   }
-  if (type === 'rent' && (!property.deposit || !property.rentAmount)) {
+  if (property.type === 'rent' && (!property.deposit || !property.rentAmount)) {
     document.getElementById('addMessage').innerHTML = '<span class="text-red-400">لطفا ودیعه و اجاره را وارد کنید</span>';
     return;
   }
 
-  const res = await fetch('/api/properties', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(property)
-  });
+  let res;
+  if (editingId) {
+    res = await fetch('/api/properties/' + editingId, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(property)
+    });
+  } else {
+    res = await fetch('/api/properties', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(property)
+    });
+  }
+
   const data = await res.json();
   if (data.success) {
-    document.getElementById('addMessage').innerHTML = '<span class="text-green-400">ملک با موفقیت اضافه شد</span>';
-    document.querySelectorAll('#dashboard input').forEach(i => i.value = '');
+    document.getElementById('addMessage').innerHTML = '<span class="text-green-400">' + (editingId ? 'ملک بروزرسانی شد' : 'ملک با موفقیت اضافه شد') + '</span>';
+    cancelEdit();
     loadProperties();
   } else {
     document.getElementById('addMessage').innerHTML = '<span class="text-red-400">' + (data.error || 'خطا در ثبت') + '</span>';
@@ -201,12 +264,14 @@ async function addProperty() {
 async function deleteProperty(id) {
   if (!confirm('آیا از حذف این ملک مطمئن هستید؟')) return;
   await fetch('/api/properties/' + id, { method: 'DELETE' });
+  if (editingId === id) cancelEdit();
   loadProperties();
 }
 
 async function loadProperties() {
   const res = await fetch('/api/properties');
   const properties = await res.json();
+  allProperties = properties;
   const list = document.getElementById('propertiesList');
 
   if (properties.length === 0) {
@@ -221,9 +286,14 @@ async function loadProperties() {
         <h3 class="font-semibold">${p.title}</h3>
         <p class="text-zinc-500 text-sm">${p.location || ''} — ${p.type === 'sale' ? (p.price + ' میلیارد تومان') : ('ودیعه ' + p.deposit + ' / اجاره ' + p.rentAmount)}</p>
       </div>
-      <button onclick="deleteProperty('${p.id}')" class="text-red-400 hover:text-red-300">
-        <i class="fas fa-trash"></i>
-      </button>
+      <div class="flex gap-4">
+        <button onclick="startEdit('${p.id}')" class="text-amber-400 hover:text-amber-300">
+          <i class="fas fa-pen"></i>
+        </button>
+        <button onclick="deleteProperty('${p.id}')" class="text-red-400 hover:text-red-300">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
     </div>
   `).join('');
 }
