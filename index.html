@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="املاک راد - مشاوره تخصصی خرید، فروش و اجاره املاک لوکس در تهران با ما. بیش از ۱۵ سال تجربه در بازار املاک خاص.">
+<meta name="description" content="املاک راد - مشاوره تخصصی خرید، فروش و اجاره املاک لوکس در تهران با آقای رضایی. بیش از ۱۵ سال تجربه در بازار املاک خاص.">
 <title>املاک راد | املاک لوکس و خاص</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
@@ -66,30 +66,17 @@ background: #09090b;
 padding: 70px 0;
 position: relative;
 }
-.marquee-section:before,
-.marquee-section:after {
-content: '';
-position: absolute;
-top: 0;
-bottom: 0;
-width: 120px;
-z-index: 2;
-pointer-events: none;
-}
-.marquee-section:before {
-right: 0;
-background: linear-gradient(to left, #09090b, transparent);
-}
-.marquee-section:after {
-left: 0;
-background: linear-gradient(to right, #09090b, transparent);
-}
 .marquee-row {
 display: flex;
 white-space: nowrap;
 width: max-content;
+will-change: transform;
 }
-.marquee-row span {
+.marquee-half {
+display: flex;
+flex-shrink: 0;
+}
+.marquee-row span.item {
 display: inline-flex;
 align-items: center;
 padding: 0 2rem;
@@ -99,16 +86,18 @@ flex-shrink: 0;
 color: #d4af37;
 margin: 0 0.5rem;
 }
-@keyframes marquee-ltr {
-from { transform: translateX(-50%); }
-to { transform: translateX(0%); }
-}
-@keyframes marquee-rtl {
+@keyframes marquee-scroll {
 from { transform: translateX(0%); }
 to { transform: translateX(-50%); }
 }
-.m-rtl { animation: marquee-rtl linear infinite; }
-.m-ltr { animation: marquee-ltr linear infinite; }
+.marquee-row {
+animation-name: marquee-scroll;
+animation-timing-function: linear;
+animation-iteration-count: infinite;
+}
+.m-ltr {
+animation-direction: reverse;
+}
 </style>
 </head>
 <body class="bg-zinc-950 text-zinc-200">
@@ -117,12 +106,12 @@ to { transform: translateX(-50%); }
 <nav class="bg-black/90 backdrop-blur-lg border-b border-zinc-800 fixed w-full z-50">
 <div class="max-w-7xl mx-auto px-8">
 <div class="flex justify-between items-center py-6">
-<div class="flex items-center gap-4">
+<a href="index.html" class="flex items-center gap-4">
 <div class="w-11 h-11 bg-gradient-to-br from-amber-400 to-yellow-600 rounded-2xl flex items-center justify-center text-3xl font-black text-black">ر</div>
 <div>
 <span class="text-3xl font-bold tracking-tighter">املاک راد</span>
 </div>
-</div>
+</a>
 <div class="hidden md:flex items-center gap-10 text-lg">
 <a href="index.html" class="nav-link font-medium hover:text-amber-400">خانه</a>
 <a href="sale.html" class="nav-link font-medium hover:text-amber-400">فروش</a>
@@ -189,7 +178,7 @@ class="whatsapp-btn inline-flex items-center gap-3 bg-green-600 hover:bg-green-5
 </div>
 <div class="flex items-center gap-3">
 <i class="fas fa-check-circle text-amber-400 text-2xl"></i>
-<span>مشاوره اختصاصی </span>
+<span>مشاوره اختصاصی آقای رضایی</span>
 </div>
 <div class="flex items-center gap-3">
 <i class="fas fa-check-circle text-amber-400 text-2xl"></i>
@@ -201,41 +190,20 @@ class="whatsapp-btn inline-flex items-center gap-3 bg-green-600 hover:bg-green-5
 
 <!-- Marquee -->
 <section class="marquee-section">
-<div class="marquee-row m-rtl text-3xl font-black text-zinc-800 mb-3" style="animation-duration: 28s;">
-<span>املاک راد<span class="dot">◆</span>RAD REAL ESTATE<span class="dot">◆</span>مستغلات لوکس<span class="dot">◆</span>LUXURY PROPERTIES<span class="dot">◆</span></span>
-<span>املاک راد<span class="dot">◆</span>RAD REAL ESTATE<span class="dot">◆</span>مستغلات لوکس<span class="dot">◆</span>LUXURY PROPERTIES<span class="dot">◆</span></span>
-</div>
-<div class="marquee-row m-ltr text-2xl font-bold text-amber-400/20 mb-3" style="animation-duration: 22s;">
-<span>ویلا<span class="dot">★</span>VILLA<span class="dot">★</span>مستغلات اداری<span class="dot">★</span>COMMERCIAL<span class="dot">★</span></span>
-<span>ویلا<span class="dot">★</span>VILLA<span class="dot">★</span>مستغلات اداری<span class="dot">★</span>COMMERCIAL<span class="dot">★</span></span>
-</div>
-<div class="marquee-row m-rtl text-4xl font-black text-zinc-800 mb-3" style="animation-duration: 34s;">
-<span>پنت‌هاوس<span class="dot">◆</span>PENTHOUSE<span class="dot">◆</span>IMMOBILIER DE LUXE<span class="dot">◆</span>املاک خاص<span class="dot">◆</span></span>
-<span>پنت‌هاوس<span class="dot">◆</span>PENTHOUSE<span class="dot">◆</span>IMMOBILIER DE LUXE<span class="dot">◆</span>املاک خاص<span class="dot">◆</span></span>
-</div>
-<div class="marquee-row m-ltr text-3xl font-bold text-amber-400 mb-3" style="animation-duration: 18s;">
-<span>رضایی<span class="dot">★</span>REZAEI<span class="dot">★</span>مشاوره اختصاصی<span class="dot">★</span>EXCLUSIVE ADVISOR<span class="dot">★</span></span>
-<span>رضایی<span class="dot">★</span>REZAEI<span class="dot">★</span>مشاوره اختصاصی<span class="dot">★</span>EXCLUSIVE ADVISOR<span class="dot">★</span></span>
-</div>
-<div class="marquee-row m-rtl text-2xl font-bold text-zinc-700 mb-3" style="animation-duration: 25s;">
-<span>فروش<span class="dot">◆</span>SALE<span class="dot">◆</span>اجاره<span class="dot">◆</span>RENT<span class="dot">◆</span>سرمایه‌گذاری<span class="dot">◆</span>INVESTMENT<span class="dot">◆</span></span>
-<span>فروش<span class="dot">◆</span>SALE<span class="dot">◆</span>اجاره<span class="dot">◆</span>RENT<span class="dot">◆</span>سرمایه‌گذاری<span class="dot">◆</span>INVESTMENT<span class="dot">◆</span></span>
-</div>
-<div class="marquee-row m-ltr text-4xl font-black text-zinc-800 mb-3" style="animation-duration: 30s;">
-<span>برج<span class="dot">★</span>TOWER<span class="dot">★</span>آپارتمان<span class="dot">★</span>APARTMENT<span class="dot">★</span></span>
-<span>برج<span class="dot">★</span>TOWER<span class="dot">★</span>آپارتمان<span class="dot">★</span>APARTMENT<span class="dot">★</span></span>
-</div>
-<div class="marquee-row m-rtl text-2xl font-bold text-amber-400/30" style="animation-duration: 20s;">
-<span>EXCLUSIVE<span class="dot">◆</span>اختصاصی<span class="dot">◆</span>PRESTIGE<span class="dot">◆</span>معتبر<span class="dot">◆</span>۰۹۱۲۴۰۹۶۹۷۰<span class="dot">◆</span></span>
-<span>EXCLUSIVE<span class="dot">◆</span>اختصاصی<span class="dot">◆</span>PRESTIGE<span class="dot">◆</span>معتبر<span class="dot">◆</span>۰۹۱۲۴۰۹۶۹۷۰<span class="dot">◆</span></span>
-</div>
+<div class="marquee-row m-rtl text-3xl font-black text-zinc-800 mb-3" data-duration="40" data-dot="◆" data-content="املاک راد|RAD REAL ESTATE|مستغلات لوکس|LUXURY PROPERTIES"></div>
+<div class="marquee-row m-ltr text-2xl font-bold text-amber-400/20 mb-3" data-duration="32" data-dot="★" data-content="ویلا|VILLA|مستغلات اداری|COMMERCIAL"></div>
+<div class="marquee-row m-rtl text-4xl font-black text-zinc-800 mb-3" data-duration="46" data-dot="◆" data-content="پنت‌هاوس|PENTHOUSE|IMMOBILIER DE LUXE|املاک خاص"></div>
+<div class="marquee-row m-ltr text-3xl font-bold text-amber-400 mb-3" data-duration="26" data-dot="★" data-content="رضایی|REZAEI|مشاوره اختصاصی|EXCLUSIVE ADVISOR"></div>
+<div class="marquee-row m-rtl text-2xl font-bold text-zinc-700 mb-3" data-duration="36" data-dot="◆" data-content="فروش|SALE|اجاره|RENT|سرمایه‌گذاری|INVESTMENT"></div>
+<div class="marquee-row m-ltr text-4xl font-black text-zinc-800 mb-3" data-duration="42" data-dot="★" data-content="برج|TOWER|آپارتمان|APARTMENT"></div>
+<div class="marquee-row m-rtl text-2xl font-bold text-amber-400/30" data-duration="30" data-dot="◆" data-content="EXCLUSIVE|اختصاصی|PRESTIGE|معتبر|۰۹۱۲۴۰۹۶۹۷۰"></div>
 </section>
 
 <!-- About Rezaei -->
 <section class="py-24 bg-zinc-900">
 <div class="max-w-5xl mx-auto px-8 text-center">
 <div class="inline-block bg-amber-400/10 text-amber-400 px-6 py-2 rounded-full text-sm mb-6">مشاوره اختصاصی</div>
-<h2 class="text-5xl font-bold mb-8">مشاوره اختصاصی <span class="gold-gradient">با ما</span></h2>
+<h2 class="text-5xl font-bold mb-8">مشاوره اختصاصی <span class="gold-gradient">آقای رضایی</span></h2>
 <p class="text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed">
 با بیش از ۱۵ سال تجربه در بازار املاک لوکس ایران، متعهد به ارائه بهترین خدمات و املاک دست‌چین شده به مشتریان محترم هستم.
 </p>
@@ -257,6 +225,49 @@ class="whatsapp-btn inline-flex items-center gap-3 bg-green-600 hover:bg-green-5
 </div>
 </div>
 </footer>
+
+<script>
+function buildMarquee() {
+  document.querySelectorAll('.marquee-row').forEach(row => {
+    row.innerHTML = '';
+    const words = row.dataset.content.split('|');
+    const dot = row.dataset.dot || '◆';
+
+    function makeItem() {
+      const span = document.createElement('span');
+      span.className = 'item';
+      span.innerHTML = words.map(w => `${w}<span class="dot">${dot}</span>`).join('');
+      return span;
+    }
+
+    const trackA = document.createElement('div');
+    trackA.className = 'marquee-half';
+    row.appendChild(trackA);
+
+    const targetWidth = window.innerWidth * 1.5;
+    let width = 0;
+    let guard = 0;
+    while (width < targetWidth && guard < 200) {
+      const item = makeItem();
+      trackA.appendChild(item);
+      width += item.offsetWidth;
+      guard++;
+    }
+
+    const trackB = trackA.cloneNode(true);
+    row.appendChild(trackB);
+
+    row.style.animationDuration = (row.dataset.duration || 30) + 's';
+  });
+}
+
+buildMarquee();
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(buildMarquee, 300);
+});
+</script>
 
 </body>
 </html>
