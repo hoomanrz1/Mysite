@@ -41,6 +41,7 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
   <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 mb-10">
     <h2 id="formTitle" class="text-xl font-bold mb-6">افزودن ملک جدید</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
       <div>
         <label class="block text-amber-400 text-sm mb-2">نوع معامله</label>
         <select id="p_type" onchange="toggleFields()" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
@@ -48,14 +49,17 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
           <option value="rent">اجاره</option>
         </select>
       </div>
+
       <div>
         <label class="block text-amber-400 text-sm mb-2">برچسب (مثلا: مستغلات فروش)</label>
         <input id="p_badge" type="text" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
       </div>
+
       <div>
         <label class="block text-amber-400 text-sm mb-2">عنوان ملک</label>
         <input id="p_title" type="text" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
       </div>
+
       <div>
         <label class="block text-amber-400 text-sm mb-2">منطقه / آدرس کوتاه</label>
         <input id="p_location" type="text" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
@@ -72,6 +76,7 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
         <label class="block text-amber-400 text-sm mb-2">ودیعه (تومان)</label>
         <input id="p_deposit" type="text" placeholder="مثلا: 500 میلیون" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
       </div>
+
       <div id="rentFields2" class="hidden">
         <label class="block text-amber-400 text-sm mb-2">اجاره ماهانه (تومان)</label>
         <input id="p_rentAmount" type="text" placeholder="مثلا: 15 میلیون" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
@@ -81,18 +86,55 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
         <label class="block text-amber-400 text-sm mb-2">متراژ هر طبقه (فقط عدد - برای فیلتر جستجو)</label>
         <input id="p_area" type="number" placeholder="مثلا: 380" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
       </div>
+
+      <!-- Image Upload -->
       <div>
-        <label class="block text-amber-400 text-sm mb-2">لینک عکس</label>
-        <input id="p_image" type="text" placeholder="https://..." class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+        <label class="block text-amber-400 text-sm mb-2">عکس ملک</label>
+
+        <div class="flex gap-3">
+          <input
+            id="p_image"
+            type="text"
+            placeholder="لینک عکس یا آپلود کنید"
+            class="flex-1 bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4"
+          >
+
+          <label class="cursor-pointer bg-amber-400 hover:bg-amber-300 text-black font-bold px-5 py-3 rounded-xl whitespace-nowrap">
+            <i class="fas fa-upload ml-2"></i>
+            انتخاب عکس
+
+            <input
+              id="imageFile"
+              type="file"
+              accept="image/*"
+              class="hidden"
+              onchange="uploadImage()"
+            >
+          </label>
+        </div>
+
+        <p id="uploadMessage" class="text-sm mt-2"></p>
+
+        <div id="imagePreview" class="hidden mt-3">
+          <img
+            id="previewImg"
+            src=""
+            alt="پیش‌نمایش عکس"
+            class="w-32 h-24 object-cover rounded-xl border border-zinc-700"
+          >
+        </div>
       </div>
+
       <div>
         <label class="block text-amber-400 text-sm mb-2">تعداد واحد</label>
         <input id="p_units" type="text" placeholder="مثلا: 2واحدی" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
       </div>
+
       <div>
         <label class="block text-amber-400 text-sm mb-2">توضیح متراژ (نمایشی)</label>
         <input id="p_floor" type="text" placeholder="مثلا: هر طبقه 380 متر" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
       </div>
+
       <div>
         <label class="block text-amber-400 text-sm mb-2">پارکینگ</label>
         <input id="p_parking" type="text" placeholder="مثلا: 90 پارکینگ" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
@@ -114,16 +156,19 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
       <button id="submitBtn" onclick="submitProperty()" class="bg-amber-400 hover:bg-amber-300 text-black font-bold py-3 px-8 rounded-2xl transition">
         <i class="fas fa-plus ml-2"></i> افزودن ملک
       </button>
+
       <button id="cancelBtn" onclick="cancelEdit()" class="hidden bg-zinc-700 hover:bg-zinc-600 text-white font-bold py-3 px-8 rounded-2xl transition">
         لغو ویرایش
       </button>
     </div>
+
     <p id="addMessage" class="mt-4 text-sm"></p>
   </div>
 
   <!-- Properties List -->
   <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
     <h2 class="text-xl font-bold mb-6">لیست املاک ثبت‌شده</h2>
+
     <div id="propertiesList" class="space-y-4">
       <p class="text-zinc-500">در حال بارگذاری...</p>
     </div>
@@ -134,224 +179,686 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 let editingId = null;
 let allProperties = [];
 
+/* =========================
+   IMAGE UPLOAD
+========================= */
+
+async function uploadImage() {
+  const fileInput = document.getElementById('imageFile');
+  const file = fileInput.files[0];
+
+  if (!file) return;
+
+  const message = document.getElementById('uploadMessage');
+  const imageInput = document.getElementById('p_image');
+  const previewBox = document.getElementById('imagePreview');
+  const previewImg = document.getElementById('previewImg');
+
+  message.innerHTML =
+    '<span class="text-amber-400">در حال آپلود عکس...</span>';
+
+  const formData = new FormData();
+  formData.append('image', file);
+
+  try {
+    const res = await fetch('https://img.iranghahreman.ir/upload', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!res.ok) {
+      throw new Error('Upload failed');
+    }
+
+    const data = await res.json();
+
+    if (data.success) {
+
+      imageInput.value = data.url;
+
+      previewImg.src = data.url;
+      previewBox.classList.remove('hidden');
+
+      message.innerHTML =
+        '<span class="text-green-400">عکس با موفقیت آپلود شد ✓</span>';
+
+    } else {
+
+      message.innerHTML =
+        '<span class="text-red-400">خطا در آپلود عکس</span>';
+    }
+
+  } catch (error) {
+
+    console.error(error);
+
+    message.innerHTML =
+      '<span class="text-red-400">ارتباط با سرور آپلود برقرار نشد</span>';
+  }
+}
+
+/* =========================
+   SALE / RENT
+========================= */
+
 function toggleFields() {
   const type = document.getElementById('p_type').value;
+
   const saleFields = document.getElementById('saleFields');
   const rentFields1 = document.getElementById('rentFields1');
   const rentFields2 = document.getElementById('rentFields2');
 
   if (type === 'sale') {
+
     saleFields.classList.remove('hidden');
     rentFields1.classList.add('hidden');
     rentFields2.classList.add('hidden');
+
   } else {
+
     saleFields.classList.add('hidden');
     rentFields1.classList.remove('hidden');
     rentFields2.classList.remove('hidden');
   }
 }
 
+/* =========================
+   EXTRA FIELDS
+========================= */
+
 function addExtraFieldRow(label, value) {
+
   const container = document.getElementById('extraFieldsContainer');
+
   const row = document.createElement('div');
+
   row.className = 'flex gap-3 extra-field-row';
+
   row.innerHTML = `
-    <input type="text" placeholder="نام ویژگی (مثلا: سند)" class="extra-label flex-1 bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4" value="${label || ''}">
-    <input type="text" placeholder="مقدار (مثلا: تک‌برگ)" class="extra-value flex-1 bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4" value="${value || ''}">
-    <button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-300 px-3">
+    <input type="text"
+      placeholder="نام ویژگی (مثلا: سند)"
+      class="extra-label flex-1 bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4"
+      value="${label || ''}">
+
+    <input type="text"
+      placeholder="مقدار (مثلا: تک‌برگ)"
+      class="extra-value flex-1 bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4"
+      value="${value || ''}">
+
+    <button
+      type="button"
+      onclick="this.parentElement.remove()"
+      class="text-red-400 hover:text-red-300 px-3">
+
       <i class="fas fa-trash"></i>
+
     </button>
   `;
+
   container.appendChild(row);
 }
 
 function getExtraFields() {
+
   const rows = document.querySelectorAll('.extra-field-row');
+
   const fields = [];
+
   rows.forEach(row => {
-    const label = row.querySelector('.extra-label').value.trim();
-    const value = row.querySelector('.extra-value').value.trim();
-    if (label && value) fields.push({ label, value });
+
+    const label =
+      row.querySelector('.extra-label').value.trim();
+
+    const value =
+      row.querySelector('.extra-value').value.trim();
+
+    if (label && value) {
+
+      fields.push({
+        label,
+        value
+      });
+    }
   });
+
   return fields;
 }
 
 function clearExtraFields() {
-  document.getElementById('extraFieldsContainer').innerHTML = '';
+
+  document.getElementById(
+    'extraFieldsContainer'
+  ).innerHTML = '';
 }
 
+/* =========================
+   AUTH
+========================= */
+
 async function checkAuth() {
+
   const res = await fetch('/api/check-auth');
+
   const data = await res.json();
+
   if (data.authed) {
-    document.getElementById('loginScreen').classList.add('hidden');
-    document.getElementById('dashboard').classList.remove('hidden');
+
+    document.getElementById(
+      'loginScreen'
+    ).classList.add('hidden');
+
+    document.getElementById(
+      'dashboard'
+    ).classList.remove('hidden');
+
     loadProperties();
   }
 }
 
 async function login() {
-  const password = document.getElementById('passwordInput').value;
+
+  const password =
+    document.getElementById(
+      'passwordInput'
+    ).value;
+
   const res = await fetch('/api/login', {
+
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ password })
+
+    headers: {
+      'Content-Type': 'application/json'
+    },
+
+    body: JSON.stringify({
+      password
+    })
   });
+
   const data = await res.json();
+
   if (data.success) {
-    document.getElementById('loginScreen').classList.add('hidden');
-    document.getElementById('dashboard').classList.remove('hidden');
+
+    document.getElementById(
+      'loginScreen'
+    ).classList.add('hidden');
+
+    document.getElementById(
+      'dashboard'
+    ).classList.remove('hidden');
+
     loadProperties();
+
   } else {
-    document.getElementById('loginError').classList.remove('hidden');
+
+    document.getElementById(
+      'loginError'
+    ).classList.remove('hidden');
   }
 }
 
+/* =========================
+   FORM
+========================= */
+
 function fillForm(p) {
-  document.getElementById('p_type').value = p.type;
-  document.getElementById('p_badge').value = p.badge || '';
-  document.getElementById('p_title').value = p.title || '';
-  document.getElementById('p_location').value = p.location || '';
-  document.getElementById('p_price').value = p.price || '';
-  document.getElementById('p_deposit').value = p.deposit || '';
-  document.getElementById('p_rentAmount').value = p.rentAmount || '';
-  document.getElementById('p_area').value = p.area || '';
-  document.getElementById('p_image').value = p.image || '';
-  document.getElementById('p_units').value = p.units || '';
-  document.getElementById('p_floor').value = p.floor || '';
-  document.getElementById('p_parking').value = p.parking || '';
+
+  document.getElementById('p_type').value =
+    p.type;
+
+  document.getElementById('p_badge').value =
+    p.badge || '';
+
+  document.getElementById('p_title').value =
+    p.title || '';
+
+  document.getElementById('p_location').value =
+    p.location || '';
+
+  document.getElementById('p_price').value =
+    p.price || '';
+
+  document.getElementById('p_deposit').value =
+    p.deposit || '';
+
+  document.getElementById('p_rentAmount').value =
+    p.rentAmount || '';
+
+  document.getElementById('p_area').value =
+    p.area || '';
+
+  document.getElementById('p_image').value =
+    p.image || '';
+
+  document.getElementById('p_units').value =
+    p.units || '';
+
+  document.getElementById('p_floor').value =
+    p.floor || '';
+
+  document.getElementById('p_parking').value =
+    p.parking || '';
+
   clearExtraFields();
+
   if (p.extraFields && p.extraFields.length) {
-    p.extraFields.forEach(f => addExtraFieldRow(f.label, f.value));
+
+    p.extraFields.forEach(f =>
+      addExtraFieldRow(
+        f.label,
+        f.value
+      )
+    );
   }
+
   toggleFields();
+
+  if (p.image) {
+
+    document.getElementById(
+      'previewImg'
+    ).src = p.image;
+
+    document.getElementById(
+      'imagePreview'
+    ).classList.remove('hidden');
+
+  } else {
+
+    document.getElementById(
+      'imagePreview'
+    ).classList.add('hidden');
+  }
 }
 
 function clearForm() {
-  document.querySelectorAll('#dashboard input').forEach(i => i.value = '');
-  document.getElementById('p_type').value = 'sale';
+
+  document.querySelectorAll(
+    '#dashboard input'
+  ).forEach(i => i.value = '');
+
+  document.getElementById(
+    'p_type'
+  ).value = 'sale';
+
+  document.getElementById(
+    'imagePreview'
+  ).classList.add('hidden');
+
+  document.getElementById(
+    'uploadMessage'
+  ).innerHTML = '';
+
   clearExtraFields();
+
   toggleFields();
 }
 
 function startEdit(id) {
-  const p = allProperties.find(x => x.id === id);
+
+  const p =
+    allProperties.find(
+      x => x.id === id
+    );
+
   if (!p) return;
+
   editingId = id;
+
   fillForm(p);
-  document.getElementById('formTitle').textContent = 'ویرایش ملک';
-  document.getElementById('submitBtn').innerHTML = '<i class="fas fa-check ml-2"></i> ذخیره تغییرات';
-  document.getElementById('cancelBtn').classList.remove('hidden');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  document.getElementById(
+    'formTitle'
+  ).textContent = 'ویرایش ملک';
+
+  document.getElementById(
+    'submitBtn'
+  ).innerHTML =
+    '<i class="fas fa-check ml-2"></i> ذخیره تغییرات';
+
+  document.getElementById(
+    'cancelBtn'
+  ).classList.remove('hidden');
+
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
 }
 
 function cancelEdit() {
+
   editingId = null;
+
   clearForm();
-  document.getElementById('formTitle').textContent = 'افزودن ملک جدید';
-  document.getElementById('submitBtn').innerHTML = '<i class="fas fa-plus ml-2"></i> افزودن ملک';
-  document.getElementById('cancelBtn').classList.add('hidden');
-  document.getElementById('addMessage').innerHTML = '';
+
+  document.getElementById(
+    'formTitle'
+  ).textContent =
+    'افزودن ملک جدید';
+
+  document.getElementById(
+    'submitBtn'
+  ).innerHTML =
+    '<i class="fas fa-plus ml-2"></i> افزودن ملک';
+
+  document.getElementById(
+    'cancelBtn'
+  ).classList.add('hidden');
+
+  document.getElementById(
+    'addMessage'
+  ).innerHTML = '';
 }
 
+/* =========================
+   PROPERTY OBJECT
+========================= */
+
 function buildPropertyObject() {
-  const type = document.getElementById('p_type').value;
+
+  const type =
+    document.getElementById(
+      'p_type'
+    ).value;
+
   return {
+
     type: type,
-    badge: document.getElementById('p_badge').value,
-    title: document.getElementById('p_title').value,
-    location: document.getElementById('p_location').value,
-    price: document.getElementById('p_price').value,
-    deposit: document.getElementById('p_deposit').value,
-    rentAmount: document.getElementById('p_rentAmount').value,
-    area: document.getElementById('p_area').value,
-    image: document.getElementById('p_image').value,
-    units: document.getElementById('p_units').value,
-    floor: document.getElementById('p_floor').value,
-    parking: document.getElementById('p_parking').value,
-    extraFields: getExtraFields()
+
+    badge:
+      document.getElementById(
+        'p_badge'
+      ).value,
+
+    title:
+      document.getElementById(
+        'p_title'
+      ).value,
+
+    location:
+      document.getElementById(
+        'p_location'
+      ).value,
+
+    price:
+      document.getElementById(
+        'p_price'
+      ).value,
+
+    deposit:
+      document.getElementById(
+        'p_deposit'
+      ).value,
+
+    rentAmount:
+      document.getElementById(
+        'p_rentAmount'
+      ).value,
+
+    area:
+      document.getElementById(
+        'p_area'
+      ).value,
+
+    image:
+      document.getElementById(
+        'p_image'
+      ).value,
+
+    units:
+      document.getElementById(
+        'p_units'
+      ).value,
+
+    floor:
+      document.getElementById(
+        'p_floor'
+      ).value,
+
+    parking:
+      document.getElementById(
+        'p_parking'
+      ).value,
+
+    extraFields:
+      getExtraFields()
   };
 }
 
+/* =========================
+   SUBMIT PROPERTY
+========================= */
+
 async function submitProperty() {
-  const property = buildPropertyObject();
+
+  const property =
+    buildPropertyObject();
 
   if (!property.title) {
-    document.getElementById('addMessage').innerHTML = '<span class="text-red-400">لطفا حداقل عنوان ملک را وارد کنید</span>';
+
+    document.getElementById(
+      'addMessage'
+    ).innerHTML =
+      '<span class="text-red-400">لطفا حداقل عنوان ملک را وارد کنید</span>';
+
     return;
   }
-  if (property.type === 'sale' && !property.price) {
-    document.getElementById('addMessage').innerHTML = '<span class="text-red-400">لطفا قیمت را وارد کنید</span>';
+
+  if (
+    property.type === 'sale' &&
+    !property.price
+  ) {
+
+    document.getElementById(
+      'addMessage'
+    ).innerHTML =
+      '<span class="text-red-400">لطفا قیمت را وارد کنید</span>';
+
     return;
   }
-  if (property.type === 'rent' && (!property.deposit || !property.rentAmount)) {
-    document.getElementById('addMessage').innerHTML = '<span class="text-red-400">لطفا ودیعه و اجاره را وارد کنید</span>';
+
+  if (
+    property.type === 'rent' &&
+    (!property.deposit ||
+     !property.rentAmount)
+  ) {
+
+    document.getElementById(
+      'addMessage'
+    ).innerHTML =
+      '<span class="text-red-400">لطفا ودیعه و اجاره را وارد کنید</span>';
+
     return;
   }
 
   let res;
+
   if (editingId) {
-    res = await fetch('/api/properties/' + editingId, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(property)
-    });
+
+    res = await fetch(
+      '/api/properties/' +
+      editingId,
+      {
+        method: 'PUT',
+
+        headers: {
+          'Content-Type':
+            'application/json'
+        },
+
+        body:
+          JSON.stringify(property)
+      }
+    );
+
   } else {
-    res = await fetch('/api/properties', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(property)
-    });
+
+    res = await fetch(
+      '/api/properties',
+      {
+        method: 'POST',
+
+        headers: {
+          'Content-Type':
+            'application/json'
+        },
+
+        body:
+          JSON.stringify(property)
+      }
+    );
   }
 
-  const data = await res.json();
+  const data =
+    await res.json();
+
   if (data.success) {
-    document.getElementById('addMessage').innerHTML = '<span class="text-green-400">' + (editingId ? 'ملک بروزرسانی شد' : 'ملک با موفقیت اضافه شد') + '</span>';
+
+    document.getElementById(
+      'addMessage'
+    ).innerHTML =
+      '<span class="text-green-400">' +
+      (
+        editingId
+          ? 'ملک بروزرسانی شد'
+          : 'ملک با موفقیت اضافه شد'
+      ) +
+      '</span>';
+
     cancelEdit();
+
     loadProperties();
+
   } else {
-    document.getElementById('addMessage').innerHTML = '<span class="text-red-400">' + (data.error || 'خطا در ثبت') + '</span>';
+
+    document.getElementById(
+      'addMessage'
+    ).innerHTML =
+      '<span class="text-red-400">' +
+      (
+        data.error ||
+        'خطا در ثبت'
+      ) +
+      '</span>';
   }
 }
 
+/* =========================
+   DELETE
+========================= */
+
 async function deleteProperty(id) {
-  if (!confirm('آیا از حذف این ملک مطمئن هستید؟')) return;
-  await fetch('/api/properties/' + id, { method: 'DELETE' });
-  if (editingId === id) cancelEdit();
+
+  if (
+    !confirm(
+      'آیا از حذف این ملک مطمئن هستید؟'
+    )
+  ) return;
+
+  await fetch(
+    '/api/properties/' +
+    id,
+    {
+      method: 'DELETE'
+    }
+  );
+
+  if (editingId === id)
+    cancelEdit();
+
   loadProperties();
 }
 
+/* =========================
+   LOAD PROPERTIES
+========================= */
+
 async function loadProperties() {
-  const res = await fetch('/api/properties');
-  const properties = await res.json();
-  allProperties = properties;
-  const list = document.getElementById('propertiesList');
+
+  const res =
+    await fetch(
+      '/api/properties'
+    );
+
+  const properties =
+    await res.json();
+
+  allProperties =
+    properties;
+
+  const list =
+    document.getElementById(
+      'propertiesList'
+    );
 
   if (properties.length === 0) {
-    list.innerHTML = '<p class="text-zinc-500">هنوز ملکی ثبت نشده</p>';
+
+    list.innerHTML =
+      '<p class="text-zinc-500">هنوز ملکی ثبت نشده</p>';
+
     return;
   }
 
-  list.innerHTML = properties.map(p => `
-    <div class="flex justify-between items-center bg-zinc-950 border border-zinc-800 rounded-2xl p-5">
-      <div>
-        <span class="text-xs text-amber-400">${p.type === 'sale' ? 'فروش' : 'اجاره'}</span>
-        <h3 class="font-semibold">${p.title}</h3>
-        <p class="text-zinc-500 text-sm">${p.location || ''} — ${p.type === 'sale' ? (p.price + ' میلیارد تومان') : ('ودیعه ' + p.deposit + ' / اجاره ' + p.rentAmount)}</p>
+  list.innerHTML =
+    properties.map(p => `
+
+      <div class="flex justify-between items-center bg-zinc-950 border border-zinc-800 rounded-2xl p-5">
+
+        <div>
+
+          <span class="text-xs text-amber-400">
+            ${p.type === 'sale' ? 'فروش' : 'اجاره'}
+          </span>
+
+          <h3 class="font-semibold">
+            ${p.title}
+          </h3>
+
+          <p class="text-zinc-500 text-sm">
+            ${p.location || ''} —
+            ${
+              p.type === 'sale'
+                ? (p.price + ' میلیارد تومان')
+                : ('ودیعه ' + p.deposit + ' / اجاره ' + p.rentAmount)
+            }
+          </p>
+
+        </div>
+
+        <div class="flex gap-4">
+
+          <a
+            href="property.html?id=${p.id}"
+            target="_blank"
+            class="text-zinc-400 hover:text-white"
+            title="مشاهده صفحه اختصاصی">
+
+            <i class="fas fa-up-right-from-square"></i>
+
+          </a>
+
+          <button
+            onclick="startEdit('${p.id}')"
+            class="text-amber-400 hover:text-amber-300">
+
+            <i class="fas fa-pen"></i>
+
+          </button>
+
+          <button
+            onclick="deleteProperty('${p.id}')"
+            class="text-red-400 hover:text-red-300">
+
+            <i class="fas fa-trash"></i>
+
+          </button>
+
+        </div>
+
       </div>
-      <div class="flex gap-4">
-        <a href="property.html?id=${p.id}" target="_blank" class="text-zinc-400 hover:text-white" title="مشاهده صفحه اختصاصی">
-          <i class="fas fa-up-right-from-square"></i>
-        </a>
-        <button onclick="startEdit('${p.id}')" class="text-amber-400 hover:text-amber-300">
-          <i class="fas fa-pen"></i>
-        </button>
-        <button onclick="deleteProperty('${p.id}')" class="text-red-400 hover:text-red-300">
-          <i class="fas fa-trash"></i>
-        </button>
-      </div>
-    </div>
-  `).join('');
+
+    `).join('');
 }
 
 checkAuth();
