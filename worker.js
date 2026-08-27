@@ -39,6 +39,28 @@ async function handleApi(request, env, url) {
     return new Response(JSON.stringify({ authed: isAuthed(request, env) }), { headers: cors });
   }
 
+  // آپلود عکس (فقط ادمین) - پروکسی امن به سمت VPS
+  if (url.pathname === '/api/upload' && request.method === 'POST') {
+    if (!isAuthed(request, env)) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    try {
+      const contentType = request.headers.get('Content-Type') || '';
+      const uploadRes = await fetch('https://img.iranghahreman.ir/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': contentType,
+          'x-upload-secret': env.VPS_UPLOAD_SECRET
+        },
+        body: request.body
+      });
+      const result = await uploadRes.json();
+      return new Response(JSON.stringify(result), { status: uploadRes.status, headers: cors });
+    } catch (err) {
+      return new Response(JSON.stringify({ error: 'خطا در اتصال به سرور عکس' }), { status: 502, headers: cors });
+    }
+  }
+
   // دریافت لیست املاک (عمومی - همه می‌تونن ببینن)
   if (url.pathname === '/api/properties' && request.method === 'GET') {
     const type = url.searchParams.get('type');
