@@ -53,7 +53,7 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 </div>
 <div class="flex items-center gap-4">
 <a href="tel:09124096970" class="hidden sm:flex luxury-btn bg-amber-400 text-black px-8 py-3.5 rounded-2xl font-semibold items-center gap-2">
-<i class="fas fa-phone"></i> تماس با رضایی
+<i class="fas fa-phone"></i> تماس با ما
 </a>
 <button onclick="document.getElementById('mobileMenu').classList.toggle('hidden')" class="md:hidden w-11 h-11 flex items-center justify-center rounded-full border border-zinc-700 text-xl">
 <i class="fas fa-bars"></i>
@@ -68,7 +68,7 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 <a href="calculator.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">محاسبه گر املاک</a>
 <a href="about.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">درباره ما</a>
 <a href="tel:09124096970" class="mt-2 bg-amber-400 text-black text-center py-3 rounded-xl font-semibold">
-<i class="fas fa-phone ml-2"></i> تماس با رضایی
+<i class="fas fa-phone ml-2"></i> تماس با ما
 </a>
 </div>
 </nav>
@@ -193,8 +193,8 @@ async function loadProperty() {
       <a href="${p.type === 'sale' ? 'sale.html' : 'rent.html'}" class="inline-flex items-center gap-2 text-amber-400 hover:text-amber-300 mb-8">
         <i class="fas fa-arrow-right"></i> بازگشت به لیست ${p.type === 'sale' ? 'فروش' : 'اجاره'}
       </a>
-      <div class="rounded-3xl overflow-hidden mb-8 border border-zinc-800">
-        <img src="${p.image || 'https://via.placeholder.com/1000x600?text=بدون+عکس'}" class="w-full h-96 object-cover" alt="${p.title}">
+      <div class="rounded-3xl overflow-hidden mb-8 border border-zinc-800 bg-zinc-900 flex items-center justify-center">
+        <img src="${p.image || 'https://via.placeholder.com/1000x600?text=بدون+عکس'}" class="w-full max-h-[550px] object-contain" alt="${p.title}">
       </div>
       <div class="flex flex-col md:flex-row justify-between md:items-center gap-6 mb-10">
         <div>
