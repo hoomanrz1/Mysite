@@ -34,7 +34,12 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 <div id="dashboard" class="hidden max-w-5xl mx-auto px-6 py-12">
   <div class="flex justify-between items-center mb-10">
     <h1 class="text-3xl font-bold">پنل مدیریت املاک</h1>
-    <a href="index.html" class="text-amber-400 hover:text-amber-300">بازگشت به سایت</a>
+    <div class="flex items-center gap-5">
+      <a href="index.html" class="text-amber-400 hover:text-amber-300">بازگشت به سایت</a>
+      <button onclick="logout()" class="text-red-400 hover:text-red-300 flex items-center gap-2">
+        <i class="fas fa-right-from-bracket"></i> خروج
+      </button>
+    </div>
   </div>
 
   <!-- Add / Edit Property Form -->
@@ -81,18 +86,6 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
         <label class="block text-amber-400 text-sm mb-2">متراژ هر طبقه (فقط عدد - برای فیلتر جستجو)</label>
         <input id="p_area" type="number" placeholder="مثلا: 380" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
       </div>
-      <div class="md:col-span-2">
-        <label class="block text-amber-400 text-sm mb-2">عکس ملک</label>
-        <div class="flex gap-3">
-          <input id="p_image" type="text" placeholder="https://..." class="flex-1 bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
-          <label class="bg-zinc-800 hover:bg-zinc-700 text-white px-5 py-3 rounded-xl cursor-pointer whitespace-nowrap flex items-center gap-2">
-            <i class="fas fa-upload"></i>
-            <span id="uploadLabel">آپلود عکس</span>
-            <input id="p_imageFile" type="file" accept="image/*" class="hidden" onchange="uploadImage()">
-          </label>
-        </div>
-        <img id="imagePreview" class="hidden mt-3 rounded-xl max-h-48 border border-zinc-700" alt="پیش‌نمایش">
-      </div>
       <div>
         <label class="block text-amber-400 text-sm mb-2">تعداد واحد</label>
         <input id="p_units" type="text" placeholder="مثلا: 2واحدی" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
@@ -107,6 +100,20 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
       </div>
     </div>
 
+    <!-- Multi-image gallery -->
+    <div class="mt-8 pt-6 border-t border-zinc-800">
+      <div class="flex justify-between items-center mb-4">
+        <label class="text-amber-400 font-semibold">عکس‌های ملک (حداکثر ۱۰ تا)</label>
+        <span id="imageCountLabel" class="text-sm text-zinc-500">۰ از ۱۰</span>
+      </div>
+      <div id="imagesGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-4"></div>
+      <label id="addImageLabel" class="inline-flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white px-5 py-3 rounded-xl cursor-pointer">
+        <i class="fas fa-upload"></i>
+        <span id="uploadLabel">افزودن عکس</span>
+        <input id="p_imageFile" type="file" accept="image/*" class="hidden" onchange="uploadImage()">
+      </label>
+    </div>
+
     <!-- Custom extra fields -->
     <div class="mt-8 pt-6 border-t border-zinc-800">
       <div class="flex justify-between items-center mb-4">
@@ -115,6 +122,7 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
           <i class="fas fa-plus ml-1"></i> افزودن ویژگی
         </button>
       </div>
+      <p class="text-zinc-500 text-xs mb-3">نکته: هر ردیف رو کامل پر کنید (هم «نام ویژگی» و هم «مقدار»)، وگرنه توی صفحه ملک نمایش داده نمی‌شه.</p>
       <div id="extraFieldsContainer" class="space-y-3"></div>
     </div>
 
@@ -141,11 +149,40 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 <script>
 let editingId = null;
 let allProperties = [];
+let currentImages = [];
+const MAX_IMAGES = 10;
+
+function renderImagesGrid() {
+  const grid = document.getElementById('imagesGrid');
+  document.getElementById('imageCountLabel').textContent = currentImages.length + ' از ' + MAX_IMAGES;
+
+  grid.innerHTML = currentImages.map((url, idx) => `
+    <div class="relative group">
+      <img src="${url}" class="w-full h-24 object-cover rounded-xl border border-zinc-700">
+      <button type="button" onclick="removeImage(${idx})" class="absolute -top-2 -left-2 bg-red-500 hover:bg-red-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">
+        <i class="fas fa-xmark"></i>
+      </button>
+      ${idx === 0 ? '<span class="absolute bottom-1 right-1 bg-amber-400 text-black text-[10px] font-bold px-2 py-0.5 rounded-lg">اصلی</span>' : ''}
+    </div>
+  `).join('');
+
+  document.getElementById('addImageLabel').classList.toggle('hidden', currentImages.length >= MAX_IMAGES);
+}
+
+function removeImage(idx) {
+  currentImages.splice(idx, 1);
+  renderImagesGrid();
+}
 
 async function uploadImage() {
   const fileInput = document.getElementById('p_imageFile');
   const file = fileInput.files[0];
   if (!file) return;
+
+  if (currentImages.length >= MAX_IMAGES) {
+    fileInput.value = '';
+    return;
+  }
 
   const label = document.getElementById('uploadLabel');
   label.textContent = 'در حال آپلود...';
@@ -160,19 +197,17 @@ async function uploadImage() {
     });
     const data = await res.json();
     if (data.url) {
-      document.getElementById('p_image').value = data.url;
-      const preview = document.getElementById('imagePreview');
-      preview.src = data.url;
-      preview.classList.remove('hidden');
+      currentImages.push(data.url);
+      renderImagesGrid();
       label.textContent = 'آپلود موفق ✓';
-      setTimeout(() => { label.textContent = 'آپلود عکس'; }, 2000);
+      setTimeout(() => { label.textContent = 'افزودن عکس'; }, 1500);
     } else {
       label.textContent = 'خطا: ' + (data.error || 'ناموفق');
-      setTimeout(() => { label.textContent = 'آپلود عکس'; }, 3000);
+      setTimeout(() => { label.textContent = 'افزودن عکس'; }, 3000);
     }
   } catch (err) {
     label.textContent = 'خطا در آپلود';
-    setTimeout(() => { label.textContent = 'آپلود عکس'; }, 3000);
+    setTimeout(() => { label.textContent = 'افزودن عکس'; }, 3000);
   }
   fileInput.value = '';
 }
@@ -214,7 +249,7 @@ function getExtraFields() {
   rows.forEach(row => {
     const label = row.querySelector('.extra-label').value.trim();
     const value = row.querySelector('.extra-value').value.trim();
-    if (label && value) fields.push({ label, value });
+    if (label || value) fields.push({ label, value });
   });
   return fields;
 }
@@ -250,6 +285,11 @@ async function login() {
   }
 }
 
+async function logout() {
+  await fetch('/api/logout', { method: 'POST' });
+  location.reload();
+}
+
 function fillForm(p) {
   document.getElementById('p_type').value = p.type;
   document.getElementById('p_badge').value = p.badge || '';
@@ -259,10 +299,19 @@ function fillForm(p) {
   document.getElementById('p_deposit').value = p.deposit || '';
   document.getElementById('p_rentAmount').value = p.rentAmount || '';
   document.getElementById('p_area').value = p.area || '';
-  document.getElementById('p_image').value = p.image || '';
   document.getElementById('p_units').value = p.units || '';
   document.getElementById('p_floor').value = p.floor || '';
   document.getElementById('p_parking').value = p.parking || '';
+
+  if (p.images && p.images.length) {
+    currentImages = [...p.images];
+  } else if (p.image) {
+    currentImages = [p.image];
+  } else {
+    currentImages = [];
+  }
+  renderImagesGrid();
+
   clearExtraFields();
   if (p.extraFields && p.extraFields.length) {
     p.extraFields.forEach(f => addExtraFieldRow(f.label, f.value));
@@ -271,8 +320,10 @@ function fillForm(p) {
 }
 
 function clearForm() {
-  document.querySelectorAll('#dashboard input').forEach(i => i.value = '');
+  document.querySelectorAll('#dashboard input[type=text], #dashboard input[type=number]').forEach(i => i.value = '');
   document.getElementById('p_type').value = 'sale';
+  currentImages = [];
+  renderImagesGrid();
   clearExtraFields();
   toggleFields();
 }
@@ -308,7 +359,8 @@ function buildPropertyObject() {
     deposit: document.getElementById('p_deposit').value,
     rentAmount: document.getElementById('p_rentAmount').value,
     area: document.getElementById('p_area').value,
-    image: document.getElementById('p_image').value,
+    images: currentImages,
+    image: currentImages[0] || '',
     units: document.getElementById('p_units').value,
     floor: document.getElementById('p_floor').value,
     parking: document.getElementById('p_parking').value,
@@ -402,3 +454,4 @@ checkAuth();
 
 </body>
 </html>
+
