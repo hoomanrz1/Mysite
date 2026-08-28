@@ -20,6 +20,50 @@ async function handleApi(request, env, url) {
     'Content-Type': 'application/json'
   };
 
+  // قیمت‌های لحظه‌ای (دلار، یورو، طلا، سکه) - با کش ۱۰ دقیقه‌ای برای صرفه‌جویی در سهمیه API
+  if (url.pathname === '/api/prices' && request.method === 'GET') {
+    try {
+      const cached = await env.PROPERTIES_KV.get('prices_cache', 'json');
+      if (cached && (Date.now() - cached.fetchedAt) < 10 * 60 * 1000) {
+        return new Response(JSON.stringify(cached.data), { headers: cors });
+      }
+
+      const apiRes = await fetch(`https://BrsApi.ir/Api/Market/Gold_Currency.php?key=${env.BRSAPI_KEY}`);
+      const raw = await apiRes.json();
+
+      const currencyList = raw.currency || raw.Currency || [];
+      const goldList = raw.gold || raw.Gold || [];
+
+      function findItem(list, matchers) {
+        return list.find(item => {
+          const text = `${item.symbol || ''} ${item.name || ''} ${item.name_en || ''}`.toLowerCase();
+          return matchers.some(m => text.includes(m.toLowerCase()));
+        });
+      }
+
+      const usd = findItem(currencyList, ['usd', 'دلار']);
+      const eur = findItem(currencyList, ['eur', 'یورو']);
+      const gold18 = findItem(goldList, ['18', 'هجده']);
+      const sekkeh = goldList.find(item => {
+        const text = `${item.name || ''}`;
+        return text.includes('سکه') && !text.includes('نیم') && !text.includes('ربع') && !text.includes('گرمی');
+      });
+
+      const result = {
+        usd: usd ? { price: usd.price, change: usd.change_percent } : null,
+        eur: eur ? { price: eur.price, change: eur.change_percent } : null,
+        gold18: gold18 ? { price: gold18.price, change: gold18.change_percent } : null,
+        sekkeh: sekkeh ? { price: sekkeh.price, change: sekkeh.change_percent } : null,
+        updatedAt: Date.now()
+      };
+
+      await env.PROPERTIES_KV.put('prices_cache', JSON.stringify({ data: result, fetchedAt: Date.now() }));
+      return new Response(JSON.stringify(result), { headers: cors });
+    } catch (err) {
+      return new Response(JSON.stringify({ error: 'خطا در دریافت قیمت‌ها' }), { status: 502, headers: cors });
+    }
+  }
+
   // ورود ادمین
   if (url.pathname === '/api/login' && request.method === 'POST') {
     const body = await request.json();
