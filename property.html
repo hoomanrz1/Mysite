@@ -32,6 +32,16 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 .modal-overlay {
   background: rgba(0,0,0,0.8);
 }
+.protected-image {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  pointer-events: none;
+}
+.protected-image-wrap {
+  position: relative;
+}
 </style>
 </head>
 <body class="bg-zinc-950 text-zinc-200">
@@ -179,12 +189,25 @@ async function loadProperty() {
       ? `<span class="text-4xl font-bold text-amber-400">${p.price}</span><span class="text-lg block text-zinc-400">میلیارد تومان</span>`
       : `<span class="text-2xl font-bold text-amber-400">ودیعه ${p.deposit}</span><span class="text-lg block text-zinc-400">اجاره ${p.rentAmount}</span>`;
 
+    const images = (p.images && p.images.length) ? p.images : (p.image ? [p.image] : []);
+    const mainImage = images[0] || 'https://via.placeholder.com/1000x600?text=بدون+عکس';
+
+    const thumbsHtml = images.length > 1 ? `
+      <div class="flex gap-3 mt-4 overflow-x-auto pb-2">
+        ${images.map((img, idx) => `
+          <div class="protected-image-wrap flex-shrink-0 w-24 h-20 rounded-xl overflow-hidden border-2 cursor-pointer thumb-item ${idx === 0 ? 'border-amber-400' : 'border-zinc-800'}" onclick="switchMainImage('${img.replace(/'/g, "\\'")}', this)">
+            <img src="${img}" class="protected-image w-full h-full object-cover" alt="عکس ${idx + 1}" oncontextmenu="return false" ondragstart="return false">
+          </div>
+        `).join('')}
+      </div>
+    ` : '';
+
     let extraHtml = '';
     if (p.extraFields && p.extraFields.length > 0) {
-      extraHtml = p.extraFields.filter(f => f.label && f.value).map(f => `
+      extraHtml = p.extraFields.filter(f => f.label || f.value).map(f => `
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-          <div class="text-amber-400 text-sm mb-1">${f.label}</div>
-          <div class="text-lg">${f.value}</div>
+          <div class="text-amber-400 text-sm mb-1">${f.label || ''}</div>
+          <div class="text-lg">${f.value || ''}</div>
         </div>
       `).join('');
     }
@@ -193,10 +216,11 @@ async function loadProperty() {
       <a href="${p.type === 'sale' ? 'sale.html' : 'rent.html'}" class="inline-flex items-center gap-2 text-amber-400 hover:text-amber-300 mb-8">
         <i class="fas fa-arrow-right"></i> بازگشت به لیست ${p.type === 'sale' ? 'فروش' : 'اجاره'}
       </a>
-      <div class="rounded-3xl overflow-hidden mb-8 border border-zinc-800 bg-zinc-900 flex items-center justify-center">
-        <img src="${p.image || 'https://via.placeholder.com/1000x600?text=بدون+عکس'}" class="w-full max-h-[550px] object-contain" alt="${p.title}">
+      <div class="protected-image-wrap rounded-3xl overflow-hidden mb-2 border border-zinc-800 bg-zinc-900 flex items-center justify-center">
+        <img id="mainPropertyImage" src="${mainImage}" class="protected-image w-full max-h-[550px] object-contain" alt="${p.title}" oncontextmenu="return false" ondragstart="return false">
       </div>
-      <div class="flex flex-col md:flex-row justify-between md:items-center gap-6 mb-10">
+      ${thumbsHtml}
+      <div class="flex flex-col md:flex-row justify-between md:items-center gap-6 mb-10 mt-8">
         <div>
           <span class="text-xs font-bold bg-amber-400/10 text-amber-400 px-4 py-2 rounded-2xl">${p.badge || (p.type === 'sale' ? 'فروش' : 'اجاره')}</span>
           <h1 class="text-4xl font-bold mt-4">${p.title}</h1>
@@ -220,6 +244,22 @@ async function loadProperty() {
     container.innerHTML = '<p class="text-red-400 text-center py-20">خطا در بارگذاری اطلاعات ملک.</p>';
   }
 }
+
+function switchMainImage(url, thumbEl) {
+  document.getElementById('mainPropertyImage').src = url;
+  document.querySelectorAll('.thumb-item').forEach(t => t.classList.remove('border-amber-400'));
+  document.querySelectorAll('.thumb-item').forEach(t => t.classList.add('border-zinc-800'));
+  thumbEl.classList.remove('border-zinc-800');
+  thumbEl.classList.add('border-amber-400');
+}
+
+// جلوگیری از راست‌کلیک و درگ‌کردن روی کل صفحه (به‌خصوص عکس‌ها)
+document.addEventListener('contextmenu', function(e) {
+  if (e.target.tagName === 'IMG') e.preventDefault();
+});
+document.addEventListener('dragstart', function(e) {
+  if (e.target.tagName === 'IMG') e.preventDefault();
+});
 
 loadProperty();
 </script>
