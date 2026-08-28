@@ -34,6 +34,16 @@ async function handleApi(request, env, url) {
     return new Response(JSON.stringify({ success: false, error: 'رمز اشتباه است' }), { status: 401, headers: cors });
   }
 
+  // خروج از پنل مدیریت
+  if (url.pathname === '/api/logout' && request.method === 'POST') {
+    return new Response(JSON.stringify({ success: true }), {
+      headers: {
+        ...cors,
+        'Set-Cookie': `admin_token=; Path=/; HttpOnly; Max-Age=0; SameSite=Strict`
+      }
+    });
+  }
+
   // بررسی وضعیت ورود
   if (url.pathname === '/api/check-auth' && request.method === 'GET') {
     return new Response(JSON.stringify({ authed: isAuthed(request, env) }), { headers: cors });
@@ -124,3 +134,4 @@ async function handleApi(request, env, url) {
 
   return new Response(JSON.stringify({ error: 'مسیر پیدا نشد' }), { status: 404, headers: cors });
 }
+
