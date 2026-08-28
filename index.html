@@ -215,6 +215,19 @@ class="whatsapp-btn inline-flex items-center gap-3 bg-green-600 hover:bg-green-5
 </div>
 </div>
 
+<!-- Live Market Prices -->
+<section class="py-16 bg-zinc-950">
+<div class="max-w-6xl mx-auto px-6">
+<div class="text-center mb-8">
+<h2 class="text-2xl md:text-3xl font-bold">قیمت‌های <span class="gold-gradient">لحظه‌ای</span> بازار</h2>
+</div>
+<div id="pricesGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<p class="text-zinc-500 col-span-full text-center text-sm">در حال دریافت قیمت‌ها...</p>
+</div>
+<p id="pricesUpdated" class="text-center text-zinc-600 text-xs mt-4"></p>
+</div>
+</section>
+
 <!-- Random Featured Properties -->
 <section class="py-24 bg-zinc-950 relative overflow-hidden">
 <div class="marquee-bg">
@@ -271,6 +284,53 @@ class="whatsapp-btn inline-flex items-center gap-3 bg-green-600 hover:bg-green-5
 </footer>
 
 <script>
+function formatPriceCard(label, icon, data) {
+  if (!data || !data.price) {
+    return `
+      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 text-center">
+        <i class="${icon} text-amber-400 text-xl mb-2"></i>
+        <div class="text-zinc-500 text-sm">${label}</div>
+        <div class="text-zinc-600 text-sm mt-1">—</div>
+      </div>
+    `;
+  }
+  const changeNum = parseFloat(data.change);
+  const isUp = changeNum > 0;
+  const isDown = changeNum < 0;
+  const changeColor = isUp ? 'text-green-400' : isDown ? 'text-red-400' : 'text-zinc-500';
+  const changeIcon = isUp ? 'fa-arrow-up' : isDown ? 'fa-arrow-down' : 'fa-minus';
+  const priceFormatted = Number(data.price).toLocaleString('fa-IR');
+
+  return `
+    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 text-center">
+      <i class="${icon} text-amber-400 text-xl mb-2"></i>
+      <div class="text-zinc-400 text-sm">${label}</div>
+      <div class="text-lg font-bold mt-1">${priceFormatted}</div>
+      <div class="text-xs mt-1 ${changeColor}"><i class="fas ${changeIcon}"></i> ${Math.abs(changeNum || 0)}٪</div>
+    </div>
+  `;
+}
+
+async function loadPrices() {
+  const grid = document.getElementById('pricesGrid');
+  try {
+    const res = await fetch('/api/prices');
+    const data = await res.json();
+
+    grid.innerHTML =
+      formatPriceCard('دلار آمریکا', 'fas fa-dollar-sign', data.usd) +
+      formatPriceCard('یورو', 'fas fa-euro-sign', data.eur) +
+      formatPriceCard('طلای ۱۸ عیار', 'fas fa-ring', data.gold18) +
+      formatPriceCard('سکه امامی', 'fas fa-coins', data.sekkeh);
+
+    document.getElementById('pricesUpdated').textContent = 'آخرین بروزرسانی: ' + new Date(data.updatedAt).toLocaleTimeString('fa-IR');
+  } catch (err) {
+    grid.innerHTML = '<p class="text-zinc-600 col-span-full text-center text-sm">قیمت‌ها در دسترس نیست</p>';
+  }
+}
+
+loadPrices();
+
 function shuffleArray(arr) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
