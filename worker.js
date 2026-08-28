@@ -46,7 +46,7 @@ async function handleApi(request, env, url) {
     }
     try {
       const contentType = request.headers.get('Content-Type') || '';
-      const uploadRes = await fetch('https://img.iranghahreman.ir/upload', {
+      const uploadRes = await fetch('https://img.realestaterezaei.ir/upload', {
         method: 'POST',
         headers: {
           'Content-Type': contentType,
