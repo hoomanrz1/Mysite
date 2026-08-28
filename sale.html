@@ -140,7 +140,7 @@ function renderCards(properties) {
   grid.innerHTML = properties.map(p => `
     <a href="property.html?id=${p.id}" class="property-card bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 block">
       <div class="relative">
-        <img src="${p.image || 'https://via.placeholder.com/600x400?text=بدون+عکس'}" class="w-full h-80 object-cover" alt="${p.title}">
+        <img src="${(p.images && p.images[0]) || p.image || 'https://via.placeholder.com/600x400?text=بدون+عکس'}" class="w-full h-80 object-cover" alt="${p.title}" oncontextmenu="return false" ondragstart="return false" style="-webkit-touch-callout: none;">
         <div class="absolute top-6 right-6 bg-black/70 text-amber-400 text-xs font-bold px-5 py-2 rounded-2xl">${p.badge || 'مستغلات فروش'}</div>
       </div>
       <div class="p-8">
