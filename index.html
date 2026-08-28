@@ -164,12 +164,16 @@ class="md:hidden w-11 h-11 flex items-center justify-center rounded-full border 
 </nav>
 
 <!-- Hero -->
-<section class="hero-bg h-screen flex items-center justify-center text-center pt-20">
+<section class="hero-bg min-h-[92vh] flex items-center justify-center text-center pt-24 pb-20">
 <div class="max-w-5xl mx-auto px-6">
-<h1 class="text-6xl md:text-7xl font-black leading-tight mb-6">
+<div class="inline-flex items-center gap-2 bg-amber-400/10 border border-amber-400/30 text-amber-400 px-5 py-2 rounded-full text-sm mb-8">
+<i class="fas fa-crown"></i>
+مشاور رسمی املاک لوکس تهران
+</div>
+<h1 class="text-5xl md:text-7xl font-black leading-tight mb-6">
 املاک <span class="gold-gradient">استثنایی</span><br>برای افراد خاص
 </h1>
-<p class="text-2xl text-zinc-300 max-w-2xl mx-auto mb-12">
+<p class="text-xl md:text-2xl text-zinc-300 max-w-2xl mx-auto mb-10">
 تجربه‌ای متفاوت از خرید و فروش املاک لوکس با املاک راد
 </p>
 
@@ -190,23 +194,26 @@ class="whatsapp-btn inline-flex items-center gap-3 bg-green-600 hover:bg-green-5
 درخواست مشاوره رایگان
 </a>
 </div>
-
-<div class="mt-16 flex flex-wrap justify-center gap-12 text-sm">
-<div class="flex items-center gap-3 float-badge" style="animation-delay: 0s;">
-<i class="fas fa-check-circle text-amber-400 text-2xl"></i>
-<span>املاک دست‌چین شده</span>
-</div>
-<div class="flex items-center gap-3 float-badge" style="animation-delay: 0.6s;">
-<i class="fas fa-check-circle text-amber-400 text-2xl"></i>
-<span>مشاوره اختصاصی</span>
-</div>
-<div class="flex items-center gap-3 float-badge" style="animation-delay: 1.2s;">
-<i class="fas fa-check-circle text-amber-400 text-2xl"></i>
-<span>خدمات VIP</span>
-</div>
-</div>
 </div>
 </section>
+
+<!-- Floating Stats Card -->
+<div class="max-w-5xl mx-auto px-6 -mt-16 relative z-20">
+<div class="bg-zinc-900/95 backdrop-blur border border-zinc-800 rounded-3xl py-10 px-6 grid grid-cols-1 sm:grid-cols-3 gap-8 shadow-2xl shadow-black/50">
+<div class="text-center float-badge" style="animation-delay: 0s;">
+<div class="text-4xl font-black text-amber-400">۱۵+</div>
+<div class="text-zinc-400 text-sm mt-1">سال تجربه</div>
+</div>
+<div class="text-center float-badge sm:border-x sm:border-zinc-800" style="animation-delay: 0.6s;">
+<div class="text-4xl font-black text-amber-400">۳۲۰+</div>
+<div class="text-zinc-400 text-sm mt-1">معامله موفق</div>
+</div>
+<div class="text-center float-badge" style="animation-delay: 1.2s;">
+<div class="text-4xl font-black text-amber-400">۹۸٪</div>
+<div class="text-zinc-400 text-sm mt-1">رضایت مشتریان</div>
+</div>
+</div>
+</div>
 
 <!-- Random Featured Properties -->
 <section class="py-24 bg-zinc-950 relative overflow-hidden">
@@ -281,7 +288,7 @@ function renderRandomCard(p) {
   return `
     <a href="property.html?id=${p.id}" class="bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 block hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl hover:shadow-amber-400/10">
       <div class="relative">
-        <img src="${p.image || 'https://via.placeholder.com/500x350?text=بدون+عکس'}" class="w-full h-56 object-cover" alt="${p.title}">
+        <img src="${(p.images && p.images[0]) || p.image || 'https://via.placeholder.com/500x350?text=بدون+عکس'}" class="w-full h-56 object-cover" alt="${p.title}" oncontextmenu="return false" ondragstart="return false" style="-webkit-touch-callout: none;">
         <div class="absolute top-4 right-4 bg-black/70 text-amber-400 text-xs font-bold px-4 py-1.5 rounded-xl">${p.badge || (p.type === 'sale' ? 'فروش' : 'اجاره')}</div>
       </div>
       <div class="p-6">
@@ -359,3 +366,4 @@ window.addEventListener('resize', () => {
 
 </body>
 </html>
+
