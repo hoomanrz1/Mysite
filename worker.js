@@ -92,7 +92,7 @@ async function handleApi(request, env, url) {
   if (url.pathname === '/api/prices' && request.method === 'GET') {
     try {
       const cached = await env.PROPERTIES_KV.get('prices_cache', 'json');
-      if (cached && (Date.now() - cached.fetchedAt) < 10 * 60 * 1000) {
+      if (cached && (Date.now() - cached.fetchedAt) < 2 * 60 * 1000) {
         return new Response(JSON.stringify(cached.data), { headers: cors });
       }
 
@@ -246,3 +246,4 @@ async function handleApi(request, env, url) {
 
   return new Response(JSON.stringify({ error: 'مسیر پیدا نشد' }), { status: 404, headers: cors });
 }
+
