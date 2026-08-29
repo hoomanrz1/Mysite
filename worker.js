@@ -6,7 +6,7 @@ export default {
       return handleApi(request, env, url);
     }
 
-    if (url.pathname === '/property.html') {
+    if (url.pathname === '/property.html' || url.pathname === '/property') {
       return handlePropertyPage(request, env, url);
     }
 
