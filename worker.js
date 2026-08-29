@@ -96,7 +96,7 @@ async function handleApi(request, env, url) {
         return new Response(JSON.stringify(cached.data), { headers: cors });
       }
 
-      const apiRes = await fetch(`https://BrsApi.ir/Api/Market/Gold_Currency.php?key=${env.BRSAPI_KEY}`);
+      const apiRes = await fetch(`https://Api.BrsApi.ir/Market/Gold_Currency.php?key=${env.BRSAPI_KEY}`);
       const raw = await apiRes.json();
 
       const currencyList = raw.currency || raw.Currency || [];
@@ -246,4 +246,3 @@ async function handleApi(request, env, url) {
 
   return new Response(JSON.stringify({ error: 'مسیر پیدا نشد' }), { status: 404, headers: cors });
 }
-
