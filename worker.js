@@ -6,9 +6,77 @@ export default {
       return handleApi(request, env, url);
     }
 
+    if (url.pathname === '/property.html') {
+      return handlePropertyPage(request, env, url);
+    }
+
     return env.ASSETS.fetch(request);
   }
 };
+
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+async function handlePropertyPage(request, env, url) {
+  const assetResponse = await env.ASSETS.fetch(request);
+  const id = url.searchParams.get('id');
+  if (!id) return assetResponse;
+
+  try {
+    const data = (await env.PROPERTIES_KV.get('properties', 'json')) || [];
+    const property = data.find(p => p.id === id);
+    if (!property) return assetResponse;
+
+    const images = (property.images && property.images.length) ? property.images : (property.image ? [property.image] : []);
+    const image = images[0] || '';
+    const priceText = property.type === 'sale'
+      ? `${property.price || ''} میلیارد تومان`
+      : `ودیعه ${property.deposit || ''} / اجاره ${property.rentAmount || ''}`;
+    const description = `${property.location || ''} — ${priceText}`.trim();
+    const title = `${property.title || 'ملک'} | املاک راد`;
+    const pageUrl = `https://realestaterezaei.ir/property.html?id=${id}`;
+
+    const rewriter = new HTMLRewriter()
+      .on('title', {
+        element(el) {
+          el.setInnerContent(title);
+        }
+      })
+      .on('meta[name="description"]', {
+        element(el) {
+          el.setAttribute('content', description);
+        }
+      })
+      .on('head', {
+        element(el) {
+          let tags = `
+<meta property="og:title" content="${escapeHtml(title)}">
+<meta property="og:description" content="${escapeHtml(description)}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="${escapeHtml(pageUrl)}">
+<meta name="twitter:title" content="${escapeHtml(title)}">
+<meta name="twitter:description" content="${escapeHtml(description)}">`;
+          if (image) {
+            tags += `
+<meta property="og:image" content="${escapeHtml(image)}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="${escapeHtml(image)}">`;
+          }
+          el.append(tags, { html: true });
+        }
+      });
+
+    return rewriter.transform(assetResponse);
+  } catch (err) {
+    return assetResponse;
+  }
+}
 
 function isAuthed(request, env) {
   const cookie = request.headers.get('Cookie') || '';
@@ -178,4 +246,3 @@ async function handleApi(request, env, url) {
 
   return new Response(JSON.stringify({ error: 'مسیر پیدا نشد' }), { status: 404, headers: cors });
 }
-
