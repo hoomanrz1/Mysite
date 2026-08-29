@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="مشاهده لیست کامل املاک لوکس آماده اجاره در املاک راد. مشاوره تخصصی اجاره ملک با آقای رضایی.">
-<meta property="og:title" content="املاک برای اجاره | املاک راد">
-<meta property="og:description" content="مشاهده لیست کامل املاک لوکس آماده اجاره در املاک راد.">
+<meta name="description" content="مشاهده لیست کامل املاک لوکس آماده فروش در املاک راد. مشاوره تخصصی خرید ملک با آقای رضایی.">
+<meta property="og:title" content="املاک برای فروش | املاک راد">
+<meta property="og:description" content="مشاهده لیست کامل املاک لوکس آماده فروش در املاک راد.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://realestaterezaei.ir/rent.html">
+<meta property="og:url" content="https://realestaterezaei.ir/sale.html">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="املاک برای اجاره | املاک راد">
-<meta name="twitter:description" content="مشاهده لیست کامل املاک لوکس آماده اجاره در املاک راد.">
-<title>املاک برای اجاره | املاک راد</title>
+<meta name="twitter:title" content="املاک برای فروش | املاک راد">
+<meta name="twitter:description" content="مشاهده لیست کامل املاک لوکس آماده فروش در املاک راد.">
+<title>املاک برای فروش | املاک راد</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -84,8 +84,8 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 
 <!-- Page Header -->
 <section class="pt-40 pb-10 bg-zinc-950 text-center">
-<h1 class="text-5xl md:text-6xl font-black mb-4">املاک <span class="gold-gradient">برای اجاره</span></h1>
-<p class="text-xl text-zinc-400 max-w-2xl mx-auto">مجموعه‌ای از بهترین املاک لوکس آماده اجاره</p>
+<h1 class="text-5xl md:text-6xl font-black mb-4">املاک <span class="gold-gradient">برای فروش</span></h1>
+<p class="text-xl text-zinc-400 max-w-2xl mx-auto">مجموعه‌ای از بهترین املاک لوکس آماده فروش</p>
 </section>
 
 <!-- Filters -->
@@ -94,7 +94,7 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
 <div class="md:col-span-2">
 <label class="block text-amber-400 text-sm mb-2">جستجو (عنوان، منطقه یا عبارت خاص)</label>
-<input id="filterSearch" type="text" placeholder="مثلا: جردن یا دوبلکس" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4" oninput="applyFilters()">
+<input id="filterSearch" type="text" placeholder="مثلا: وزرا یا پنت‌هاوس" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4" oninput="applyFilters()">
 </div>
 <div>
 <label class="block text-amber-400 text-sm mb-2">منطقه</label>
@@ -103,14 +103,18 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 </select>
 </div>
 <div>
-<label class="block text-amber-400 text-sm mb-2">حداقل متراژ (هر طبقه)</label>
-<input id="filterArea" type="number" placeholder="مثلا: 150" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4" oninput="applyFilters()">
+<label class="block text-amber-400 text-sm mb-2">بازه متراژ (متر)</label>
+<div class="flex gap-2 items-center">
+<input id="filterAreaMin" type="number" placeholder="از" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4" oninput="applyFilters()">
+<span class="text-zinc-500">تا</span>
+<input id="filterAreaMax" type="number" placeholder="تا" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4" oninput="applyFilters()">
+</div>
 </div>
 </div>
 </div>
 </section>
 
-<!-- Rent Properties -->
+<!-- Sale Properties -->
 <section class="py-8 bg-zinc-950">
 <div class="max-w-7xl mx-auto px-8">
 <div id="propertiesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -136,7 +140,7 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 </footer>
 
 <script>
-let allRentProperties = [];
+let allSaleProperties = [];
 
 function renderCards(properties) {
   const grid = document.getElementById('propertiesGrid');
@@ -148,7 +152,7 @@ function renderCards(properties) {
     <a href="property.html?id=${p.id}" class="property-card bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 block">
       <div class="relative">
         <img src="${(p.images && p.images[0]) || p.image || 'https://via.placeholder.com/600x400?text=بدون+عکس'}" class="w-full h-80 object-cover" alt="${p.title}" oncontextmenu="return false" ondragstart="return false" style="-webkit-touch-callout: none;">
-        <div class="absolute top-6 right-6 bg-black/70 text-amber-400 text-xs font-bold px-5 py-2 rounded-2xl">${p.badge || 'مستغلات اجاره'}</div>
+        <div class="absolute top-6 right-6 bg-black/70 text-amber-400 text-xs font-bold px-5 py-2 rounded-2xl">${p.badge || 'مستغلات فروش'}</div>
       </div>
       <div class="p-8">
         <div class="flex justify-between">
@@ -157,8 +161,8 @@ function renderCards(properties) {
             <p class="text-zinc-400 mt-1">${p.location || ''}</p>
           </div>
           <div class="text-left">
-            <span class="text-lg font-bold text-amber-400">ودیعه ${p.deposit}</span>
-            <span class="text-sm block">اجاره ${p.rentAmount}</span>
+            <span class="text-3xl font-bold text-amber-400">${p.price}</span>
+            <span class="text-sm block">میلیارد تومان</span>
           </div>
         </div>
         <div class="flex flex-wrap gap-6 mt-8 text-zinc-400 text-sm">
@@ -180,31 +184,34 @@ function populateLocationFilter(properties) {
 function applyFilters() {
   const search = document.getElementById('filterSearch').value.trim().toLowerCase();
   const location = document.getElementById('filterLocation').value;
-  const minArea = parseFloat(document.getElementById('filterArea').value);
+  const minArea = parseFloat(document.getElementById('filterAreaMin').value);
+  const maxArea = parseFloat(document.getElementById('filterAreaMax').value);
 
-  let filtered = allRentProperties.filter(p => {
+  let filtered = allSaleProperties.filter(p => {
     const matchesSearch = !search || (p.title || '').toLowerCase().includes(search) || (p.location || '').toLowerCase().includes(search) || (p.badge || '').toLowerCase().includes(search);
     const matchesLocation = !location || p.location === location;
-    const matchesArea = isNaN(minArea) || (parseFloat(p.area) >= minArea);
-    return matchesSearch && matchesLocation && matchesArea;
+    const propertyArea = parseFloat(p.area);
+    const matchesAreaMin = isNaN(minArea) || (!isNaN(propertyArea) && propertyArea >= minArea);
+    const matchesAreaMax = isNaN(maxArea) || (!isNaN(propertyArea) && propertyArea <= maxArea);
+    return matchesSearch && matchesLocation && matchesAreaMin && matchesAreaMax;
   });
 
   renderCards(filtered);
 }
 
-async function loadRentProperties() {
+async function loadSaleProperties() {
   const grid = document.getElementById('propertiesGrid');
   try {
-    const res = await fetch('/api/properties?type=rent');
-    allRentProperties = await res.json();
-    populateLocationFilter(allRentProperties);
-    renderCards(allRentProperties);
+    const res = await fetch('/api/properties?type=sale');
+    allSaleProperties = await res.json();
+    populateLocationFilter(allSaleProperties);
+    renderCards(allSaleProperties);
   } catch (err) {
     grid.innerHTML = '<p class="text-red-400 col-span-full text-center">خطا در بارگذاری املاک</p>';
   }
 }
 
-loadRentProperties();
+loadSaleProperties();
 </script>
 
 </body>
