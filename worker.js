@@ -128,7 +128,7 @@ async function handleApi(request, env, url) {
       await env.PROPERTIES_KV.put('prices_cache', JSON.stringify({ data: result, fetchedAt: Date.now() }));
       return new Response(JSON.stringify(result), { headers: cors });
     } catch (err) {
-      return new Response(JSON.stringify({ error: 'خطا در دریافت قیمت‌ها' }), { status: 502, headers: cors });
+      return new Response(JSON.stringify({ error: 'خطا در دریافت قیمت‌ها', debug: err.message, hasKey: !!env.BRSAPI_KEY }), { status: 502, headers: cors });
     }
   }
 
@@ -246,3 +246,4 @@ async function handleApi(request, env, url) {
 
   return new Response(JSON.stringify({ error: 'مسیر پیدا نشد' }), { status: 404, headers: cors });
 }
+
