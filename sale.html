@@ -103,8 +103,12 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 </select>
 </div>
 <div>
-<label class="block text-amber-400 text-sm mb-2">حداقل متراژ (هر طبقه)</label>
-<input id="filterArea" type="number" placeholder="مثلا: 200" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4" oninput="applyFilters()">
+<label class="block text-amber-400 text-sm mb-2">بازه متراژ (متر)</label>
+<div class="flex gap-2 items-center">
+<input id="filterAreaMin" type="number" placeholder="از" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4" oninput="applyFilters()">
+<span class="text-zinc-500">تا</span>
+<input id="filterAreaMax" type="number" placeholder="تا" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4" oninput="applyFilters()">
+</div>
 </div>
 </div>
 </div>
@@ -180,13 +184,16 @@ function populateLocationFilter(properties) {
 function applyFilters() {
   const search = document.getElementById('filterSearch').value.trim().toLowerCase();
   const location = document.getElementById('filterLocation').value;
-  const minArea = parseFloat(document.getElementById('filterArea').value);
+  const minArea = parseFloat(document.getElementById('filterAreaMin').value);
+  const maxArea = parseFloat(document.getElementById('filterAreaMax').value);
 
   let filtered = allSaleProperties.filter(p => {
     const matchesSearch = !search || (p.title || '').toLowerCase().includes(search) || (p.location || '').toLowerCase().includes(search) || (p.badge || '').toLowerCase().includes(search);
     const matchesLocation = !location || p.location === location;
-    const matchesArea = isNaN(minArea) || (parseFloat(p.area) >= minArea);
-    return matchesSearch && matchesLocation && matchesArea;
+    const propertyArea = parseFloat(p.area);
+    const matchesAreaMin = isNaN(minArea) || (!isNaN(propertyArea) && propertyArea >= minArea);
+    const matchesAreaMax = isNaN(maxArea) || (!isNaN(propertyArea) && propertyArea <= maxArea);
+    return matchesSearch && matchesLocation && matchesAreaMin && matchesAreaMax;
   });
 
   renderCards(filtered);
