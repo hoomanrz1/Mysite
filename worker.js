@@ -78,9 +78,27 @@ async function handlePropertyPage(request, env, url) {
   }
 }
 
-function isAuthed(request, env) {
+async function hashPassword(pw) {
+  const data = new TextEncoder().encode(pw);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function getCurrentPasswordHash(env) {
+  let hash = await env.PROPERTIES_KV.get('admin_password_hash');
+  if (!hash) {
+    hash = await hashPassword(env.ADMIN_PASSWORD);
+    await env.PROPERTIES_KV.put('admin_password_hash', hash);
+  }
+  return hash;
+}
+
+async function isAuthed(request, env) {
   const cookie = request.headers.get('Cookie') || '';
-  return cookie.includes(`admin_token=${env.ADMIN_PASSWORD}`);
+  const match = cookie.match(/admin_token=([a-f0-9]+)/);
+  if (!match) return false;
+  const currentHash = await getCurrentPasswordHash(env);
+  return match[1] === currentHash;
 }
 
 async function handleApi(request, env, url) {
@@ -135,15 +153,41 @@ async function handleApi(request, env, url) {
   // ورود ادمین
   if (url.pathname === '/api/login' && request.method === 'POST') {
     const body = await request.json();
-    if (body.password === env.ADMIN_PASSWORD) {
+    const currentHash = await getCurrentPasswordHash(env);
+    const inputHash = await hashPassword(body.password);
+    if (inputHash === currentHash) {
       return new Response(JSON.stringify({ success: true }), {
         headers: {
           ...cors,
-          'Set-Cookie': `admin_token=${env.ADMIN_PASSWORD}; Path=/; HttpOnly; Max-Age=86400; SameSite=Strict`
+          'Set-Cookie': `admin_token=${currentHash}; Path=/; HttpOnly; Max-Age=86400; SameSite=Strict`
         }
       });
     }
     return new Response(JSON.stringify({ success: false, error: 'رمز اشتباه است' }), { status: 401, headers: cors });
+  }
+
+  // تغییر رمز عبور (فقط ادمین وارد شده)
+  if (url.pathname === '/api/change-password' && request.method === 'POST') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const { oldPassword, newPassword } = await request.json();
+    if (!newPassword || newPassword.length < 4) {
+      return new Response(JSON.stringify({ error: 'رمز جدید باید حداقل ۴ کاراکتر باشد' }), { status: 400, headers: cors });
+    }
+    const currentHash = await getCurrentPasswordHash(env);
+    const oldHash = await hashPassword(oldPassword || '');
+    if (oldHash !== currentHash) {
+      return new Response(JSON.stringify({ error: 'رمز فعلی اشتباه است' }), { status: 401, headers: cors });
+    }
+    const newHash = await hashPassword(newPassword);
+    await env.PROPERTIES_KV.put('admin_password_hash', newHash);
+    return new Response(JSON.stringify({ success: true }), {
+      headers: {
+        ...cors,
+        'Set-Cookie': `admin_token=${newHash}; Path=/; HttpOnly; Max-Age=86400; SameSite=Strict`
+      }
+    });
   }
 
   // خروج از پنل مدیریت
@@ -158,12 +202,12 @@ async function handleApi(request, env, url) {
 
   // بررسی وضعیت ورود
   if (url.pathname === '/api/check-auth' && request.method === 'GET') {
-    return new Response(JSON.stringify({ authed: isAuthed(request, env) }), { headers: cors });
+    return new Response(JSON.stringify({ authed: await isAuthed(request, env) }), { headers: cors });
   }
 
   // آپلود عکس (فقط ادمین) - پروکسی امن به سمت VPS
   if (url.pathname === '/api/upload' && request.method === 'POST') {
-    if (!isAuthed(request, env)) {
+    if (!(await isAuthed(request, env))) {
       return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
     }
     try {
@@ -204,7 +248,7 @@ async function handleApi(request, env, url) {
 
   // افزودن ملک جدید (فقط ادمین)
   if (url.pathname === '/api/properties' && request.method === 'POST') {
-    if (!isAuthed(request, env)) {
+    if (!(await isAuthed(request, env))) {
       return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
     }
     const newProperty = await request.json();
@@ -217,7 +261,7 @@ async function handleApi(request, env, url) {
 
   // ویرایش ملک (فقط ادمین)
   if (url.pathname.startsWith('/api/properties/') && request.method === 'PUT') {
-    if (!isAuthed(request, env)) {
+    if (!(await isAuthed(request, env))) {
       return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
     }
     const id = url.pathname.split('/').pop();
@@ -234,7 +278,7 @@ async function handleApi(request, env, url) {
 
   // حذف ملک (فقط ادمین)
   if (url.pathname.startsWith('/api/properties/') && request.method === 'DELETE') {
-    if (!isAuthed(request, env)) {
+    if (!(await isAuthed(request, env))) {
       return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
     }
     const id = url.pathname.split('/').pop();
@@ -244,6 +288,56 @@ async function handleApi(request, env, url) {
     return new Response(JSON.stringify({ success: true }), { headers: cors });
   }
 
+  // دریافت لیست مشتری‌ها (فقط ادمین - اطلاعات خصوصی)
+  if (url.pathname === '/api/customers' && request.method === 'GET') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const customers = (await env.PROPERTIES_KV.get('customers', 'json')) || [];
+    return new Response(JSON.stringify(customers), { headers: cors });
+  }
+
+  // افزودن مشتری جدید (فقط ادمین)
+  if (url.pathname === '/api/customers' && request.method === 'POST') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const newCustomer = await request.json();
+    const customers = (await env.PROPERTIES_KV.get('customers', 'json')) || [];
+    newCustomer.id = Date.now().toString();
+    customers.unshift(newCustomer);
+    await env.PROPERTIES_KV.put('customers', JSON.stringify(customers));
+    return new Response(JSON.stringify({ success: true, id: newCustomer.id }), { headers: cors });
+  }
+
+  // ویرایش مشتری (فقط ادمین)
+  if (url.pathname.startsWith('/api/customers/') && request.method === 'PUT') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const id = url.pathname.split('/').pop();
+    const updates = await request.json();
+    let customers = (await env.PROPERTIES_KV.get('customers', 'json')) || [];
+    const index = customers.findIndex(c => c.id === id);
+    if (index === -1) {
+      return new Response(JSON.stringify({ error: 'مشتری پیدا نشد' }), { status: 404, headers: cors });
+    }
+    customers[index] = { ...customers[index], ...updates, id };
+    await env.PROPERTIES_KV.put('customers', JSON.stringify(customers));
+    return new Response(JSON.stringify({ success: true }), { headers: cors });
+  }
+
+  // حذف مشتری (فقط ادمین)
+  if (url.pathname.startsWith('/api/customers/') && request.method === 'DELETE') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const id = url.pathname.split('/').pop();
+    let customers = (await env.PROPERTIES_KV.get('customers', 'json')) || [];
+    customers = customers.filter(c => c.id !== id);
+    await env.PROPERTIES_KV.put('customers', JSON.stringify(customers));
+    return new Response(JSON.stringify({ success: true }), { headers: cors });
+  }
+
   return new Response(JSON.stringify({ error: 'مسیر پیدا نشد' }), { status: 404, headers: cors });
 }
-
