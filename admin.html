@@ -36,10 +36,36 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
     <h1 class="text-3xl font-bold">پنل مدیریت املاک</h1>
     <div class="flex items-center gap-5">
       <a href="index.html" class="text-amber-400 hover:text-amber-300">بازگشت به سایت</a>
+      <button onclick="document.getElementById('passwordCard').classList.toggle('hidden')" class="text-zinc-400 hover:text-white flex items-center gap-2">
+        <i class="fas fa-key"></i> تغییر رمز
+      </button>
       <button onclick="logout()" class="text-red-400 hover:text-red-300 flex items-center gap-2">
         <i class="fas fa-right-from-bracket"></i> خروج
       </button>
     </div>
+  </div>
+
+  <!-- Change Password -->
+  <div id="passwordCard" class="hidden bg-zinc-900 border border-zinc-800 rounded-3xl p-8 mb-10">
+    <h2 class="text-xl font-bold mb-6">تغییر رمز عبور</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">رمز فعلی</label>
+        <input id="oldPassword" type="password" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">رمز جدید</label>
+        <input id="newPassword" type="password" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">تکرار رمز جدید</label>
+        <input id="confirmPassword" type="password" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+    </div>
+    <button onclick="changePassword()" class="mt-5 bg-amber-400 hover:bg-amber-300 text-black font-bold py-3 px-8 rounded-2xl transition">
+      ذخیره رمز جدید
+    </button>
+    <p id="passwordMessage" class="mt-4 text-sm"></p>
   </div>
 
   <!-- Add / Edit Property Form -->
@@ -135,6 +161,56 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
       </button>
     </div>
     <p id="addMessage" class="mt-4 text-sm"></p>
+  </div>
+
+  <!-- Customer Management -->
+  <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 mb-10">
+    <h2 id="customerFormTitle" class="text-xl font-bold mb-6">افزودن مشتری جدید</h2>
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-5">
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">نام مشتری</label>
+        <input id="c_name" type="text" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">شماره تماس</label>
+        <input id="c_phone" type="text" placeholder="مثلا: 09121234567" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">نوع درخواست</label>
+        <select id="c_type" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+          <option value="sale">خرید</option>
+          <option value="rent">اجاره</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">متراژ مدنظر</label>
+        <input id="c_area" type="number" placeholder="مثلا: 250" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+      <div>
+        <label class="block text-amber-400 text-sm mb-2" id="c_budgetLabel">بودجه (میلیارد تومان)</label>
+        <input id="c_budget" type="number" placeholder="مثلا: 2" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">منطقه مدنظر</label>
+        <input id="c_location" type="text" placeholder="مثلا: جردن" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+    </div>
+    <div class="flex gap-4 mt-6">
+      <button id="customerSubmitBtn" onclick="submitCustomer()" class="bg-amber-400 hover:bg-amber-300 text-black font-bold py-3 px-8 rounded-2xl transition">
+        <i class="fas fa-plus ml-2"></i> افزودن مشتری
+      </button>
+      <button id="customerCancelBtn" onclick="cancelCustomerEdit()" class="hidden bg-zinc-700 hover:bg-zinc-600 text-white font-bold py-3 px-8 rounded-2xl transition">
+        لغو ویرایش
+      </button>
+    </div>
+    <p id="customerMessage" class="mt-4 text-sm"></p>
+
+    <div class="mt-8 pt-6 border-t border-zinc-800">
+      <h3 class="font-bold mb-4">لیست مشتری‌ها</h3>
+      <div id="customersList" class="space-y-3">
+        <p class="text-zinc-500">در حال بارگذاری...</p>
+      </div>
+    </div>
   </div>
 
   <!-- Properties List -->
@@ -258,6 +334,249 @@ function clearExtraFields() {
   document.getElementById('extraFieldsContainer').innerHTML = '';
 }
 
+document.getElementById('c_type').addEventListener('change', function() {
+  document.getElementById('c_budgetLabel').textContent = this.value === 'sale'
+    ? 'بودجه (میلیارد تومان)'
+    : 'بودجه ودیعه (میلیون تومان، تقریبی)';
+});
+
+let editingCustomerId = null;
+let allCustomers = [];
+
+function buildCustomerObject() {
+  return {
+    name: document.getElementById('c_name').value,
+    phone: document.getElementById('c_phone').value,
+    type: document.getElementById('c_type').value,
+    area: document.getElementById('c_area').value,
+    budget: document.getElementById('c_budget').value,
+    location: document.getElementById('c_location').value
+  };
+}
+
+function clearCustomerForm() {
+  document.getElementById('c_name').value = '';
+  document.getElementById('c_phone').value = '';
+  document.getElementById('c_area').value = '';
+  document.getElementById('c_budget').value = '';
+  document.getElementById('c_location').value = '';
+  document.getElementById('c_type').value = 'sale';
+}
+
+async function submitCustomer() {
+  const customer = buildCustomerObject();
+  const msg = document.getElementById('customerMessage');
+
+  if (!customer.name) {
+    msg.innerHTML = '<span class="text-red-400">لطفا نام مشتری را وارد کنید</span>';
+    return;
+  }
+
+  let res;
+  if (editingCustomerId) {
+    res = await fetch('/api/customers/' + editingCustomerId, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(customer)
+    });
+  } else {
+    res = await fetch('/api/customers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(customer)
+    });
+  }
+
+  const data = await res.json();
+  if (data.success) {
+    msg.innerHTML = '<span class="text-green-400">' + (editingCustomerId ? 'مشتری بروزرسانی شد' : 'مشتری اضافه شد') + '</span>';
+    cancelCustomerEdit();
+    loadCustomers();
+  } else {
+    msg.innerHTML = '<span class="text-red-400">' + (data.error || 'خطا در ثبت') + '</span>';
+  }
+}
+
+function startEditCustomer(id) {
+  const c = allCustomers.find(x => x.id === id);
+  if (!c) return;
+  editingCustomerId = id;
+  document.getElementById('c_name').value = c.name || '';
+  document.getElementById('c_phone').value = c.phone || '';
+  document.getElementById('c_type').value = c.type || 'sale';
+  document.getElementById('c_area').value = c.area || '';
+  document.getElementById('c_budget').value = c.budget || '';
+  document.getElementById('c_location').value = c.location || '';
+  document.getElementById('customerFormTitle').textContent = 'ویرایش مشتری';
+  document.getElementById('customerSubmitBtn').innerHTML = '<i class="fas fa-check ml-2"></i> ذخیره تغییرات';
+  document.getElementById('customerCancelBtn').classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function cancelCustomerEdit() {
+  editingCustomerId = null;
+  clearCustomerForm();
+  document.getElementById('customerFormTitle').textContent = 'افزودن مشتری جدید';
+  document.getElementById('customerSubmitBtn').innerHTML = '<i class="fas fa-plus ml-2"></i> افزودن مشتری';
+  document.getElementById('customerCancelBtn').classList.add('hidden');
+  document.getElementById('customerMessage').innerHTML = '';
+}
+
+async function deleteCustomer(id) {
+  if (!confirm('آیا از حذف این مشتری مطمئن هستید؟')) return;
+  await fetch('/api/customers/' + id, { method: 'DELETE' });
+  if (editingCustomerId === id) cancelCustomerEdit();
+  loadCustomers();
+}
+
+function findMatchingProperties(customer) {
+  const custArea = parseFloat(customer.area);
+  const custBudget = parseFloat(customer.budget);
+
+  return allProperties.filter(p => {
+    if (p.type !== customer.type) return false;
+
+    const propBudget = p.type === 'sale'
+      ? parseFloat(p.price)
+      : parseFloat(String(p.deposit || '').replace(/[^\d.]/g, ''));
+
+    let areaOk = true;
+    const propArea = parseFloat(p.area);
+    if (!isNaN(custArea) && custArea > 0 && !isNaN(propArea)) {
+      areaOk = Math.abs(propArea - custArea) <= custArea * 0.25;
+    }
+
+    let budgetOk = true;
+    if (!isNaN(custBudget) && custBudget > 0 && !isNaN(propBudget)) {
+      budgetOk = Math.abs(propBudget - custBudget) <= custBudget * 0.25;
+    }
+
+    let locationOk = true;
+    if (customer.location && p.location) {
+      const cLoc = customer.location.trim().toLowerCase();
+      const pLoc = p.location.trim().toLowerCase();
+      locationOk = pLoc.includes(cLoc) || cLoc.includes(pLoc);
+    }
+
+    return areaOk && budgetOk && locationOk;
+  });
+}
+
+function toggleSuggestions(customerId) {
+  const panel = document.getElementById('suggest-' + customerId);
+  if (!panel) return;
+  panel.classList.toggle('hidden');
+  if (!panel.classList.contains('hidden')) {
+    const customer = allCustomers.find(c => c.id === customerId);
+    const matches = findMatchingProperties(customer);
+    if (matches.length === 0) {
+      panel.innerHTML = '<p class="text-zinc-500 text-sm p-3">ملک متناسبی (با تلرانس فعلی) پیدا نشد.</p>';
+    } else {
+      panel.innerHTML = matches.map(p => `
+        <a href="property.html?id=${p.id}" target="_blank" class="block text-sm p-3 border-b border-zinc-800 last:border-0 hover:bg-zinc-800 rounded-lg">
+          <span class="font-semibold text-amber-400">${p.title}</span>
+          — ${p.location || '—'}،
+          ${p.type === 'sale' ? (p.price + ' میلیارد تومان') : ('ودیعه ' + p.deposit + ' / اجاره ' + p.rentAmount)}
+          <i class="fas fa-arrow-up-left-from-square mr-1"></i>
+        </a>
+      `).join('');
+    }
+  }
+}
+
+async function loadCustomers() {
+  const res = await fetch('/api/customers');
+  const customers = await res.json();
+  allCustomers = customers;
+  const list = document.getElementById('customersList');
+
+  if (customers.length === 0) {
+    list.innerHTML = '<p class="text-zinc-500">هنوز مشتری‌ای ثبت نشده</p>';
+    return;
+  }
+
+  list.innerHTML = customers.map(c => `
+    <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
+      <div class="flex justify-between items-center">
+        <div>
+          <span class="text-xs text-amber-400">${c.type === 'sale' ? 'خرید' : 'اجاره'}</span>
+          <h4 class="font-semibold">${c.name}</h4>
+          <p class="text-zinc-500 text-sm">
+            ${c.phone ? '📞 ' + c.phone + ' — ' : ''}
+            ${c.location ? 'منطقه: ' + c.location + ' — ' : ''}
+            ${c.area ? 'متراژ: ' + c.area + ' متر — ' : ''}
+            ${c.budget ? 'بودجه: ' + c.budget : ''}
+          </p>
+        </div>
+        <div class="flex gap-4">
+          <button onclick="toggleSuggestions('${c.id}')" class="text-green-400 hover:text-green-300" title="پیشنهاد ملک">
+            <i class="fas fa-house-circle-check"></i>
+          </button>
+          <button onclick="startEditCustomer('${c.id}')" class="text-amber-400 hover:text-amber-300">
+            <i class="fas fa-pen"></i>
+          </button>
+          <button onclick="deleteCustomer('${c.id}')" class="text-red-400 hover:text-red-300">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+      <div id="suggest-${c.id}" class="hidden mt-4 bg-zinc-900 rounded-xl"></div>
+    </div>
+  `).join('');
+}
+
+function findMatchingCustomers(property) {
+  const propArea = parseFloat(property.area);
+  const propBudget = property.type === 'sale'
+    ? parseFloat(property.price)
+    : parseFloat(String(property.deposit || '').replace(/[^\d.]/g, ''));
+
+  return allCustomers.filter(c => {
+    if (c.type !== property.type) return false;
+
+    let areaOk = true;
+    const custArea = parseFloat(c.area);
+    if (!isNaN(propArea) && !isNaN(custArea) && custArea > 0) {
+      areaOk = Math.abs(propArea - custArea) <= custArea * 0.25;
+    }
+
+    let budgetOk = true;
+    const custBudget = parseFloat(c.budget);
+    if (!isNaN(propBudget) && !isNaN(custBudget) && custBudget > 0) {
+      budgetOk = Math.abs(propBudget - custBudget) <= custBudget * 0.25;
+    }
+
+    let locationOk = true;
+    if (c.location && property.location) {
+      const cLoc = c.location.trim().toLowerCase();
+      const pLoc = property.location.trim().toLowerCase();
+      locationOk = pLoc.includes(cLoc) || cLoc.includes(pLoc);
+    }
+
+    return areaOk && budgetOk && locationOk;
+  });
+}
+
+function toggleMatches(propertyId) {
+  const panel = document.getElementById('matches-' + propertyId);
+  if (!panel) return;
+  panel.classList.toggle('hidden');
+  if (!panel.classList.contains('hidden')) {
+    const property = allProperties.find(p => p.id === propertyId);
+    const matches = findMatchingCustomers(property);
+    if (matches.length === 0) {
+      panel.innerHTML = '<p class="text-zinc-500 text-sm p-3">مشتری متناسبی (با تلرانس فعلی) پیدا نشد.</p>';
+    } else {
+      panel.innerHTML = matches.map(c => `
+        <div class="text-sm p-3 border-b border-zinc-800 last:border-0">
+          <span class="font-semibold text-amber-400">${c.name}</span>
+          — بودجه: ${c.budget || '—'}، متراژ: ${c.area || '—'}، منطقه: ${c.location || '—'}
+        </div>
+      `).join('');
+    }
+  }
+}
+
 async function checkAuth() {
   const res = await fetch('/api/check-auth');
   const data = await res.json();
@@ -265,6 +584,7 @@ async function checkAuth() {
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('dashboard').classList.remove('hidden');
     loadProperties();
+    loadCustomers();
   }
 }
 
@@ -280,8 +600,44 @@ async function login() {
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('dashboard').classList.remove('hidden');
     loadProperties();
+    loadCustomers();
   } else {
     document.getElementById('loginError').classList.remove('hidden');
+  }
+}
+
+async function changePassword() {
+  const oldPassword = document.getElementById('oldPassword').value;
+  const newPassword = document.getElementById('newPassword').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+  const msg = document.getElementById('passwordMessage');
+
+  if (!oldPassword || !newPassword) {
+    msg.innerHTML = '<span class="text-red-400">همه فیلدها را پر کنید</span>';
+    return;
+  }
+  if (newPassword !== confirmPassword) {
+    msg.innerHTML = '<span class="text-red-400">رمز جدید و تکرار آن یکسان نیست</span>';
+    return;
+  }
+  if (newPassword.length < 4) {
+    msg.innerHTML = '<span class="text-red-400">رمز جدید باید حداقل ۴ کاراکتر باشد</span>';
+    return;
+  }
+
+  const res = await fetch('/api/change-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ oldPassword, newPassword })
+  });
+  const data = await res.json();
+  if (data.success) {
+    msg.innerHTML = '<span class="text-green-400">رمز عبور با موفقیت تغییر کرد</span>';
+    document.getElementById('oldPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+  } else {
+    msg.innerHTML = '<span class="text-red-400">' + (data.error || 'خطا در تغییر رمز') + '</span>';
   }
 }
 
@@ -428,23 +784,29 @@ async function loadProperties() {
   }
 
   list.innerHTML = properties.map(p => `
-    <div class="flex justify-between items-center bg-zinc-950 border border-zinc-800 rounded-2xl p-5">
-      <div>
-        <span class="text-xs text-amber-400">${p.type === 'sale' ? 'فروش' : 'اجاره'}</span>
-        <h3 class="font-semibold">${p.title}</h3>
-        <p class="text-zinc-500 text-sm">${p.location || ''} — ${p.type === 'sale' ? (p.price + ' میلیارد تومان') : ('ودیعه ' + p.deposit + ' / اجاره ' + p.rentAmount)}</p>
+    <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-5">
+      <div class="flex justify-between items-center">
+        <div>
+          <span class="text-xs text-amber-400">${p.type === 'sale' ? 'فروش' : 'اجاره'}</span>
+          <h3 class="font-semibold">${p.title}</h3>
+          <p class="text-zinc-500 text-sm">${p.location || ''} — ${p.type === 'sale' ? (p.price + ' میلیارد تومان') : ('ودیعه ' + p.deposit + ' / اجاره ' + p.rentAmount)}</p>
+        </div>
+        <div class="flex gap-4">
+          <button onclick="toggleMatches('${p.id}')" class="text-green-400 hover:text-green-300" title="مشتریان متناسب">
+            <i class="fas fa-user-check"></i>
+          </button>
+          <a href="property.html?id=${p.id}" target="_blank" class="text-zinc-400 hover:text-white" title="مشاهده صفحه اختصاصی">
+            <i class="fas fa-up-right-from-square"></i>
+          </a>
+          <button onclick="startEdit('${p.id}')" class="text-amber-400 hover:text-amber-300">
+            <i class="fas fa-pen"></i>
+          </button>
+          <button onclick="deleteProperty('${p.id}')" class="text-red-400 hover:text-red-300">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
       </div>
-      <div class="flex gap-4">
-        <a href="property.html?id=${p.id}" target="_blank" class="text-zinc-400 hover:text-white" title="مشاهده صفحه اختصاصی">
-          <i class="fas fa-up-right-from-square"></i>
-        </a>
-        <button onclick="startEdit('${p.id}')" class="text-amber-400 hover:text-amber-300">
-          <i class="fas fa-pen"></i>
-        </button>
-        <button onclick="deleteProperty('${p.id}')" class="text-red-400 hover:text-red-300">
-          <i class="fas fa-trash"></i>
-        </button>
-      </div>
+      <div id="matches-${p.id}" class="hidden mt-4 bg-zinc-900 rounded-xl"></div>
     </div>
   `).join('');
 }
@@ -454,3 +816,4 @@ checkAuth();
 
 </body>
 </html>
+
