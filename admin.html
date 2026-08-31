@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 body { font-family: 'Vazirmatn', system-ui, sans-serif; }
+.tab-btn { transition: all 0.15s ease; }
 </style>
 </head>
 <body class="bg-zinc-950 text-zinc-200 min-h-screen">
@@ -67,6 +68,19 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
     </button>
     <p id="passwordMessage" class="mt-4 text-sm"></p>
   </div>
+
+  <!-- Tabs -->
+  <div class="flex gap-2 mb-8 border-b border-zinc-800">
+    <button id="tabBtn-properties" onclick="switchTab('properties')" class="tab-btn px-6 py-3 font-bold border-b-2 border-amber-400 text-amber-400">
+      <i class="fas fa-building ml-2"></i> املاک
+    </button>
+    <button id="tabBtn-customers" onclick="switchTab('customers')" class="tab-btn px-6 py-3 font-bold border-b-2 border-transparent text-zinc-400 hover:text-white">
+      <i class="fas fa-users ml-2"></i> مشتریان
+    </button>
+  </div>
+
+  <!-- ===================== PROPERTIES TAB ===================== -->
+  <div id="tab-properties">
 
   <!-- Add / Edit Property Form -->
   <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 mb-10">
@@ -163,9 +177,48 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
     <p id="addMessage" class="mt-4 text-sm"></p>
   </div>
 
+  <!-- Properties List -->
+  <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
+    <h2 class="text-xl font-bold mb-6">لیست املاک ثبت‌شده</h2>
+    <div id="propertiesList" class="space-y-4">
+      <p class="text-zinc-500">در حال بارگذاری...</p>
+    </div>
+  </div>
+
+  </div>
+  <!-- ===================== END PROPERTIES TAB ===================== -->
+
+  <!-- ===================== CUSTOMERS TAB ===================== -->
+  <div id="tab-customers" class="hidden">
+
+  <!-- Conversion rate settings + calculator -->
+  <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 mb-10">
+    <h2 class="text-xl font-bold mb-4"><i class="fas fa-calculator text-amber-400 ml-2"></i>محاسبه‌گر تبدیل رهن به اجاره</h2>
+    <p class="text-zinc-500 text-sm mb-5">این نرخ برای پیدا کردن خودکار ملک‌های رهن‌واجاره‌ای که با بودجه مشتری «تبدیل‌پذیر» و نزدیک هستند استفاده می‌شود. مثلا با نرخ ۳٪، هر ۱۰۰ میلیون تومان رهن تقریبا معادل ۳ میلیون تومان اجاره ماهانه است.</p>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-5 items-end">
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">نرخ تبدیل (درصد ماهانه)</label>
+        <input id="conversionRate" type="number" step="0.1" min="0.1" onchange="saveConversionRate()" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+      <div>
+        <label class="block text-zinc-400 text-sm mb-2">رهن (میلیون تومان)</label>
+        <input id="calc_deposit" type="number" oninput="runCalculator()" placeholder="مثلا: 500" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+      <div>
+        <label class="block text-zinc-400 text-sm mb-2">اجاره (میلیون تومان)</label>
+        <input id="calc_rent" type="number" oninput="runCalculator()" placeholder="مثلا: 15" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+      <div class="text-sm text-zinc-300 bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+        <div>معادل رهن کامل: <span id="calc_rahnResult" class="text-amber-400 font-bold">—</span></div>
+        <div>معادل اجاره کامل: <span id="calc_ejareResult" class="text-amber-400 font-bold">—</span></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Customer Management -->
   <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 mb-10">
     <h2 id="customerFormTitle" class="text-xl font-bold mb-6">افزودن مشتری جدید</h2>
+
     <div class="grid grid-cols-1 md:grid-cols-5 gap-5">
       <div>
         <label class="block text-amber-400 text-sm mb-2">نام مشتری</label>
@@ -177,7 +230,7 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
       </div>
       <div>
         <label class="block text-amber-400 text-sm mb-2">نوع درخواست</label>
-        <select id="c_type" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+        <select id="c_type" onchange="toggleCustomerFields()" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
           <option value="sale">خرید</option>
           <option value="rent">اجاره</option>
         </select>
@@ -187,14 +240,44 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
         <input id="c_area" type="number" placeholder="مثلا: 250" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
       </div>
       <div>
-        <label class="block text-amber-400 text-sm mb-2" id="c_budgetLabel">بودجه (میلیارد تومان)</label>
-        <input id="c_budget" type="number" placeholder="مثلا: 2" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
-      </div>
-      <div>
         <label class="block text-amber-400 text-sm mb-2">منطقه مدنظر</label>
         <input id="c_location" type="text" placeholder="مثلا: جردن" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
       </div>
     </div>
+
+    <!-- Sale budget range -->
+    <div id="saleCustomerFields" class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5 pt-5 border-t border-zinc-800">
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">بودجه از (میلیارد تومان)</label>
+        <input id="c_budgetMin" type="number" placeholder="مثلا: 2" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">بودجه تا (میلیارد تومان)</label>
+        <input id="c_budgetMax" type="number" placeholder="مثلا: 3" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+    </div>
+
+    <!-- Rent deposit/rent ranges -->
+    <div id="rentCustomerFields" class="hidden grid grid-cols-1 md:grid-cols-4 gap-5 mt-5 pt-5 border-t border-zinc-800">
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">رهن از (میلیون تومان)</label>
+        <input id="c_depositMin" type="number" placeholder="مثلا: 300" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">رهن تا (میلیون تومان)</label>
+        <input id="c_depositMax" type="number" placeholder="مثلا: 600" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">اجاره از (میلیون تومان)</label>
+        <input id="c_rentMin" type="number" placeholder="مثلا: 10" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">اجاره تا (میلیون تومان)</label>
+        <input id="c_rentMax" type="number" placeholder="مثلا: 20" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+      <p class="md:col-span-4 text-zinc-500 text-xs">می‌تونید فقط یکی از بازه‌های رهن یا اجاره رو پر کنید؛ سیستم با تبدیل خودکار، ملک‌های رهن‌واجاره‌ای نزدیک به هر کدوم رو هم پیشنهاد می‌ده.</p>
+    </div>
+
     <div class="flex gap-4 mt-6">
       <button id="customerSubmitBtn" onclick="submitCustomer()" class="bg-amber-400 hover:bg-amber-300 text-black font-bold py-3 px-8 rounded-2xl transition">
         <i class="fas fa-plus ml-2"></i> افزودن مشتری
@@ -213,13 +296,9 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
     </div>
   </div>
 
-  <!-- Properties List -->
-  <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
-    <h2 class="text-xl font-bold mb-6">لیست املاک ثبت‌شده</h2>
-    <div id="propertiesList" class="space-y-4">
-      <p class="text-zinc-500">در حال بارگذاری...</p>
-    </div>
   </div>
+  <!-- ===================== END CUSTOMERS TAB ===================== -->
+
 </div>
 
 <script>
@@ -228,6 +307,63 @@ let allProperties = [];
 let currentImages = [];
 const MAX_IMAGES = 10;
 
+/* ---------------- Tabs ---------------- */
+function switchTab(tab) {
+  document.getElementById('tab-properties').classList.toggle('hidden', tab !== 'properties');
+  document.getElementById('tab-customers').classList.toggle('hidden', tab !== 'customers');
+
+  const propBtn = document.getElementById('tabBtn-properties');
+  const custBtn = document.getElementById('tabBtn-customers');
+
+  propBtn.classList.toggle('border-amber-400', tab === 'properties');
+  propBtn.classList.toggle('text-amber-400', tab === 'properties');
+  propBtn.classList.toggle('border-transparent', tab !== 'properties');
+  propBtn.classList.toggle('text-zinc-400', tab !== 'properties');
+
+  custBtn.classList.toggle('border-amber-400', tab === 'customers');
+  custBtn.classList.toggle('text-amber-400', tab === 'customers');
+  custBtn.classList.toggle('border-transparent', tab !== 'customers');
+  custBtn.classList.toggle('text-zinc-400', tab !== 'customers');
+}
+
+/* ---------------- Rahn <-> Ejareh conversion ---------------- */
+function getConversionRate() {
+  const v = parseFloat(localStorage.getItem('radRahnRate'));
+  return (!isNaN(v) && v > 0) ? v : 3;
+}
+function saveConversionRate() {
+  const v = parseFloat(document.getElementById('conversionRate').value);
+  if (!isNaN(v) && v > 0) {
+    localStorage.setItem('radRahnRate', v);
+  }
+  runCalculator();
+}
+// Equivalent full-rahn value if the whole rent amount were converted into extra deposit
+function toRahnEquivalent(deposit, rent, rate) {
+  deposit = isNaN(deposit) ? 0 : deposit;
+  rent = isNaN(rent) ? 0 : rent;
+  return deposit + (rent * 100 / rate);
+}
+// Equivalent full-rent value if the whole deposit were converted into extra monthly rent
+function toEjareEquivalent(deposit, rent, rate) {
+  deposit = isNaN(deposit) ? 0 : deposit;
+  rent = isNaN(rent) ? 0 : rent;
+  return rent + (deposit * rate / 100);
+}
+function runCalculator() {
+  const rate = getConversionRate();
+  const deposit = parseFloat(document.getElementById('calc_deposit').value);
+  const rent = parseFloat(document.getElementById('calc_rent').value);
+  const hasInput = !isNaN(deposit) || !isNaN(rent);
+  document.getElementById('calc_rahnResult').textContent = hasInput
+    ? Math.round(toRahnEquivalent(deposit, rent, rate)).toLocaleString('fa-IR') + ' میلیون'
+    : '—';
+  document.getElementById('calc_ejareResult').textContent = hasInput
+    ? Math.round(toEjareEquivalent(deposit, rent, rate)).toLocaleString('fa-IR') + ' میلیون'
+    : '—';
+}
+
+/* ---------------- Image gallery ---------------- */
 function renderImagesGrid() {
   const grid = document.getElementById('imagesGrid');
   document.getElementById('imageCountLabel').textContent = currentImages.length + ' از ' + MAX_IMAGES;
@@ -334,14 +470,15 @@ function clearExtraFields() {
   document.getElementById('extraFieldsContainer').innerHTML = '';
 }
 
-document.getElementById('c_type').addEventListener('change', function() {
-  document.getElementById('c_budgetLabel').textContent = this.value === 'sale'
-    ? 'بودجه (میلیارد تومان)'
-    : 'بودجه ودیعه (میلیون تومان، تقریبی)';
-});
-
+/* ---------------- Customers ---------------- */
 let editingCustomerId = null;
 let allCustomers = [];
+
+function toggleCustomerFields() {
+  const type = document.getElementById('c_type').value;
+  document.getElementById('saleCustomerFields').classList.toggle('hidden', type !== 'sale');
+  document.getElementById('rentCustomerFields').classList.toggle('hidden', type !== 'rent');
+}
 
 function buildCustomerObject() {
   return {
@@ -349,8 +486,13 @@ function buildCustomerObject() {
     phone: document.getElementById('c_phone').value,
     type: document.getElementById('c_type').value,
     area: document.getElementById('c_area').value,
-    budget: document.getElementById('c_budget').value,
-    location: document.getElementById('c_location').value
+    location: document.getElementById('c_location').value,
+    budgetMin: document.getElementById('c_budgetMin').value,
+    budgetMax: document.getElementById('c_budgetMax').value,
+    depositMin: document.getElementById('c_depositMin').value,
+    depositMax: document.getElementById('c_depositMax').value,
+    rentMin: document.getElementById('c_rentMin').value,
+    rentMax: document.getElementById('c_rentMax').value
   };
 }
 
@@ -358,9 +500,15 @@ function clearCustomerForm() {
   document.getElementById('c_name').value = '';
   document.getElementById('c_phone').value = '';
   document.getElementById('c_area').value = '';
-  document.getElementById('c_budget').value = '';
   document.getElementById('c_location').value = '';
+  document.getElementById('c_budgetMin').value = '';
+  document.getElementById('c_budgetMax').value = '';
+  document.getElementById('c_depositMin').value = '';
+  document.getElementById('c_depositMax').value = '';
+  document.getElementById('c_rentMin').value = '';
+  document.getElementById('c_rentMax').value = '';
   document.getElementById('c_type').value = 'sale';
+  toggleCustomerFields();
 }
 
 async function submitCustomer() {
@@ -405,11 +553,29 @@ function startEditCustomer(id) {
   document.getElementById('c_phone').value = c.phone || '';
   document.getElementById('c_type').value = c.type || 'sale';
   document.getElementById('c_area').value = c.area || '';
-  document.getElementById('c_budget').value = c.budget || '';
   document.getElementById('c_location').value = c.location || '';
+
+  // Backward compatibility: older records only had a single "budget" field
+  let budgetMin = c.budgetMin, budgetMax = c.budgetMax;
+  let depositMin = c.depositMin, depositMax = c.depositMax;
+  const hasNewRange = budgetMin || budgetMax || depositMin || depositMax;
+  if (!hasNewRange && c.budget) {
+    if (c.type === 'sale') { budgetMin = c.budget; budgetMax = c.budget; }
+    else { depositMin = c.budget; depositMax = c.budget; }
+  }
+
+  document.getElementById('c_budgetMin').value = budgetMin || '';
+  document.getElementById('c_budgetMax').value = budgetMax || '';
+  document.getElementById('c_depositMin').value = depositMin || '';
+  document.getElementById('c_depositMax').value = depositMax || '';
+  document.getElementById('c_rentMin').value = c.rentMin || '';
+  document.getElementById('c_rentMax').value = c.rentMax || '';
+
+  toggleCustomerFields();
   document.getElementById('customerFormTitle').textContent = 'ویرایش مشتری';
   document.getElementById('customerSubmitBtn').innerHTML = '<i class="fas fa-check ml-2"></i> ذخیره تغییرات';
   document.getElementById('customerCancelBtn').classList.remove('hidden');
+  switchTab('customers');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -429,26 +595,56 @@ async function deleteCustomer(id) {
   loadCustomers();
 }
 
+/* ---------------- Matching (with range + rahn/ejareh conversion) ---------------- */
+const RANGE_TOLERANCE = 0.1; // 10% wiggle room around the stated range, so "نزدیک" matches show up too
+
+function inRange(value, min, max) {
+  if (isNaN(value)) return false;
+  const lo = !isNaN(min) ? min * (1 - RANGE_TOLERANCE) : -Infinity;
+  const hi = !isNaN(max) ? max * (1 + RANGE_TOLERANCE) : Infinity;
+  return value >= lo && value <= hi;
+}
+
 function findMatchingProperties(customer) {
+  const rate = getConversionRate();
   const custArea = parseFloat(customer.area);
-  const custBudget = parseFloat(customer.budget);
 
   return allProperties.filter(p => {
     if (p.type !== customer.type) return false;
 
-    const propBudget = p.type === 'sale'
-      ? parseFloat(p.price)
-      : parseFloat(String(p.deposit || '').replace(/[^\d.]/g, ''));
+    let numericOk = true;
+
+    if (p.type === 'sale') {
+      const min = parseFloat(customer.budgetMin);
+      const max = parseFloat(customer.budgetMax);
+      const price = parseFloat(p.price);
+      if (!isNaN(min) || !isNaN(max)) {
+        numericOk = inRange(price, min, max);
+      }
+    } else {
+      const propDeposit = parseFloat(String(p.deposit || '').replace(/[^\d.]/g, ''));
+      const propRent = parseFloat(String(p.rentAmount || '').replace(/[^\d.]/g, ''));
+      const dMin = parseFloat(customer.depositMin);
+      const dMax = parseFloat(customer.depositMax);
+      const rMin = parseFloat(customer.rentMin);
+      const rMax = parseFloat(customer.rentMax);
+
+      let rahnMatch = null, ejareMatch = null;
+      if (!isNaN(dMin) || !isNaN(dMax)) {
+        rahnMatch = inRange(toRahnEquivalent(propDeposit, propRent, rate), dMin, dMax);
+      }
+      if (!isNaN(rMin) || !isNaN(rMax)) {
+        ejareMatch = inRange(toEjareEquivalent(propDeposit, propRent, rate), rMin, rMax);
+      }
+
+      if (rahnMatch === null && ejareMatch === null) numericOk = true;
+      else numericOk = Boolean(rahnMatch) || Boolean(ejareMatch);
+    }
 
     let areaOk = true;
     const propArea = parseFloat(p.area);
     if (!isNaN(custArea) && custArea > 0 && !isNaN(propArea)) {
       areaOk = Math.abs(propArea - custArea) <= custArea * 0.25;
-    }
-
-    let budgetOk = true;
-    if (!isNaN(custBudget) && custBudget > 0 && !isNaN(propBudget)) {
-      budgetOk = Math.abs(propBudget - custBudget) <= custBudget * 0.25;
     }
 
     let locationOk = true;
@@ -458,7 +654,75 @@ function findMatchingProperties(customer) {
       locationOk = pLoc.includes(cLoc) || cLoc.includes(pLoc);
     }
 
-    return areaOk && budgetOk && locationOk;
+    return numericOk && areaOk && locationOk;
+  });
+}
+
+function findMatchingCustomers(property) {
+  const rate = getConversionRate();
+  const propArea = parseFloat(property.area);
+
+  const propDeposit = parseFloat(String(property.deposit || '').replace(/[^\d.]/g, ''));
+  const propRent = parseFloat(String(property.rentAmount || '').replace(/[^\d.]/g, ''));
+  const propRahnEquiv = toRahnEquivalent(propDeposit, propRent, rate);
+  const propEjareEquiv = toEjareEquivalent(propDeposit, propRent, rate);
+
+  return allCustomers.filter(c => {
+    if (c.type !== property.type) return false;
+
+    let numericOk = true;
+
+    if (property.type === 'sale') {
+      const price = parseFloat(property.price);
+      const min = parseFloat(c.budgetMin);
+      const max = parseFloat(c.budgetMax);
+      if (!isNaN(min) || !isNaN(max)) {
+        numericOk = inRange(price, min, max);
+      } else if (c.budget) {
+        // backward compatibility with old single-value customers
+        const b = parseFloat(c.budget);
+        numericOk = !isNaN(price) && !isNaN(b) ? Math.abs(price - b) <= b * 0.25 : true;
+      }
+    } else {
+      const dMin = parseFloat(c.depositMin);
+      const dMax = parseFloat(c.depositMax);
+      const rMin = parseFloat(c.rentMin);
+      const rMax = parseFloat(c.rentMax);
+
+      let rahnMatch = null, ejareMatch = null;
+      if (!isNaN(dMin) || !isNaN(dMax)) {
+        rahnMatch = inRange(propRahnEquiv, dMin, dMax);
+      }
+      if (!isNaN(rMin) || !isNaN(rMax)) {
+        ejareMatch = inRange(propEjareEquiv, rMin, rMax);
+      }
+
+      if (rahnMatch === null && ejareMatch === null) {
+        if (c.budget) {
+          const b = parseFloat(c.budget);
+          numericOk = !isNaN(b) ? Math.abs(propRahnEquiv - b) <= b * 0.25 : true;
+        } else {
+          numericOk = true;
+        }
+      } else {
+        numericOk = Boolean(rahnMatch) || Boolean(ejareMatch);
+      }
+    }
+
+    let areaOk = true;
+    const custArea = parseFloat(c.area);
+    if (!isNaN(propArea) && !isNaN(custArea) && custArea > 0) {
+      areaOk = Math.abs(propArea - custArea) <= custArea * 0.25;
+    }
+
+    let locationOk = true;
+    if (c.location && property.location) {
+      const cLoc = c.location.trim().toLowerCase();
+      const pLoc = property.location.trim().toLowerCase();
+      locationOk = pLoc.includes(cLoc) || cLoc.includes(pLoc);
+    }
+
+    return numericOk && areaOk && locationOk;
   });
 }
 
@@ -484,6 +748,13 @@ function toggleSuggestions(customerId) {
   }
 }
 
+function formatRange(min, max, unit) {
+  if (!min && !max) return '';
+  if (min && max) return min + ' تا ' + max + ' ' + unit;
+  if (min) return 'از ' + min + ' ' + unit;
+  return 'تا ' + max + ' ' + unit;
+}
+
 async function loadCustomers() {
   const res = await fetch('/api/customers');
   const customers = await res.json();
@@ -495,7 +766,21 @@ async function loadCustomers() {
     return;
   }
 
-  list.innerHTML = customers.map(c => `
+  list.innerHTML = customers.map(c => {
+    let budgetLine = '';
+    if (c.type === 'sale') {
+      const range = formatRange(c.budgetMin, c.budgetMax, 'میلیارد');
+      budgetLine = range || (c.budget ? 'بودجه: ' + c.budget + ' میلیارد' : '');
+    } else {
+      const depositRange = formatRange(c.depositMin, c.depositMax, 'میلیون');
+      const rentRange = formatRange(c.rentMin, c.rentMax, 'میلیون');
+      const parts = [];
+      if (depositRange) parts.push('رهن: ' + depositRange);
+      if (rentRange) parts.push('اجاره: ' + rentRange);
+      budgetLine = parts.length ? parts.join(' — ') : (c.budget ? 'بودجه: ' + c.budget : '');
+    }
+
+    return `
     <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
       <div class="flex justify-between items-center">
         <div>
@@ -505,7 +790,7 @@ async function loadCustomers() {
             ${c.phone ? '📞 ' + c.phone + ' — ' : ''}
             ${c.location ? 'منطقه: ' + c.location + ' — ' : ''}
             ${c.area ? 'متراژ: ' + c.area + ' متر — ' : ''}
-            ${c.budget ? 'بودجه: ' + c.budget : ''}
+            ${budgetLine}
           </p>
         </div>
         <div class="flex gap-4">
@@ -522,39 +807,8 @@ async function loadCustomers() {
       </div>
       <div id="suggest-${c.id}" class="hidden mt-4 bg-zinc-900 rounded-xl"></div>
     </div>
-  `).join('');
-}
-
-function findMatchingCustomers(property) {
-  const propArea = parseFloat(property.area);
-  const propBudget = property.type === 'sale'
-    ? parseFloat(property.price)
-    : parseFloat(String(property.deposit || '').replace(/[^\d.]/g, ''));
-
-  return allCustomers.filter(c => {
-    if (c.type !== property.type) return false;
-
-    let areaOk = true;
-    const custArea = parseFloat(c.area);
-    if (!isNaN(propArea) && !isNaN(custArea) && custArea > 0) {
-      areaOk = Math.abs(propArea - custArea) <= custArea * 0.25;
-    }
-
-    let budgetOk = true;
-    const custBudget = parseFloat(c.budget);
-    if (!isNaN(propBudget) && !isNaN(custBudget) && custBudget > 0) {
-      budgetOk = Math.abs(propBudget - custBudget) <= custBudget * 0.25;
-    }
-
-    let locationOk = true;
-    if (c.location && property.location) {
-      const cLoc = c.location.trim().toLowerCase();
-      const pLoc = property.location.trim().toLowerCase();
-      locationOk = pLoc.includes(cLoc) || cLoc.includes(pLoc);
-    }
-
-    return areaOk && budgetOk && locationOk;
-  });
+  `;
+  }).join('');
 }
 
 function toggleMatches(propertyId) {
@@ -567,16 +821,27 @@ function toggleMatches(propertyId) {
     if (matches.length === 0) {
       panel.innerHTML = '<p class="text-zinc-500 text-sm p-3">مشتری متناسبی (با تلرانس فعلی) پیدا نشد.</p>';
     } else {
-      panel.innerHTML = matches.map(c => `
+      panel.innerHTML = matches.map(c => {
+        let budgetLine = '—';
+        if (c.type === 'sale') {
+          budgetLine = formatRange(c.budgetMin, c.budgetMax, 'میلیارد') || c.budget || '—';
+        } else {
+          const depositRange = formatRange(c.depositMin, c.depositMax, 'میلیون رهن');
+          const rentRange = formatRange(c.rentMin, c.rentMax, 'میلیون اجاره');
+          budgetLine = [depositRange, rentRange].filter(Boolean).join(' — ') || c.budget || '—';
+        }
+        return `
         <div class="text-sm p-3 border-b border-zinc-800 last:border-0">
           <span class="font-semibold text-amber-400">${c.name}</span>
-          — بودجه: ${c.budget || '—'}، متراژ: ${c.area || '—'}، منطقه: ${c.location || '—'}
+          — بودجه: ${budgetLine}، متراژ: ${c.area || '—'}، منطقه: ${c.location || '—'}
         </div>
-      `).join('');
+      `;
+      }).join('');
     }
   }
 }
 
+/* ---------------- Auth ---------------- */
 async function checkAuth() {
   const res = await fetch('/api/check-auth');
   const data = await res.json();
@@ -646,6 +911,7 @@ async function logout() {
   location.reload();
 }
 
+/* ---------------- Properties ---------------- */
 function fillForm(p) {
   document.getElementById('p_type').value = p.type;
   document.getElementById('p_badge').value = p.badge || '';
@@ -692,6 +958,7 @@ function startEdit(id) {
   document.getElementById('formTitle').textContent = 'ویرایش ملک';
   document.getElementById('submitBtn').innerHTML = '<i class="fas fa-check ml-2"></i> ذخیره تغییرات';
   document.getElementById('cancelBtn').classList.remove('hidden');
+  switchTab('properties');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -811,9 +1078,11 @@ async function loadProperties() {
   `).join('');
 }
 
+/* ---------------- Init ---------------- */
+document.getElementById('conversionRate').value = getConversionRate();
+toggleCustomerFields();
 checkAuth();
 </script>
 
 </body>
 </html>
-
