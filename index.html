@@ -238,8 +238,8 @@ class="whatsapp-btn inline-flex items-center gap-3 bg-green-600 hover:bg-green-5
 <!-- Random Featured Properties -->
 <section class="py-24 bg-zinc-950 relative overflow-hidden">
 <div class="marquee-bg">
-<div class="marquee-row text-5xl font-black text-amber-400" data-duration="38" data-dot="◆" data-content="املاک راد|RAD REAL ESTATE|مستغلات لوکس|LUXURY"></div>
-<div class="marquee-row m-ltr text-4xl font-black text-amber-400" data-duration="44" data-dot="★" data-content="فروش|SALE|اجاره|RENT|VIP"></div>
+<div class="marquee-row text-5xl font-black text-amber-400" data-speed="65" data-dot="◆" data-content="املاک راد|RAD REAL ESTATE|مستغلات لوکس|LUXURY"></div>
+<div class="marquee-row m-ltr text-4xl font-black text-amber-400" data-speed="95" data-dot="★" data-content="فروش|SALE|اجاره|RENT|VIP"></div>
 </div>
 <div class="max-w-7xl mx-auto px-8 relative z-10">
 <div class="text-center mb-14">
@@ -254,13 +254,13 @@ class="whatsapp-btn inline-flex items-center gap-3 bg-green-600 hover:bg-green-5
 
 <!-- Marquee -->
 <section class="marquee-section">
-<div class="marquee-row m-rtl text-3xl font-black text-zinc-800 mb-3" data-duration="40" data-dot="◆" data-content="املاک راد|RAD REAL ESTATE|مستغلات لوکس|LUXURY PROPERTIES"></div>
-<div class="marquee-row m-ltr text-2xl font-bold text-amber-400/20 mb-3" data-duration="32" data-dot="★" data-content="ویلا|VILLA|مستغلات اداری|COMMERCIAL"></div>
-<div class="marquee-row m-rtl text-4xl font-black text-zinc-800 mb-3" data-duration="46" data-dot="◆" data-content="پنت‌هاوس|PENTHOUSE|IMMOBILIER DE LUXE|املاک خاص"></div>
-<div class="marquee-row m-ltr text-3xl font-bold text-amber-400 mb-3" data-duration="26" data-dot="★" data-content="رضایی|REZAEI|مشاوره اختصاصی|EXCLUSIVE ADVISOR"></div>
-<div class="marquee-row m-rtl text-2xl font-bold text-zinc-700 mb-3" data-duration="36" data-dot="◆" data-content="فروش|SALE|اجاره|RENT|سرمایه‌گذاری|INVESTMENT"></div>
-<div class="marquee-row m-ltr text-4xl font-black text-zinc-800 mb-3" data-duration="42" data-dot="★" data-content="برج|TOWER|آپارتمان|APARTMENT"></div>
-<div class="marquee-row m-rtl text-2xl font-bold text-amber-400/30" data-duration="30" data-dot="◆" data-content="EXCLUSIVE|اختصاصی|PRESTIGE|معتبر|۰۹۱۲۴۰۹۶۹۷۰"></div>
+<div class="marquee-row m-rtl text-3xl font-black text-zinc-800 mb-3" data-speed="60" data-dot="◆" data-content="املاک راد|RAD REAL ESTATE|مستغلات لوکس|LUXURY PROPERTIES"></div>
+<div class="marquee-row m-ltr text-2xl font-bold text-amber-400/20 mb-3" data-speed="90" data-dot="★" data-content="ویلا|VILLA|مستغلات اداری|COMMERCIAL"></div>
+<div class="marquee-row m-rtl text-4xl font-black text-zinc-800 mb-3" data-speed="45" data-dot="◆" data-content="پنت‌هاوس|PENTHOUSE|IMMOBILIER DE LUXE|املاک خاص"></div>
+<div class="marquee-row m-ltr text-3xl font-bold text-amber-400 mb-3" data-speed="110" data-dot="★" data-content="رضایی|REZAEI|مشاوره اختصاصی|EXCLUSIVE ADVISOR"></div>
+<div class="marquee-row m-rtl text-2xl font-bold text-zinc-700 mb-3" data-speed="70" data-dot="◆" data-content="فروش|SALE|اجاره|RENT|سرمایه‌گذاری|INVESTMENT"></div>
+<div class="marquee-row m-ltr text-4xl font-black text-zinc-800 mb-3" data-speed="50" data-dot="★" data-content="برج|TOWER|آپارتمان|APARTMENT"></div>
+<div class="marquee-row m-rtl text-2xl font-bold text-amber-400/30" data-speed="100" data-dot="◆" data-content="EXCLUSIVE|اختصاصی|PRESTIGE|معتبر|۰۹۱۲۴۰۹۶۹۷۰"></div>
 </section>
 
 <!-- About Rezaei -->
@@ -444,9 +444,9 @@ loadRandomProperties();
 <script>
 function buildMarquee() {
   document.querySelectorAll('.marquee-row').forEach(row => {
-    row.innerHTML = '';
     const words = row.dataset.content.split('|');
     const dot = row.dataset.dot || '◆';
+    const REPEAT_COUNT = 40; // به‌قدر کافی زیاد که روی هر مانیتوری (حتی خیلی بزرگ) کم نیاره
 
     function makeItem() {
       const span = document.createElement('span');
@@ -457,34 +457,25 @@ function buildMarquee() {
 
     const trackA = document.createElement('div');
     trackA.className = 'marquee-half';
-    row.appendChild(trackA);
-
-    const targetWidth = Math.max(window.innerWidth, document.documentElement.clientWidth) * 4;
-    let width = 0;
-    let guard = 0;
-    while (width < targetWidth && guard < 600) {
-      const item = makeItem();
-      trackA.appendChild(item);
-      width += item.offsetWidth;
-      guard++;
+    for (let i = 0; i < REPEAT_COUNT; i++) {
+      trackA.appendChild(makeItem());
     }
+    row.appendChild(trackA);
 
     const trackB = trackA.cloneNode(true);
     row.appendChild(trackB);
 
-    row.style.animationDuration = (row.dataset.duration || 30) + 's';
+    // سرعت رو بر اساس عرض واقعی محتوا تنظیم می‌کنیم تا حرکت طبیعی و یکنواخت بمونه
+    const speed = parseFloat(row.dataset.speed) || 70; // پیکسل بر ثانیه
+    const trackWidth = trackA.offsetWidth;
+    const duration = trackWidth / speed;
+    row.style.animationDuration = duration + 's';
   });
 }
 
+// این تابع فقط یک‌بار در کل عمر صفحه اجرا می‌شه و هیچ‌وقت دوباره ساخته نمی‌شه
+// (قبلاً موقع تغییر سایز صفحه در گوشی، دوباره ساخته می‌شد و باعث قطع‌شدن مداوم می‌شد)
 buildMarquee();
-if (document.fonts && document.fonts.ready) {
-  document.fonts.ready.then(buildMarquee);
-}
-let resizeTimer;
-window.addEventListener('resize', () => {
-  clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(buildMarquee, 300);
-});
 </script>
 
 </body>
