@@ -459,10 +459,10 @@ function buildMarquee() {
     trackA.className = 'marquee-half';
     row.appendChild(trackA);
 
-    const targetWidth = window.innerWidth * 1.5;
+    const targetWidth = Math.max(window.innerWidth, document.documentElement.clientWidth) * 4;
     let width = 0;
     let guard = 0;
-    while (width < targetWidth && guard < 200) {
+    while (width < targetWidth && guard < 600) {
       const item = makeItem();
       trackA.appendChild(item);
       width += item.offsetWidth;
@@ -477,6 +477,9 @@ function buildMarquee() {
 }
 
 buildMarquee();
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(buildMarquee);
+}
 let resizeTimer;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
@@ -486,4 +489,3 @@ window.addEventListener('resize', () => {
 
 </body>
 </html>
-
