@@ -10,7 +10,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 body { font-family: 'Vazirmatn', system-ui, sans-serif; }
-.tab-btn { transition: all 0.15s ease; }
+.tab-btn.active { background: #fbbf24; color: #111827; }
+.number-hint { color: #fbbf24; font-size: 0.8rem; margin-top: 4px; min-height: 1.2em; }
 </style>
 </head>
 <body class="bg-zinc-950 text-zinc-200 min-h-screen">
@@ -33,7 +34,7 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 
 <!-- Admin Dashboard -->
 <div id="dashboard" class="hidden max-w-5xl mx-auto px-6 py-12">
-  <div class="flex justify-between items-center mb-10">
+  <div class="flex justify-between items-center mb-8">
     <h1 class="text-3xl font-bold">پنل مدیریت املاک</h1>
     <div class="flex items-center gap-5">
       <a href="index.html" class="text-amber-400 hover:text-amber-300">بازگشت به سایت</a>
@@ -47,7 +48,7 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
   </div>
 
   <!-- Change Password -->
-  <div id="passwordCard" class="hidden bg-zinc-900 border border-zinc-800 rounded-3xl p-8 mb-10">
+  <div id="passwordCard" class="hidden bg-zinc-900 border border-zinc-800 rounded-3xl p-8 mb-8">
     <h2 class="text-xl font-bold mb-6">تغییر رمز عبور</h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
       <div>
@@ -70,17 +71,17 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
   </div>
 
   <!-- Tabs -->
-  <div class="flex gap-2 mb-8 border-b border-zinc-800">
-    <button id="tabBtn-properties" onclick="switchTab('properties')" class="tab-btn px-6 py-3 font-bold border-b-2 border-amber-400 text-amber-400">
+  <div class="flex gap-3 mb-8 bg-zinc-900 border border-zinc-800 rounded-2xl p-2">
+    <button id="tabBtnProperties" onclick="switchTab('properties')" class="tab-btn active flex-1 py-3 rounded-xl font-bold transition">
       <i class="fas fa-building ml-2"></i> املاک
     </button>
-    <button id="tabBtn-customers" onclick="switchTab('customers')" class="tab-btn px-6 py-3 font-bold border-b-2 border-transparent text-zinc-400 hover:text-white">
+    <button id="tabBtnCustomers" onclick="switchTab('customers')" class="tab-btn flex-1 py-3 rounded-xl font-bold transition text-zinc-300">
       <i class="fas fa-users ml-2"></i> مشتریان
     </button>
   </div>
 
-  <!-- ===================== PROPERTIES TAB ===================== -->
-  <div id="tab-properties">
+  <!-- ================= PROPERTIES TAB ================= -->
+  <div id="tabProperties">
 
   <!-- Add / Edit Property Form -->
   <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 mb-10">
@@ -109,17 +110,20 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
       <!-- Sale-only field -->
       <div id="saleFields">
         <label class="block text-amber-400 text-sm mb-2">قیمت (میلیارد تومان)</label>
-        <input id="p_price" type="text" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+        <input id="p_price" type="number" step="any" oninput="showNumberHint('p_price', 'p_priceHint', 'billion')" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+        <div id="p_priceHint" class="number-hint"></div>
       </div>
 
       <!-- Rent-only fields -->
       <div id="rentFields1" class="hidden">
-        <label class="block text-amber-400 text-sm mb-2">ودیعه (تومان)</label>
-        <input id="p_deposit" type="text" placeholder="مثلا: 500 میلیون" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+        <label class="block text-amber-400 text-sm mb-2">ودیعه (میلیون تومان)</label>
+        <input id="p_deposit" type="number" step="any" placeholder="مثلا: 500" oninput="showNumberHint('p_deposit', 'p_depositHint', 'million')" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+        <div id="p_depositHint" class="number-hint"></div>
       </div>
       <div id="rentFields2" class="hidden">
-        <label class="block text-amber-400 text-sm mb-2">اجاره ماهانه (تومان)</label>
-        <input id="p_rentAmount" type="text" placeholder="مثلا: 15 میلیون" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+        <label class="block text-amber-400 text-sm mb-2">اجاره ماهانه (میلیون تومان)</label>
+        <input id="p_rentAmount" type="number" step="any" placeholder="مثلا: 15" oninput="showNumberHint('p_rentAmount', 'p_rentAmountHint', 'million')" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+        <div id="p_rentAmountHint" class="number-hint"></div>
       </div>
 
       <div>
@@ -137,6 +141,23 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
       <div>
         <label class="block text-amber-400 text-sm mb-2">پارکینگ</label>
         <input id="p_parking" type="text" placeholder="مثلا: 90 پارکینگ" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+    </div>
+
+    <!-- Divisible property -->
+    <div class="mt-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-5">
+      <label class="flex items-center gap-3 cursor-pointer">
+        <input id="p_divisible" type="checkbox" onchange="toggleDivisible()" class="w-5 h-5 accent-amber-400">
+        <span class="font-semibold">این ملک قابل تفکیک است (مثلا چند طبقه مستقل)</span>
+      </label>
+      <div id="divisibleFields" class="hidden grid grid-cols-1 md:grid-cols-2 gap-5 mt-4">
+        <div>
+          <label class="block text-amber-400 text-sm mb-2">تعداد کل طبقات/واحدهای قابل تفکیک</label>
+          <input id="p_totalFloors" type="number" placeholder="مثلا: 3" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
+        </div>
+        <div class="flex items-end text-zinc-500 text-sm pb-3">
+          متراژ هر طبقه از فیلد «متراژ هر طبقه» بالا خونده می‌شه.
+        </div>
       </div>
     </div>
 
@@ -184,42 +205,15 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
       <p class="text-zinc-500">در حال بارگذاری...</p>
     </div>
   </div>
-
   </div>
-  <!-- ===================== END PROPERTIES TAB ===================== -->
+  <!-- ================= END PROPERTIES TAB ================= -->
 
-  <!-- ===================== CUSTOMERS TAB ===================== -->
-  <div id="tab-customers" class="hidden">
+  <!-- ================= CUSTOMERS TAB ================= -->
+  <div id="tabCustomers" class="hidden">
 
-  <!-- Conversion rate settings + calculator -->
-  <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 mb-10">
-    <h2 class="text-xl font-bold mb-4"><i class="fas fa-calculator text-amber-400 ml-2"></i>محاسبه‌گر تبدیل رهن به اجاره</h2>
-    <p class="text-zinc-500 text-sm mb-5">این نرخ برای پیدا کردن خودکار ملک‌های رهن‌واجاره‌ای که با بودجه مشتری «تبدیل‌پذیر» و نزدیک هستند استفاده می‌شود. مثلا با نرخ ۳٪، هر ۱۰۰ میلیون تومان رهن تقریبا معادل ۳ میلیون تومان اجاره ماهانه است.</p>
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-5 items-end">
-      <div>
-        <label class="block text-amber-400 text-sm mb-2">نرخ تبدیل (درصد ماهانه)</label>
-        <input id="conversionRate" type="number" step="0.1" min="0.1" onchange="saveConversionRate()" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
-      </div>
-      <div>
-        <label class="block text-zinc-400 text-sm mb-2">رهن (میلیون تومان)</label>
-        <input id="calc_deposit" type="number" oninput="runCalculator()" placeholder="مثلا: 500" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
-      </div>
-      <div>
-        <label class="block text-zinc-400 text-sm mb-2">اجاره (میلیون تومان)</label>
-        <input id="calc_rent" type="number" oninput="runCalculator()" placeholder="مثلا: 15" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
-      </div>
-      <div class="text-sm text-zinc-300 bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
-        <div>معادل رهن کامل: <span id="calc_rahnResult" class="text-amber-400 font-bold">—</span></div>
-        <div>معادل اجاره کامل: <span id="calc_ejareResult" class="text-amber-400 font-bold">—</span></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Customer Management -->
   <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 mb-10">
     <h2 id="customerFormTitle" class="text-xl font-bold mb-6">افزودن مشتری جدید</h2>
-
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-5">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
       <div>
         <label class="block text-amber-400 text-sm mb-2">نام مشتری</label>
         <input id="c_name" type="text" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
@@ -246,36 +240,52 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
     </div>
 
     <!-- Sale budget range -->
-    <div id="saleCustomerFields" class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5 pt-5 border-t border-zinc-800">
-      <div>
-        <label class="block text-amber-400 text-sm mb-2">بودجه از (میلیارد تومان)</label>
-        <input id="c_budgetMin" type="number" placeholder="مثلا: 2" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
-      </div>
-      <div>
-        <label class="block text-amber-400 text-sm mb-2">بودجه تا (میلیارد تومان)</label>
-        <input id="c_budgetMax" type="number" placeholder="مثلا: 3" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+    <div id="c_saleFields" class="mt-5 bg-zinc-950 border border-zinc-800 rounded-2xl p-5">
+      <label class="block text-amber-400 text-sm mb-3">بازه بودجه خرید (میلیارد تومان)</label>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <input id="c_priceMin" type="number" step="any" placeholder="از" oninput="showNumberHint('c_priceMin', 'c_priceMinHint', 'billion')" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
+          <div id="c_priceMinHint" class="number-hint"></div>
+        </div>
+        <div>
+          <input id="c_priceMax" type="number" step="any" placeholder="تا" oninput="showNumberHint('c_priceMax', 'c_priceMaxHint', 'billion')" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
+          <div id="c_priceMaxHint" class="number-hint"></div>
+        </div>
       </div>
     </div>
 
     <!-- Rent deposit/rent ranges -->
-    <div id="rentCustomerFields" class="hidden grid grid-cols-1 md:grid-cols-4 gap-5 mt-5 pt-5 border-t border-zinc-800">
+    <div id="c_rentFields" class="hidden mt-5 bg-zinc-950 border border-zinc-800 rounded-2xl p-5 space-y-5">
       <div>
-        <label class="block text-amber-400 text-sm mb-2">رهن از (میلیون تومان)</label>
-        <input id="c_depositMin" type="number" placeholder="مثلا: 300" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+        <label class="block text-amber-400 text-sm mb-3">بازه رهن (میلیون تومان)</label>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <input id="c_depositMin" type="number" step="any" placeholder="از" oninput="showNumberHint('c_depositMin', 'c_depositMinHint', 'million')" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
+            <div id="c_depositMinHint" class="number-hint"></div>
+          </div>
+          <div>
+            <input id="c_depositMax" type="number" step="any" placeholder="تا" oninput="showNumberHint('c_depositMax', 'c_depositMaxHint', 'million')" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
+            <div id="c_depositMaxHint" class="number-hint"></div>
+          </div>
+        </div>
       </div>
       <div>
-        <label class="block text-amber-400 text-sm mb-2">رهن تا (میلیون تومان)</label>
-        <input id="c_depositMax" type="number" placeholder="مثلا: 600" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+        <label class="block text-amber-400 text-sm mb-3">بازه اجاره ماهانه (میلیون تومان)</label>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <input id="c_rentMin" type="number" step="any" placeholder="از" oninput="showNumberHint('c_rentMin', 'c_rentMinHint', 'million')" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
+            <div id="c_rentMinHint" class="number-hint"></div>
+          </div>
+          <div>
+            <input id="c_rentMax" type="number" step="any" placeholder="تا" oninput="showNumberHint('c_rentMax', 'c_rentMaxHint', 'million')" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
+            <div id="c_rentMaxHint" class="number-hint"></div>
+          </div>
+        </div>
       </div>
-      <div>
-        <label class="block text-amber-400 text-sm mb-2">اجاره از (میلیون تومان)</label>
-        <input id="c_rentMin" type="number" placeholder="مثلا: 10" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
-      </div>
-      <div>
-        <label class="block text-amber-400 text-sm mb-2">اجاره تا (میلیون تومان)</label>
-        <input id="c_rentMax" type="number" placeholder="مثلا: 20" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
-      </div>
-      <p class="md:col-span-4 text-zinc-500 text-xs">می‌تونید فقط یکی از بازه‌های رهن یا اجاره رو پر کنید؛ سیستم با تبدیل خودکار، ملک‌های رهن‌واجاره‌ای نزدیک به هر کدوم رو هم پیشنهاد می‌ده.</p>
+      <p class="text-zinc-500 text-xs">
+        <i class="fas fa-circle-info ml-1"></i>
+        سیستم خودش رهن و اجاره رو با هم می‌سنجه (طبق فرمول محاسبه‌گر: هر ۱۰۰ میلیون رهن ≈ ۳ میلیون اجاره)، پس اگه مشتری فقط رهن کامل بخواد، ملک‌های ترکیبی (رهن + اجاره) هم که ارزش کلشون نزدیکه، پیشنهاد داده می‌شن.
+      </p>
     </div>
 
     <div class="flex gap-4 mt-6">
@@ -287,83 +297,101 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
       </button>
     </div>
     <p id="customerMessage" class="mt-4 text-sm"></p>
+  </div>
 
-    <div class="mt-8 pt-6 border-t border-zinc-800">
-      <h3 class="font-bold mb-4">لیست مشتری‌ها</h3>
-      <div id="customersList" class="space-y-3">
-        <p class="text-zinc-500">در حال بارگذاری...</p>
-      </div>
+  <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
+    <h3 class="font-bold mb-4">لیست مشتری‌ها</h3>
+    <div id="customersList" class="space-y-3">
+      <p class="text-zinc-500">در حال بارگذاری...</p>
     </div>
   </div>
 
   </div>
-  <!-- ===================== END CUSTOMERS TAB ===================== -->
+  <!-- ================= END CUSTOMERS TAB ================= -->
 
 </div>
 
 <script>
+// ---------- ابزار نمایش عدد به‌صورت خوانا (رفع ابهام واحد) ----------
+function numberToPersianWords(num) {
+  if (isNaN(num) || num === 0) return 'صفر';
+  num = Math.round(num);
+  const ones = ['', 'یک', 'دو', 'سه', 'چهار', 'پنج', 'شش', 'هفت', 'هشت', 'نه'];
+  const tens = ['', '', 'بیست', 'سی', 'چهل', 'پنجاه', 'شصت', 'هفتاد', 'هشتاد', 'نود'];
+  const teens = ['ده', 'یازده', 'دوازده', 'سیزده', 'چهارده', 'پانزده', 'شانزده', 'هفده', 'هجده', 'نوزده'];
+
+  function convertLessThanThousand(n) {
+    if (n === 0) return '';
+    let result = '';
+    if (n >= 100) {
+      result += ones[Math.floor(n / 100)] + 'صد';
+      n %= 100;
+      if (n > 0) result += ' و ';
+    }
+    if (n >= 20) {
+      result += tens[Math.floor(n / 10)];
+      n %= 10;
+      if (n > 0) result += ' و ' + ones[n];
+    } else if (n >= 10) {
+      result += teens[n - 10];
+    } else if (n > 0) {
+      result += ones[n];
+    }
+    return result;
+  }
+
+  const units = [
+    { name: 'میلیارد', value: 1000000000 },
+    { name: 'میلیون', value: 1000000 },
+    { name: 'هزار', value: 1000 },
+    { name: '', value: 1 }
+  ];
+
+  let parts = [];
+  let remaining = num;
+  for (let unit of units) {
+    if (remaining >= unit.value) {
+      let amount = Math.floor(remaining / unit.value);
+      if (amount > 0) {
+        let amountText = convertLessThanThousand(amount);
+        parts.push(unit.name ? amountText + ' ' + unit.name : amountText);
+      }
+      remaining %= unit.value;
+    }
+  }
+  if (parts.length === 0) return 'صفر';
+  return parts.join(' و ');
+}
+
+function showNumberHint(inputId, hintId, unit) {
+  const val = parseFloat(document.getElementById(inputId).value);
+  const hintEl = document.getElementById(hintId);
+  if (isNaN(val) || val === 0) {
+    hintEl.textContent = '';
+    return;
+  }
+  const toman = unit === 'billion' ? val * 1000000000 : val * 1000000;
+  hintEl.textContent = '= ' + toman.toLocaleString('fa-IR') + ' تومان (' + numberToPersianWords(toman) + ' تومان)';
+}
+
+// ---------- Tabs ----------
+function switchTab(tab) {
+  document.getElementById('tabProperties').classList.toggle('hidden', tab !== 'properties');
+  document.getElementById('tabCustomers').classList.toggle('hidden', tab !== 'customers');
+  document.getElementById('tabBtnProperties').classList.toggle('active', tab === 'properties');
+  document.getElementById('tabBtnCustomers').classList.toggle('active', tab === 'customers');
+}
+
+// ---------- Properties ----------
 let editingId = null;
 let allProperties = [];
 let currentImages = [];
 const MAX_IMAGES = 10;
 
-/* ---------------- Tabs ---------------- */
-function switchTab(tab) {
-  document.getElementById('tab-properties').classList.toggle('hidden', tab !== 'properties');
-  document.getElementById('tab-customers').classList.toggle('hidden', tab !== 'customers');
-
-  const propBtn = document.getElementById('tabBtn-properties');
-  const custBtn = document.getElementById('tabBtn-customers');
-
-  propBtn.classList.toggle('border-amber-400', tab === 'properties');
-  propBtn.classList.toggle('text-amber-400', tab === 'properties');
-  propBtn.classList.toggle('border-transparent', tab !== 'properties');
-  propBtn.classList.toggle('text-zinc-400', tab !== 'properties');
-
-  custBtn.classList.toggle('border-amber-400', tab === 'customers');
-  custBtn.classList.toggle('text-amber-400', tab === 'customers');
-  custBtn.classList.toggle('border-transparent', tab !== 'customers');
-  custBtn.classList.toggle('text-zinc-400', tab !== 'customers');
+function toggleDivisible() {
+  document.getElementById('divisibleFields').classList.toggle('hidden', !document.getElementById('p_divisible').checked);
 }
 
-/* ---------------- Rahn <-> Ejareh conversion ---------------- */
-function getConversionRate() {
-  const v = parseFloat(localStorage.getItem('radRahnRate'));
-  return (!isNaN(v) && v > 0) ? v : 3;
-}
-function saveConversionRate() {
-  const v = parseFloat(document.getElementById('conversionRate').value);
-  if (!isNaN(v) && v > 0) {
-    localStorage.setItem('radRahnRate', v);
-  }
-  runCalculator();
-}
-// Equivalent full-rahn value if the whole rent amount were converted into extra deposit
-function toRahnEquivalent(deposit, rent, rate) {
-  deposit = isNaN(deposit) ? 0 : deposit;
-  rent = isNaN(rent) ? 0 : rent;
-  return deposit + (rent * 100 / rate);
-}
-// Equivalent full-rent value if the whole deposit were converted into extra monthly rent
-function toEjareEquivalent(deposit, rent, rate) {
-  deposit = isNaN(deposit) ? 0 : deposit;
-  rent = isNaN(rent) ? 0 : rent;
-  return rent + (deposit * rate / 100);
-}
-function runCalculator() {
-  const rate = getConversionRate();
-  const deposit = parseFloat(document.getElementById('calc_deposit').value);
-  const rent = parseFloat(document.getElementById('calc_rent').value);
-  const hasInput = !isNaN(deposit) || !isNaN(rent);
-  document.getElementById('calc_rahnResult').textContent = hasInput
-    ? Math.round(toRahnEquivalent(deposit, rent, rate)).toLocaleString('fa-IR') + ' میلیون'
-    : '—';
-  document.getElementById('calc_ejareResult').textContent = hasInput
-    ? Math.round(toEjareEquivalent(deposit, rent, rate)).toLocaleString('fa-IR') + ' میلیون'
-    : '—';
-}
-
-/* ---------------- Image gallery ---------------- */
 function renderImagesGrid() {
   const grid = document.getElementById('imagesGrid');
   document.getElementById('imageCountLabel').textContent = currentImages.length + ' از ' + MAX_IMAGES;
@@ -390,23 +418,15 @@ async function uploadImage() {
   const fileInput = document.getElementById('p_imageFile');
   const file = fileInput.files[0];
   if (!file) return;
-
-  if (currentImages.length >= MAX_IMAGES) {
-    fileInput.value = '';
-    return;
-  }
+  if (currentImages.length >= MAX_IMAGES) { fileInput.value = ''; return; }
 
   const label = document.getElementById('uploadLabel');
   label.textContent = 'در حال آپلود...';
-
   const formData = new FormData();
   formData.append('image', file);
 
   try {
-    const res = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData
-    });
+    const res = await fetch('/api/upload', { method: 'POST', body: formData });
     const data = await res.json();
     if (data.url) {
       currentImages.push(data.url);
@@ -426,19 +446,9 @@ async function uploadImage() {
 
 function toggleFields() {
   const type = document.getElementById('p_type').value;
-  const saleFields = document.getElementById('saleFields');
-  const rentFields1 = document.getElementById('rentFields1');
-  const rentFields2 = document.getElementById('rentFields2');
-
-  if (type === 'sale') {
-    saleFields.classList.remove('hidden');
-    rentFields1.classList.add('hidden');
-    rentFields2.classList.add('hidden');
-  } else {
-    saleFields.classList.add('hidden');
-    rentFields1.classList.remove('hidden');
-    rentFields2.classList.remove('hidden');
-  }
+  document.getElementById('saleFields').classList.toggle('hidden', type !== 'sale');
+  document.getElementById('rentFields1').classList.toggle('hidden', type !== 'rent');
+  document.getElementById('rentFields2').classList.toggle('hidden', type !== 'rent');
 }
 
 function addExtraFieldRow(label, value) {
@@ -470,448 +480,6 @@ function clearExtraFields() {
   document.getElementById('extraFieldsContainer').innerHTML = '';
 }
 
-/* ---------------- Customers ---------------- */
-let editingCustomerId = null;
-let allCustomers = [];
-
-function toggleCustomerFields() {
-  const type = document.getElementById('c_type').value;
-  document.getElementById('saleCustomerFields').classList.toggle('hidden', type !== 'sale');
-  document.getElementById('rentCustomerFields').classList.toggle('hidden', type !== 'rent');
-}
-
-function buildCustomerObject() {
-  return {
-    name: document.getElementById('c_name').value,
-    phone: document.getElementById('c_phone').value,
-    type: document.getElementById('c_type').value,
-    area: document.getElementById('c_area').value,
-    location: document.getElementById('c_location').value,
-    budgetMin: document.getElementById('c_budgetMin').value,
-    budgetMax: document.getElementById('c_budgetMax').value,
-    depositMin: document.getElementById('c_depositMin').value,
-    depositMax: document.getElementById('c_depositMax').value,
-    rentMin: document.getElementById('c_rentMin').value,
-    rentMax: document.getElementById('c_rentMax').value
-  };
-}
-
-function clearCustomerForm() {
-  document.getElementById('c_name').value = '';
-  document.getElementById('c_phone').value = '';
-  document.getElementById('c_area').value = '';
-  document.getElementById('c_location').value = '';
-  document.getElementById('c_budgetMin').value = '';
-  document.getElementById('c_budgetMax').value = '';
-  document.getElementById('c_depositMin').value = '';
-  document.getElementById('c_depositMax').value = '';
-  document.getElementById('c_rentMin').value = '';
-  document.getElementById('c_rentMax').value = '';
-  document.getElementById('c_type').value = 'sale';
-  toggleCustomerFields();
-}
-
-async function submitCustomer() {
-  const customer = buildCustomerObject();
-  const msg = document.getElementById('customerMessage');
-
-  if (!customer.name) {
-    msg.innerHTML = '<span class="text-red-400">لطفا نام مشتری را وارد کنید</span>';
-    return;
-  }
-
-  let res;
-  if (editingCustomerId) {
-    res = await fetch('/api/customers/' + editingCustomerId, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(customer)
-    });
-  } else {
-    res = await fetch('/api/customers', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(customer)
-    });
-  }
-
-  const data = await res.json();
-  if (data.success) {
-    msg.innerHTML = '<span class="text-green-400">' + (editingCustomerId ? 'مشتری بروزرسانی شد' : 'مشتری اضافه شد') + '</span>';
-    cancelCustomerEdit();
-    loadCustomers();
-  } else {
-    msg.innerHTML = '<span class="text-red-400">' + (data.error || 'خطا در ثبت') + '</span>';
-  }
-}
-
-function startEditCustomer(id) {
-  const c = allCustomers.find(x => x.id === id);
-  if (!c) return;
-  editingCustomerId = id;
-  document.getElementById('c_name').value = c.name || '';
-  document.getElementById('c_phone').value = c.phone || '';
-  document.getElementById('c_type').value = c.type || 'sale';
-  document.getElementById('c_area').value = c.area || '';
-  document.getElementById('c_location').value = c.location || '';
-
-  // Backward compatibility: older records only had a single "budget" field
-  let budgetMin = c.budgetMin, budgetMax = c.budgetMax;
-  let depositMin = c.depositMin, depositMax = c.depositMax;
-  const hasNewRange = budgetMin || budgetMax || depositMin || depositMax;
-  if (!hasNewRange && c.budget) {
-    if (c.type === 'sale') { budgetMin = c.budget; budgetMax = c.budget; }
-    else { depositMin = c.budget; depositMax = c.budget; }
-  }
-
-  document.getElementById('c_budgetMin').value = budgetMin || '';
-  document.getElementById('c_budgetMax').value = budgetMax || '';
-  document.getElementById('c_depositMin').value = depositMin || '';
-  document.getElementById('c_depositMax').value = depositMax || '';
-  document.getElementById('c_rentMin').value = c.rentMin || '';
-  document.getElementById('c_rentMax').value = c.rentMax || '';
-
-  toggleCustomerFields();
-  document.getElementById('customerFormTitle').textContent = 'ویرایش مشتری';
-  document.getElementById('customerSubmitBtn').innerHTML = '<i class="fas fa-check ml-2"></i> ذخیره تغییرات';
-  document.getElementById('customerCancelBtn').classList.remove('hidden');
-  switchTab('customers');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function cancelCustomerEdit() {
-  editingCustomerId = null;
-  clearCustomerForm();
-  document.getElementById('customerFormTitle').textContent = 'افزودن مشتری جدید';
-  document.getElementById('customerSubmitBtn').innerHTML = '<i class="fas fa-plus ml-2"></i> افزودن مشتری';
-  document.getElementById('customerCancelBtn').classList.add('hidden');
-  document.getElementById('customerMessage').innerHTML = '';
-}
-
-async function deleteCustomer(id) {
-  if (!confirm('آیا از حذف این مشتری مطمئن هستید؟')) return;
-  await fetch('/api/customers/' + id, { method: 'DELETE' });
-  if (editingCustomerId === id) cancelCustomerEdit();
-  loadCustomers();
-}
-
-/* ---------------- Matching (with range + rahn/ejareh conversion) ---------------- */
-const RANGE_TOLERANCE = 0.1; // 10% wiggle room around the stated range, so "نزدیک" matches show up too
-
-function inRange(value, min, max) {
-  if (isNaN(value)) return false;
-  const lo = !isNaN(min) ? min * (1 - RANGE_TOLERANCE) : -Infinity;
-  const hi = !isNaN(max) ? max * (1 + RANGE_TOLERANCE) : Infinity;
-  return value >= lo && value <= hi;
-}
-
-function findMatchingProperties(customer) {
-  const rate = getConversionRate();
-  const custArea = parseFloat(customer.area);
-
-  return allProperties.filter(p => {
-    if (p.type !== customer.type) return false;
-
-    let numericOk = true;
-
-    if (p.type === 'sale') {
-      const min = parseFloat(customer.budgetMin);
-      const max = parseFloat(customer.budgetMax);
-      const price = parseFloat(p.price);
-      if (!isNaN(min) || !isNaN(max)) {
-        numericOk = inRange(price, min, max);
-      }
-    } else {
-      const propDeposit = parseFloat(String(p.deposit || '').replace(/[^\d.]/g, ''));
-      const propRent = parseFloat(String(p.rentAmount || '').replace(/[^\d.]/g, ''));
-      const dMin = parseFloat(customer.depositMin);
-      const dMax = parseFloat(customer.depositMax);
-      const rMin = parseFloat(customer.rentMin);
-      const rMax = parseFloat(customer.rentMax);
-
-      let rahnMatch = null, ejareMatch = null;
-      if (!isNaN(dMin) || !isNaN(dMax)) {
-        rahnMatch = inRange(toRahnEquivalent(propDeposit, propRent, rate), dMin, dMax);
-      }
-      if (!isNaN(rMin) || !isNaN(rMax)) {
-        ejareMatch = inRange(toEjareEquivalent(propDeposit, propRent, rate), rMin, rMax);
-      }
-
-      if (rahnMatch === null && ejareMatch === null) numericOk = true;
-      else numericOk = Boolean(rahnMatch) || Boolean(ejareMatch);
-    }
-
-    let areaOk = true;
-    const propArea = parseFloat(p.area);
-    if (!isNaN(custArea) && custArea > 0 && !isNaN(propArea)) {
-      areaOk = Math.abs(propArea - custArea) <= custArea * 0.25;
-    }
-
-    let locationOk = true;
-    if (customer.location && p.location) {
-      const cLoc = customer.location.trim().toLowerCase();
-      const pLoc = p.location.trim().toLowerCase();
-      locationOk = pLoc.includes(cLoc) || cLoc.includes(pLoc);
-    }
-
-    return numericOk && areaOk && locationOk;
-  });
-}
-
-function findMatchingCustomers(property) {
-  const rate = getConversionRate();
-  const propArea = parseFloat(property.area);
-
-  const propDeposit = parseFloat(String(property.deposit || '').replace(/[^\d.]/g, ''));
-  const propRent = parseFloat(String(property.rentAmount || '').replace(/[^\d.]/g, ''));
-  const propRahnEquiv = toRahnEquivalent(propDeposit, propRent, rate);
-  const propEjareEquiv = toEjareEquivalent(propDeposit, propRent, rate);
-
-  return allCustomers.filter(c => {
-    if (c.type !== property.type) return false;
-
-    let numericOk = true;
-
-    if (property.type === 'sale') {
-      const price = parseFloat(property.price);
-      const min = parseFloat(c.budgetMin);
-      const max = parseFloat(c.budgetMax);
-      if (!isNaN(min) || !isNaN(max)) {
-        numericOk = inRange(price, min, max);
-      } else if (c.budget) {
-        // backward compatibility with old single-value customers
-        const b = parseFloat(c.budget);
-        numericOk = !isNaN(price) && !isNaN(b) ? Math.abs(price - b) <= b * 0.25 : true;
-      }
-    } else {
-      const dMin = parseFloat(c.depositMin);
-      const dMax = parseFloat(c.depositMax);
-      const rMin = parseFloat(c.rentMin);
-      const rMax = parseFloat(c.rentMax);
-
-      let rahnMatch = null, ejareMatch = null;
-      if (!isNaN(dMin) || !isNaN(dMax)) {
-        rahnMatch = inRange(propRahnEquiv, dMin, dMax);
-      }
-      if (!isNaN(rMin) || !isNaN(rMax)) {
-        ejareMatch = inRange(propEjareEquiv, rMin, rMax);
-      }
-
-      if (rahnMatch === null && ejareMatch === null) {
-        if (c.budget) {
-          const b = parseFloat(c.budget);
-          numericOk = !isNaN(b) ? Math.abs(propRahnEquiv - b) <= b * 0.25 : true;
-        } else {
-          numericOk = true;
-        }
-      } else {
-        numericOk = Boolean(rahnMatch) || Boolean(ejareMatch);
-      }
-    }
-
-    let areaOk = true;
-    const custArea = parseFloat(c.area);
-    if (!isNaN(propArea) && !isNaN(custArea) && custArea > 0) {
-      areaOk = Math.abs(propArea - custArea) <= custArea * 0.25;
-    }
-
-    let locationOk = true;
-    if (c.location && property.location) {
-      const cLoc = c.location.trim().toLowerCase();
-      const pLoc = property.location.trim().toLowerCase();
-      locationOk = pLoc.includes(cLoc) || cLoc.includes(pLoc);
-    }
-
-    return numericOk && areaOk && locationOk;
-  });
-}
-
-function toggleSuggestions(customerId) {
-  const panel = document.getElementById('suggest-' + customerId);
-  if (!panel) return;
-  panel.classList.toggle('hidden');
-  if (!panel.classList.contains('hidden')) {
-    const customer = allCustomers.find(c => c.id === customerId);
-    const matches = findMatchingProperties(customer);
-    if (matches.length === 0) {
-      panel.innerHTML = '<p class="text-zinc-500 text-sm p-3">ملک متناسبی (با تلرانس فعلی) پیدا نشد.</p>';
-    } else {
-      panel.innerHTML = matches.map(p => `
-        <a href="property.html?id=${p.id}" target="_blank" class="block text-sm p-3 border-b border-zinc-800 last:border-0 hover:bg-zinc-800 rounded-lg">
-          <span class="font-semibold text-amber-400">${p.title}</span>
-          — ${p.location || '—'}،
-          ${p.type === 'sale' ? (p.price + ' میلیارد تومان') : ('ودیعه ' + p.deposit + ' / اجاره ' + p.rentAmount)}
-          <i class="fas fa-arrow-up-left-from-square mr-1"></i>
-        </a>
-      `).join('');
-    }
-  }
-}
-
-function formatRange(min, max, unit) {
-  if (!min && !max) return '';
-  if (min && max) return min + ' تا ' + max + ' ' + unit;
-  if (min) return 'از ' + min + ' ' + unit;
-  return 'تا ' + max + ' ' + unit;
-}
-
-async function loadCustomers() {
-  const res = await fetch('/api/customers');
-  const customers = await res.json();
-  allCustomers = customers;
-  const list = document.getElementById('customersList');
-
-  if (customers.length === 0) {
-    list.innerHTML = '<p class="text-zinc-500">هنوز مشتری‌ای ثبت نشده</p>';
-    return;
-  }
-
-  list.innerHTML = customers.map(c => {
-    let budgetLine = '';
-    if (c.type === 'sale') {
-      const range = formatRange(c.budgetMin, c.budgetMax, 'میلیارد');
-      budgetLine = range || (c.budget ? 'بودجه: ' + c.budget + ' میلیارد' : '');
-    } else {
-      const depositRange = formatRange(c.depositMin, c.depositMax, 'میلیون');
-      const rentRange = formatRange(c.rentMin, c.rentMax, 'میلیون');
-      const parts = [];
-      if (depositRange) parts.push('رهن: ' + depositRange);
-      if (rentRange) parts.push('اجاره: ' + rentRange);
-      budgetLine = parts.length ? parts.join(' — ') : (c.budget ? 'بودجه: ' + c.budget : '');
-    }
-
-    return `
-    <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
-      <div class="flex justify-between items-center">
-        <div>
-          <span class="text-xs text-amber-400">${c.type === 'sale' ? 'خرید' : 'اجاره'}</span>
-          <h4 class="font-semibold">${c.name}</h4>
-          <p class="text-zinc-500 text-sm">
-            ${c.phone ? '📞 ' + c.phone + ' — ' : ''}
-            ${c.location ? 'منطقه: ' + c.location + ' — ' : ''}
-            ${c.area ? 'متراژ: ' + c.area + ' متر — ' : ''}
-            ${budgetLine}
-          </p>
-        </div>
-        <div class="flex gap-4">
-          <button onclick="toggleSuggestions('${c.id}')" class="text-green-400 hover:text-green-300" title="پیشنهاد ملک">
-            <i class="fas fa-house-circle-check"></i>
-          </button>
-          <button onclick="startEditCustomer('${c.id}')" class="text-amber-400 hover:text-amber-300">
-            <i class="fas fa-pen"></i>
-          </button>
-          <button onclick="deleteCustomer('${c.id}')" class="text-red-400 hover:text-red-300">
-            <i class="fas fa-trash"></i>
-          </button>
-        </div>
-      </div>
-      <div id="suggest-${c.id}" class="hidden mt-4 bg-zinc-900 rounded-xl"></div>
-    </div>
-  `;
-  }).join('');
-}
-
-function toggleMatches(propertyId) {
-  const panel = document.getElementById('matches-' + propertyId);
-  if (!panel) return;
-  panel.classList.toggle('hidden');
-  if (!panel.classList.contains('hidden')) {
-    const property = allProperties.find(p => p.id === propertyId);
-    const matches = findMatchingCustomers(property);
-    if (matches.length === 0) {
-      panel.innerHTML = '<p class="text-zinc-500 text-sm p-3">مشتری متناسبی (با تلرانس فعلی) پیدا نشد.</p>';
-    } else {
-      panel.innerHTML = matches.map(c => {
-        let budgetLine = '—';
-        if (c.type === 'sale') {
-          budgetLine = formatRange(c.budgetMin, c.budgetMax, 'میلیارد') || c.budget || '—';
-        } else {
-          const depositRange = formatRange(c.depositMin, c.depositMax, 'میلیون رهن');
-          const rentRange = formatRange(c.rentMin, c.rentMax, 'میلیون اجاره');
-          budgetLine = [depositRange, rentRange].filter(Boolean).join(' — ') || c.budget || '—';
-        }
-        return `
-        <div class="text-sm p-3 border-b border-zinc-800 last:border-0">
-          <span class="font-semibold text-amber-400">${c.name}</span>
-          — بودجه: ${budgetLine}، متراژ: ${c.area || '—'}، منطقه: ${c.location || '—'}
-        </div>
-      `;
-      }).join('');
-    }
-  }
-}
-
-/* ---------------- Auth ---------------- */
-async function checkAuth() {
-  const res = await fetch('/api/check-auth');
-  const data = await res.json();
-  if (data.authed) {
-    document.getElementById('loginScreen').classList.add('hidden');
-    document.getElementById('dashboard').classList.remove('hidden');
-    loadProperties();
-    loadCustomers();
-  }
-}
-
-async function login() {
-  const password = document.getElementById('passwordInput').value;
-  const res = await fetch('/api/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ password })
-  });
-  const data = await res.json();
-  if (data.success) {
-    document.getElementById('loginScreen').classList.add('hidden');
-    document.getElementById('dashboard').classList.remove('hidden');
-    loadProperties();
-    loadCustomers();
-  } else {
-    document.getElementById('loginError').classList.remove('hidden');
-  }
-}
-
-async function changePassword() {
-  const oldPassword = document.getElementById('oldPassword').value;
-  const newPassword = document.getElementById('newPassword').value;
-  const confirmPassword = document.getElementById('confirmPassword').value;
-  const msg = document.getElementById('passwordMessage');
-
-  if (!oldPassword || !newPassword) {
-    msg.innerHTML = '<span class="text-red-400">همه فیلدها را پر کنید</span>';
-    return;
-  }
-  if (newPassword !== confirmPassword) {
-    msg.innerHTML = '<span class="text-red-400">رمز جدید و تکرار آن یکسان نیست</span>';
-    return;
-  }
-  if (newPassword.length < 4) {
-    msg.innerHTML = '<span class="text-red-400">رمز جدید باید حداقل ۴ کاراکتر باشد</span>';
-    return;
-  }
-
-  const res = await fetch('/api/change-password', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ oldPassword, newPassword })
-  });
-  const data = await res.json();
-  if (data.success) {
-    msg.innerHTML = '<span class="text-green-400">رمز عبور با موفقیت تغییر کرد</span>';
-    document.getElementById('oldPassword').value = '';
-    document.getElementById('newPassword').value = '';
-    document.getElementById('confirmPassword').value = '';
-  } else {
-    msg.innerHTML = '<span class="text-red-400">' + (data.error || 'خطا در تغییر رمز') + '</span>';
-  }
-}
-
-async function logout() {
-  await fetch('/api/logout', { method: 'POST' });
-  location.reload();
-}
-
-/* ---------------- Properties ---------------- */
 function fillForm(p) {
   document.getElementById('p_type').value = p.type;
   document.getElementById('p_badge').value = p.badge || '';
@@ -924,6 +492,12 @@ function fillForm(p) {
   document.getElementById('p_units').value = p.units || '';
   document.getElementById('p_floor').value = p.floor || '';
   document.getElementById('p_parking').value = p.parking || '';
+  document.getElementById('p_divisible').checked = !!p.divisible;
+  document.getElementById('p_totalFloors').value = p.totalFloors || '';
+  toggleDivisible();
+  showNumberHint('p_price', 'p_priceHint', 'billion');
+  showNumberHint('p_deposit', 'p_depositHint', 'million');
+  showNumberHint('p_rentAmount', 'p_rentAmountHint', 'million');
 
   if (p.images && p.images.length) {
     currentImages = [...p.images];
@@ -942,12 +516,15 @@ function fillForm(p) {
 }
 
 function clearForm() {
-  document.querySelectorAll('#dashboard input[type=text], #dashboard input[type=number]').forEach(i => i.value = '');
+  document.querySelectorAll('#tabProperties input[type=text], #tabProperties input[type=number]').forEach(i => i.value = '');
   document.getElementById('p_type').value = 'sale';
+  document.getElementById('p_divisible').checked = false;
+  toggleDivisible();
   currentImages = [];
   renderImagesGrid();
   clearExtraFields();
   toggleFields();
+  ['p_priceHint','p_depositHint','p_rentAmountHint'].forEach(id => document.getElementById(id).textContent = '');
 }
 
 function startEdit(id) {
@@ -958,7 +535,6 @@ function startEdit(id) {
   document.getElementById('formTitle').textContent = 'ویرایش ملک';
   document.getElementById('submitBtn').innerHTML = '<i class="fas fa-check ml-2"></i> ذخیره تغییرات';
   document.getElementById('cancelBtn').classList.remove('hidden');
-  switchTab('properties');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -987,13 +563,14 @@ function buildPropertyObject() {
     units: document.getElementById('p_units').value,
     floor: document.getElementById('p_floor').value,
     parking: document.getElementById('p_parking').value,
+    divisible: document.getElementById('p_divisible').checked,
+    totalFloors: document.getElementById('p_totalFloors').value,
     extraFields: getExtraFields()
   };
 }
 
 async function submitProperty() {
   const property = buildPropertyObject();
-
   if (!property.title) {
     document.getElementById('addMessage').innerHTML = '<span class="text-red-400">لطفا حداقل عنوان ملک را وارد کنید</span>';
     return;
@@ -1010,15 +587,11 @@ async function submitProperty() {
   let res;
   if (editingId) {
     res = await fetch('/api/properties/' + editingId, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(property)
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(property)
     });
   } else {
     res = await fetch('/api/properties', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(property)
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(property)
     });
   }
 
@@ -1055,13 +628,11 @@ async function loadProperties() {
       <div class="flex justify-between items-center">
         <div>
           <span class="text-xs text-amber-400">${p.type === 'sale' ? 'فروش' : 'اجاره'}</span>
+          ${p.divisible ? '<span class="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-lg mr-1">قابل تفکیک</span>' : ''}
           <h3 class="font-semibold">${p.title}</h3>
-          <p class="text-zinc-500 text-sm">${p.location || ''} — ${p.type === 'sale' ? (p.price + ' میلیارد تومان') : ('ودیعه ' + p.deposit + ' / اجاره ' + p.rentAmount)}</p>
+          <p class="text-zinc-500 text-sm">${p.location || ''} — ${p.type === 'sale' ? (p.price + ' میلیارد تومان') : ('ودیعه ' + p.deposit + ' م.ت / اجاره ' + p.rentAmount + ' م.ت')}</p>
         </div>
         <div class="flex gap-4">
-          <button onclick="toggleMatches('${p.id}')" class="text-green-400 hover:text-green-300" title="مشتریان متناسب">
-            <i class="fas fa-user-check"></i>
-          </button>
           <a href="property.html?id=${p.id}" target="_blank" class="text-zinc-400 hover:text-white" title="مشاهده صفحه اختصاصی">
             <i class="fas fa-up-right-from-square"></i>
           </a>
@@ -1073,14 +644,352 @@ async function loadProperties() {
           </button>
         </div>
       </div>
-      <div id="matches-${p.id}" class="hidden mt-4 bg-zinc-900 rounded-xl"></div>
     </div>
   `).join('');
 }
 
-/* ---------------- Init ---------------- */
-document.getElementById('conversionRate').value = getConversionRate();
-toggleCustomerFields();
+// ---------- Customers ----------
+let editingCustomerId = null;
+let allCustomers = [];
+const RENT_RATIO = 0.03; // مطابق محاسبه‌گر: هر ۱۰۰ میلیون رهن = ۳ میلیون اجاره
+const TOLERANCE = 0.25; // ۲۵٪ تلرانس برای همه مقایسه‌های تقریبی
+
+function toggleCustomerFields() {
+  const type = document.getElementById('c_type').value;
+  document.getElementById('c_saleFields').classList.toggle('hidden', type !== 'sale');
+  document.getElementById('c_rentFields').classList.toggle('hidden', type !== 'rent');
+}
+
+function buildCustomerObject() {
+  return {
+    name: document.getElementById('c_name').value,
+    phone: document.getElementById('c_phone').value,
+    type: document.getElementById('c_type').value,
+    area: document.getElementById('c_area').value,
+    location: document.getElementById('c_location').value,
+    priceMin: document.getElementById('c_priceMin').value,
+    priceMax: document.getElementById('c_priceMax').value,
+    depositMin: document.getElementById('c_depositMin').value,
+    depositMax: document.getElementById('c_depositMax').value,
+    rentMin: document.getElementById('c_rentMin').value,
+    rentMax: document.getElementById('c_rentMax').value
+  };
+}
+
+function clearCustomerForm() {
+  ['c_name','c_phone','c_area','c_location','c_priceMin','c_priceMax','c_depositMin','c_depositMax','c_rentMin','c_rentMax'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('c_type').value = 'sale';
+  toggleCustomerFields();
+  ['c_priceMinHint','c_priceMaxHint','c_depositMinHint','c_depositMaxHint','c_rentMinHint','c_rentMaxHint'].forEach(id => {
+    document.getElementById(id).textContent = '';
+  });
+}
+
+async function submitCustomer() {
+  const customer = buildCustomerObject();
+  const msg = document.getElementById('customerMessage');
+
+  if (!customer.name) {
+    msg.innerHTML = '<span class="text-red-400">لطفا نام مشتری را وارد کنید</span>';
+    return;
+  }
+
+  let res;
+  if (editingCustomerId) {
+    res = await fetch('/api/customers/' + editingCustomerId, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(customer)
+    });
+  } else {
+    res = await fetch('/api/customers', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(customer)
+    });
+  }
+
+  const data = await res.json();
+  if (data.success) {
+    msg.innerHTML = '<span class="text-green-400">' + (editingCustomerId ? 'مشتری بروزرسانی شد' : 'مشتری اضافه شد') + '</span>';
+    cancelCustomerEdit();
+    loadCustomers();
+  } else {
+    msg.innerHTML = '<span class="text-red-400">' + (data.error || 'خطا در ثبت') + '</span>';
+  }
+}
+
+function startEditCustomer(id) {
+  const c = allCustomers.find(x => x.id === id);
+  if (!c) return;
+  editingCustomerId = id;
+  document.getElementById('c_name').value = c.name || '';
+  document.getElementById('c_phone').value = c.phone || '';
+  document.getElementById('c_type').value = c.type || 'sale';
+  document.getElementById('c_area').value = c.area || '';
+  document.getElementById('c_location').value = c.location || '';
+  // پشتیبانی از داده‌ی قدیمی که فقط یه فیلد "budget" داشت
+  document.getElementById('c_priceMin').value = c.priceMin || c.budget || '';
+  document.getElementById('c_priceMax').value = c.priceMax || c.budget || '';
+  document.getElementById('c_depositMin').value = c.depositMin || '';
+  document.getElementById('c_depositMax').value = c.depositMax || '';
+  document.getElementById('c_rentMin').value = c.rentMin || '';
+  document.getElementById('c_rentMax').value = c.rentMax || '';
+  toggleCustomerFields();
+  showNumberHint('c_priceMin', 'c_priceMinHint', 'billion');
+  showNumberHint('c_priceMax', 'c_priceMaxHint', 'billion');
+  showNumberHint('c_depositMin', 'c_depositMinHint', 'million');
+  showNumberHint('c_depositMax', 'c_depositMaxHint', 'million');
+  showNumberHint('c_rentMin', 'c_rentMinHint', 'million');
+  showNumberHint('c_rentMax', 'c_rentMaxHint', 'million');
+  document.getElementById('customerFormTitle').textContent = 'ویرایش مشتری';
+  document.getElementById('customerSubmitBtn').innerHTML = '<i class="fas fa-check ml-2"></i> ذخیره تغییرات';
+  document.getElementById('customerCancelBtn').classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function cancelCustomerEdit() {
+  editingCustomerId = null;
+  clearCustomerForm();
+  document.getElementById('customerFormTitle').textContent = 'افزودن مشتری جدید';
+  document.getElementById('customerSubmitBtn').innerHTML = '<i class="fas fa-plus ml-2"></i> افزودن مشتری';
+  document.getElementById('customerCancelBtn').classList.add('hidden');
+  document.getElementById('customerMessage').innerHTML = '';
+}
+
+async function deleteCustomer(id) {
+  if (!confirm('آیا از حذف این مشتری مطمئن هستید؟')) return;
+  await fetch('/api/customers/' + id, { method: 'DELETE' });
+  if (editingCustomerId === id) cancelCustomerEdit();
+  loadCustomers();
+}
+
+// تبدیل متن آزاد قدیمی («500 میلیون») به عدد بر حسب میلیون تومان
+function parseToMillion(text) {
+  if (text === null || text === undefined || text === '') return NaN;
+  if (typeof text === 'number') return text;
+  const str = String(text);
+  const numMatch = str.match(/[\d.]+/);
+  if (!numMatch) return NaN;
+  const num = parseFloat(numMatch[0]);
+  if (str.includes('میلیارد')) return num * 1000;
+  return num; // پیش‌فرض: میلیون تومان
+}
+
+function rentEquivalentMillion(depositMillion, rentMillion) {
+  const d = isNaN(depositMillion) ? 0 : depositMillion;
+  const r = isNaN(rentMillion) ? 0 : rentMillion;
+  return d + (r / RENT_RATIO);
+}
+
+// آیا متراژ ملک (یا ترکیبی از طبقاتش) با متراژ مدنظر مشتری جور در میاد؟
+// خروجی: { ok: bool, note: 'توضیح در صورت تفکیک' }
+function checkAreaMatch(property, customerArea) {
+  if (isNaN(customerArea) || customerArea <= 0) return { ok: true, note: '' };
+  const propArea = parseFloat(property.area);
+  if (isNaN(propArea)) return { ok: true, note: '' };
+
+  if (Math.abs(propArea - customerArea) <= customerArea * TOLERANCE) {
+    return { ok: true, note: '' };
+  }
+
+  // بررسی حالت تفکیک‌پذیر (چند طبقه مستقل)
+  if (property.divisible && property.totalFloors) {
+    const totalFloors = parseInt(property.totalFloors);
+    for (let n = 1; n <= totalFloors; n++) {
+      const candidateArea = n * propArea;
+      if (Math.abs(candidateArea - customerArea) <= customerArea * TOLERANCE) {
+        return { ok: true, note: `این ملک ${totalFloors} طبقه‌ی ${propArea} متری قابل تفکیکه — می‌تونید ${n} طبقه (≈ ${candidateArea} متر) رو به این مشتری پیشنهاد بدید.` };
+      }
+    }
+    return { ok: false, note: '' };
+  }
+
+  return { ok: false, note: '' };
+}
+
+function findMatchingProperties(customer) {
+  const custArea = parseFloat(customer.area);
+
+  const results = [];
+  allProperties.forEach(p => {
+    if (p.type !== customer.type) return;
+
+    const areaCheck = checkAreaMatch(p, custArea);
+    if (!areaCheck.ok) return;
+
+    let budgetOk = true;
+    if (customer.type === 'sale') {
+      const propPrice = parseFloat(p.price);
+      const min = parseFloat(customer.priceMin);
+      const max = parseFloat(customer.priceMax);
+      if (!isNaN(propPrice) && (!isNaN(min) || !isNaN(max))) {
+        const lo = !isNaN(min) ? min * (1 - TOLERANCE) : -Infinity;
+        const hi = !isNaN(max) ? max * (1 + TOLERANCE) : Infinity;
+        budgetOk = propPrice >= lo && propPrice <= hi;
+      }
+    } else {
+      const propEquivalent = rentEquivalentMillion(parseToMillion(p.deposit), parseToMillion(p.rentAmount));
+      const minEq = rentEquivalentMillion(parseFloat(customer.depositMin) || 0, parseFloat(customer.rentMin) || 0);
+      const maxEq = rentEquivalentMillion(parseFloat(customer.depositMax) || 0, parseFloat(customer.rentMax) || 0);
+      const hasRange = customer.depositMin || customer.depositMax || customer.rentMin || customer.rentMax;
+      if (hasRange && !isNaN(propEquivalent)) {
+        const lo = minEq * (1 - TOLERANCE);
+        const hi = (maxEq || minEq) * (1 + TOLERANCE);
+        budgetOk = propEquivalent >= lo && propEquivalent <= hi;
+      }
+    }
+    if (!budgetOk) return;
+
+    let locationOk = true;
+    if (customer.location && p.location) {
+      const cLoc = customer.location.trim().toLowerCase();
+      const pLoc = p.location.trim().toLowerCase();
+      locationOk = pLoc.includes(cLoc) || cLoc.includes(pLoc);
+    }
+    if (!locationOk) return;
+
+    results.push({ property: p, note: areaCheck.note });
+  });
+
+  return results;
+}
+
+function toggleSuggestions(customerId) {
+  const panel = document.getElementById('suggest-' + customerId);
+  if (!panel) return;
+  panel.classList.toggle('hidden');
+  if (!panel.classList.contains('hidden')) {
+    const customer = allCustomers.find(c => c.id === customerId);
+    const matches = findMatchingProperties(customer);
+    if (matches.length === 0) {
+      panel.innerHTML = '<p class="text-zinc-500 text-sm p-3">ملک متناسبی (با تلرانس فعلی) پیدا نشد.</p>';
+    } else {
+      panel.innerHTML = matches.map(({ property: p, note }) => `
+        <a href="property.html?id=${p.id}" target="_blank" class="block text-sm p-3 border-b border-zinc-800 last:border-0 hover:bg-zinc-800 rounded-lg">
+          <span class="font-semibold text-amber-400">${p.title}</span>
+          — ${p.location || '—'}،
+          ${p.type === 'sale' ? (p.price + ' میلیارد تومان') : ('ودیعه ' + p.deposit + ' م.ت / اجاره ' + p.rentAmount + ' م.ت')}
+          <i class="fas fa-arrow-up-left-from-square mr-1"></i>
+          ${note ? `<div class="text-blue-300 text-xs mt-1">${note}</div>` : ''}
+        </a>
+      `).join('');
+    }
+  }
+}
+
+async function loadCustomers() {
+  const res = await fetch('/api/customers');
+  const customers = await res.json();
+  allCustomers = customers;
+  const list = document.getElementById('customersList');
+
+  if (customers.length === 0) {
+    list.innerHTML = '<p class="text-zinc-500">هنوز مشتری‌ای ثبت نشده</p>';
+    return;
+  }
+
+  list.innerHTML = customers.map(c => {
+    const budgetText = c.type === 'sale'
+      ? (c.priceMin || c.priceMax ? `بودجه: ${c.priceMin || '؟'} تا ${c.priceMax || '؟'} میلیارد` : (c.budget ? 'بودجه: ' + c.budget : ''))
+      : ((c.depositMin || c.depositMax) ? `رهن: ${c.depositMin || '؟'} تا ${c.depositMax || '؟'} م.ت` : '') +
+        ((c.rentMin || c.rentMax) ? ` / اجاره: ${c.rentMin || '؟'} تا ${c.rentMax || '؟'} م.ت` : '');
+
+    return `
+    <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
+      <div class="flex justify-between items-center">
+        <div>
+          <span class="text-xs text-amber-400">${c.type === 'sale' ? 'خرید' : 'اجاره'}</span>
+          <h4 class="font-semibold">${c.name}</h4>
+          <p class="text-zinc-500 text-sm">
+            ${c.phone ? '📞 ' + c.phone + ' — ' : ''}
+            ${c.location ? 'منطقه: ' + c.location + ' — ' : ''}
+            ${c.area ? 'متراژ: ' + c.area + ' متر — ' : ''}
+            ${budgetText}
+          </p>
+        </div>
+        <div class="flex gap-4">
+          <button onclick="toggleSuggestions('${c.id}')" class="text-green-400 hover:text-green-300" title="پیشنهاد ملک">
+            <i class="fas fa-house-circle-check"></i>
+          </button>
+          <button onclick="startEditCustomer('${c.id}')" class="text-amber-400 hover:text-amber-300">
+            <i class="fas fa-pen"></i>
+          </button>
+          <button onclick="deleteCustomer('${c.id}')" class="text-red-400 hover:text-red-300">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+      <div id="suggest-${c.id}" class="hidden mt-4 bg-zinc-900 rounded-xl"></div>
+    </div>
+  `;
+  }).join('');
+}
+
+// ---------- Auth ----------
+async function checkAuth() {
+  const res = await fetch('/api/check-auth');
+  const data = await res.json();
+  if (data.authed) {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
+    loadProperties();
+    loadCustomers();
+  }
+}
+
+async function login() {
+  const password = document.getElementById('passwordInput').value;
+  const res = await fetch('/api/login', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password })
+  });
+  const data = await res.json();
+  if (data.success) {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
+    loadProperties();
+    loadCustomers();
+  } else {
+    document.getElementById('loginError').classList.remove('hidden');
+  }
+}
+
+async function changePassword() {
+  const oldPassword = document.getElementById('oldPassword').value;
+  const newPassword = document.getElementById('newPassword').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+  const msg = document.getElementById('passwordMessage');
+
+  if (!oldPassword || !newPassword) {
+    msg.innerHTML = '<span class="text-red-400">همه فیلدها را پر کنید</span>';
+    return;
+  }
+  if (newPassword !== confirmPassword) {
+    msg.innerHTML = '<span class="text-red-400">رمز جدید و تکرار آن یکسان نیست</span>';
+    return;
+  }
+  if (newPassword.length < 4) {
+    msg.innerHTML = '<span class="text-red-400">رمز جدید باید حداقل ۴ کاراکتر باشد</span>';
+    return;
+  }
+
+  const res = await fetch('/api/change-password', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ oldPassword, newPassword })
+  });
+  const data = await res.json();
+  if (data.success) {
+    msg.innerHTML = '<span class="text-green-400">رمز عبور با موفقیت تغییر کرد</span>';
+    document.getElementById('oldPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+  } else {
+    msg.innerHTML = '<span class="text-red-400">' + (data.error || 'خطا در تغییر رمز') + '</span>';
+  }
+}
+
+async function logout() {
+  await fetch('/api/logout', { method: 'POST' });
+  location.reload();
+}
+
 checkAuth();
 </script>
 
