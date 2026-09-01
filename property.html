@@ -186,7 +186,7 @@ async function loadProperty() {
 
     const priceBlock = p.type === 'sale'
       ? `<span class="text-4xl font-bold text-amber-400">${p.price}</span><span class="text-lg block text-zinc-400">میلیارد تومان</span>`
-      : `<span class="text-2xl font-bold text-amber-400">ودیعه ${p.deposit}</span><span class="text-lg block text-zinc-400">اجاره ${p.rentAmount}</span>`;
+      : `<span class="text-2xl font-bold text-amber-400">ودیعه ${p.deposit} میلیون</span><span class="text-lg block text-zinc-400">اجاره ${p.rentAmount} میلیون تومان</span>`;
 
     const images = (p.images && p.images.length) ? p.images : (p.image ? [p.image] : []);
     const mainImage = images[0] || 'https://via.placeholder.com/1000x600?text=بدون+عکس';
@@ -265,4 +265,3 @@ loadProperty();
 
 </body>
 </html>
-
