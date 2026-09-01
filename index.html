@@ -403,7 +403,7 @@ function shuffleArray(arr) {
 function renderRandomCard(p) {
   const priceBlock = p.type === 'sale'
     ? `<span class="text-2xl font-bold text-amber-400">${p.price}</span><span class="text-xs block text-zinc-400">میلیارد تومان</span>`
-    : `<span class="text-base font-bold text-amber-400">ودیعه ${p.deposit}</span><span class="text-xs block text-zinc-400">اجاره ${p.rentAmount}</span>`;
+    : `<span class="text-base font-bold text-amber-400">ودیعه ${p.deposit} م.ت</span><span class="text-xs block text-zinc-400">اجاره ${p.rentAmount} م.ت</span>`;
 
   return `
     <a href="property.html?id=${p.id}" class="bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 block hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl hover:shadow-amber-400/10">
