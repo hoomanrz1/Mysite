@@ -127,8 +127,8 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
       </div>
 
       <div>
-        <label class="block text-amber-400 text-sm mb-2">متراژ هر طبقه (فقط عدد - برای فیلتر جستجو)</label>
-        <input id="p_area" type="number" placeholder="مثلا: 380" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+        <label class="block text-amber-400 text-sm mb-2">متراژ کلی (فقط عدد - برای فیلتر جستجو)</label>
+        <input id="p_area" type="number" placeholder="مثلا: 3600" oninput="updateDivisibleSummary()" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
       </div>
       <div>
         <label class="block text-amber-400 text-sm mb-2">تعداد واحد</label>
@@ -153,12 +153,14 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
       <div id="divisibleFields" class="hidden grid grid-cols-1 md:grid-cols-2 gap-5 mt-4">
         <div>
           <label class="block text-amber-400 text-sm mb-2">تعداد کل طبقات/واحدهای قابل تفکیک</label>
-          <input id="p_totalFloors" type="number" placeholder="مثلا: 3" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
+          <input id="p_totalFloors" type="number" placeholder="مثلا: 3" oninput="updateDivisibleSummary()" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
         </div>
-        <div class="flex items-end text-zinc-500 text-sm pb-3">
-          متراژ هر طبقه از فیلد «متراژ هر طبقه» بالا خونده می‌شه.
+        <div>
+          <label class="block text-amber-400 text-sm mb-2">متراژ هر طبقه (متر)</label>
+          <input id="p_areaPerFloor" type="number" placeholder="مثلا: 1200" oninput="updateDivisibleSummary()" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
         </div>
       </div>
+      <div id="divisibleSummary" class="hidden mt-4 bg-zinc-900 border border-amber-400/30 rounded-xl p-4 text-sm text-amber-300"></div>
     </div>
 
     <!-- Multi-image gallery -->
@@ -344,12 +346,13 @@ function numberToPersianWords(num) {
   const ones = ['', 'یک', 'دو', 'سه', 'چهار', 'پنج', 'شش', 'هفت', 'هشت', 'نه'];
   const tens = ['', '', 'بیست', 'سی', 'چهل', 'پنجاه', 'شصت', 'هفتاد', 'هشتاد', 'نود'];
   const teens = ['ده', 'یازده', 'دوازده', 'سیزده', 'چهارده', 'پانزده', 'شانزده', 'هفده', 'هجده', 'نوزده'];
+  const hundreds = ['', 'صد', 'دویست', 'سیصد', 'چهارصد', 'پانصد', 'ششصد', 'هفتصد', 'هشتصد', 'نهصد'];
 
   function convertLessThanThousand(n) {
     if (n === 0) return '';
     let result = '';
     if (n >= 100) {
-      result += ones[Math.floor(n / 100)] + 'صد';
+      result += hundreds[Math.floor(n / 100)];
       n %= 100;
       if (n > 0) result += ' و ';
     }
@@ -414,7 +417,33 @@ let currentImages = [];
 const MAX_IMAGES = 10;
 
 function toggleDivisible() {
-  document.getElementById('divisibleFields').classList.toggle('hidden', !document.getElementById('p_divisible').checked);
+  const checked = document.getElementById('p_divisible').checked;
+  document.getElementById('divisibleFields').classList.toggle('hidden', !checked);
+  updateDivisibleSummary();
+}
+
+function updateDivisibleSummary() {
+  const summaryBox = document.getElementById('divisibleSummary');
+  const isDivisible = document.getElementById('p_divisible').checked;
+  const totalFloors = parseInt(document.getElementById('p_totalFloors').value);
+  const perFloor = parseFloat(document.getElementById('p_areaPerFloor').value);
+
+  if (!isDivisible || isNaN(totalFloors) || totalFloors < 1 || isNaN(perFloor) || perFloor <= 0) {
+    summaryBox.classList.add('hidden');
+    summaryBox.innerHTML = '';
+    return;
+  }
+
+  let rows = '';
+  for (let n = 1; n <= totalFloors; n++) {
+    rows += `<div>• ${n} طبقه = ${(n * perFloor).toLocaleString('fa-IR')} متر</div>`;
+  }
+
+  summaryBox.classList.remove('hidden');
+  summaryBox.innerHTML = `
+    <div class="font-semibold mb-2">این ملک ${totalFloors} طبقه دارد، هر طبقه ${perFloor.toLocaleString('fa-IR')} متر (مجموع کل: ${(totalFloors * perFloor).toLocaleString('fa-IR')} متر). گزینه‌های قابل پیشنهاد:</div>
+    ${rows}
+  `;
 }
 
 function renderImagesGrid() {
@@ -519,6 +548,7 @@ function fillForm(p) {
   document.getElementById('p_parking').value = p.parking || '';
   document.getElementById('p_divisible').checked = !!p.divisible;
   document.getElementById('p_totalFloors').value = p.totalFloors || '';
+  document.getElementById('p_areaPerFloor').value = p.areaPerFloor || '';
   toggleDivisible();
   showNumberHint('p_price', 'p_priceHint', 'billion');
   showNumberHint('p_deposit', 'p_depositHint', 'million');
@@ -590,6 +620,7 @@ function buildPropertyObject() {
     parking: document.getElementById('p_parking').value,
     divisible: document.getElementById('p_divisible').checked,
     totalFloors: document.getElementById('p_totalFloors').value,
+    areaPerFloor: document.getElementById('p_areaPerFloor').value,
     extraFields: getExtraFields()
   };
 }
@@ -670,6 +701,7 @@ function renderPropertiesList() {
           ${p.divisible ? '<span class="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-lg mr-1">قابل تفکیک</span>' : ''}
           <h3 class="font-semibold">${p.title}</h3>
           <p class="text-zinc-500 text-sm">${p.location || ''} — ${p.type === 'sale' ? (p.price + ' میلیارد تومان') : ('ودیعه ' + p.deposit + ' م.ت / اجاره ' + p.rentAmount + ' م.ت')}</p>
+          ${p.divisible && p.totalFloors && p.areaPerFloor ? `<p class="text-blue-300 text-xs mt-1">کلاً ${parseFloat(p.area || 0).toLocaleString('fa-IR')} متر (${p.totalFloors} طبقه × ${parseFloat(p.areaPerFloor).toLocaleString('fa-IR')} متر) — می‌توان ۱ تا ${p.totalFloors} طبقه جداگانه پیشنهاد داد</p>` : ''}
         </div>
         <div class="flex gap-4">
           <button onclick="togglePropertyMatches('${p.id}')" class="text-green-400 hover:text-green-300" title="مشتریان متناسب">
@@ -875,14 +907,22 @@ function checkAreaMatch(property, areaMin, areaMax) {
     return { ok: true, note: '' };
   }
 
-  // بررسی حالت تفکیک‌پذیر (چند طبقه مستقل)
-  if (property.divisible && property.totalFloors) {
+  // بررسی حالت تفکیک‌پذیر (چند طبقه مستقل) - همه‌ی گزینه‌های ممکن رو لیست می‌کنیم
+  if (property.divisible && property.totalFloors && property.areaPerFloor) {
     const totalFloors = parseInt(property.totalFloors);
+    const perFloor = parseFloat(property.areaPerFloor);
+    const viableOptions = [];
     for (let n = 1; n <= totalFloors; n++) {
-      const candidateArea = n * propArea;
+      const candidateArea = n * perFloor;
       if (candidateArea >= lo && candidateArea <= hi) {
-        return { ok: true, note: `این ملک ${totalFloors} طبقه‌ی ${propArea} متری قابل تفکیکه — می‌تونید ${n} طبقه (≈ ${candidateArea} متر) رو پیشنهاد بدید.` };
+        viableOptions.push({ n, area: candidateArea });
       }
+    }
+    if (viableOptions.length > 0) {
+      const optionsText = viableOptions
+        .map(o => `${o.n} طبقه (≈ ${o.area.toLocaleString('fa-IR')} متر)`)
+        .join(' یا ');
+      return { ok: true, note: `این ملک کلاً ${propArea.toLocaleString('fa-IR')} متر است (${totalFloors} طبقه × ${perFloor.toLocaleString('fa-IR')} متر). گزینه‌های قابل پیشنهاد به این مشتری: ${optionsText}.` };
     }
     return { ok: false, note: '' };
   }
@@ -1127,4 +1167,3 @@ checkAuth();
 
 </body>
 </html>
-
