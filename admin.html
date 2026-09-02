@@ -200,7 +200,13 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 
   <!-- Properties List -->
   <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
-    <h2 class="text-xl font-bold mb-6">لیست املاک ثبت‌شده</h2>
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-xl font-bold">لیست املاک ثبت‌شده</h2>
+      <div class="relative w-64">
+        <input id="propertySearchInput" type="text" placeholder="جستجو عنوان، منطقه..." oninput="renderPropertiesList()" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-2 px-4 pr-9 text-sm">
+        <i class="fas fa-magnifying-glass absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm"></i>
+      </div>
+    </div>
     <div id="propertiesList" class="space-y-4">
       <p class="text-zinc-500">در حال بارگذاری...</p>
     </div>
@@ -229,14 +235,27 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
           <option value="rent">اجاره</option>
         </select>
       </div>
-      <div>
-        <label class="block text-amber-400 text-sm mb-2">متراژ مدنظر</label>
-        <input id="c_area" type="number" placeholder="مثلا: 250" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+    </div>
+
+    <!-- Area range -->
+    <div class="mt-5 bg-zinc-950 border border-zinc-800 rounded-2xl p-5">
+      <label class="block text-amber-400 text-sm mb-3">بازه متراژ مدنظر (متر)</label>
+      <div class="grid grid-cols-2 gap-4">
+        <input id="c_areaMin" type="number" placeholder="از" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
+        <input id="c_areaMax" type="number" placeholder="تا" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
       </div>
-      <div>
-        <label class="block text-amber-400 text-sm mb-2">منطقه مدنظر</label>
-        <input id="c_location" type="text" placeholder="مثلا: جردن" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+    </div>
+
+    <!-- Multi-location -->
+    <div class="mt-5 bg-zinc-950 border border-zinc-800 rounded-2xl p-5">
+      <label class="block text-amber-400 text-sm mb-3">مناطق مدنظر (می‌تونید چندتا اضافه کنید)</label>
+      <div class="flex gap-3">
+        <input id="c_locationInput" type="text" placeholder="مثلا: جردن" class="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4" onkeydown="if(event.key==='Enter'){event.preventDefault(); addCustomerLocation();}">
+        <button type="button" onclick="addCustomerLocation()" class="bg-zinc-800 hover:bg-zinc-700 text-white px-5 rounded-xl">
+          <i class="fas fa-plus"></i>
+        </button>
       </div>
+      <div id="c_locationsChips" class="flex flex-wrap gap-2 mt-3"></div>
     </div>
 
     <!-- Sale budget range -->
@@ -300,7 +319,13 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
   </div>
 
   <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
-    <h3 class="font-bold mb-4">لیست مشتری‌ها</h3>
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="font-bold">لیست مشتری‌ها</h3>
+      <div class="relative w-64">
+        <input id="customerSearchInput" type="text" placeholder="جستجو نام، شماره، منطقه..." oninput="renderCustomersList()" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-2 px-4 pr-9 text-sm">
+        <i class="fas fa-magnifying-glass absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm"></i>
+      </div>
+    </div>
     <div id="customersList" class="space-y-3">
       <p class="text-zinc-500">در حال بارگذاری...</p>
     </div>
@@ -614,16 +639,30 @@ async function deleteProperty(id) {
 
 async function loadProperties() {
   const res = await fetch('/api/properties');
-  const properties = await res.json();
-  allProperties = properties;
+  allProperties = await res.json();
+  renderPropertiesList();
+}
+
+function renderPropertiesList() {
+  const query = (document.getElementById('propertySearchInput').value || '').trim().toLowerCase();
   const list = document.getElementById('propertiesList');
 
-  if (properties.length === 0) {
+  const filtered = allProperties.filter(p => {
+    if (!query) return true;
+    const text = `${p.title || ''} ${p.location || ''} ${p.badge || ''}`.toLowerCase();
+    return text.includes(query);
+  });
+
+  if (allProperties.length === 0) {
     list.innerHTML = '<p class="text-zinc-500">هنوز ملکی ثبت نشده</p>';
     return;
   }
+  if (filtered.length === 0) {
+    list.innerHTML = '<p class="text-zinc-500">نتیجه‌ای برای این جستجو پیدا نشد</p>';
+    return;
+  }
 
-  list.innerHTML = properties.map(p => `
+  list.innerHTML = filtered.map(p => `
     <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-5">
       <div class="flex justify-between items-center">
         <div>
@@ -633,6 +672,9 @@ async function loadProperties() {
           <p class="text-zinc-500 text-sm">${p.location || ''} — ${p.type === 'sale' ? (p.price + ' میلیارد تومان') : ('ودیعه ' + p.deposit + ' م.ت / اجاره ' + p.rentAmount + ' م.ت')}</p>
         </div>
         <div class="flex gap-4">
+          <button onclick="togglePropertyMatches('${p.id}')" class="text-green-400 hover:text-green-300" title="مشتریان متناسب">
+            <i class="fas fa-user-check"></i>
+          </button>
           <a href="property.html?id=${p.id}" target="_blank" class="text-zinc-400 hover:text-white" title="مشاهده صفحه اختصاصی">
             <i class="fas fa-up-right-from-square"></i>
           </a>
@@ -644,6 +686,7 @@ async function loadProperties() {
           </button>
         </div>
       </div>
+      <div id="propmatch-${p.id}" class="hidden mt-4 bg-zinc-900 rounded-xl"></div>
     </div>
   `).join('');
 }
@@ -651,6 +694,7 @@ async function loadProperties() {
 // ---------- Customers ----------
 let editingCustomerId = null;
 let allCustomers = [];
+let currentCustomerLocations = [];
 const RENT_RATIO = 0.03; // مطابق محاسبه‌گر: هر ۱۰۰ میلیون رهن = ۳ میلیون اجاره
 const TOLERANCE = 0.25; // ۲۵٪ تلرانس برای همه مقایسه‌های تقریبی
 
@@ -660,13 +704,41 @@ function toggleCustomerFields() {
   document.getElementById('c_rentFields').classList.toggle('hidden', type !== 'rent');
 }
 
+function renderLocationChips() {
+  const box = document.getElementById('c_locationsChips');
+  box.innerHTML = currentCustomerLocations.map((loc, idx) => `
+    <span class="bg-zinc-800 border border-zinc-700 rounded-full px-4 py-1.5 text-sm flex items-center gap-2">
+      ${loc}
+      <button type="button" onclick="removeCustomerLocation(${idx})" class="text-red-400 hover:text-red-300"><i class="fas fa-xmark"></i></button>
+    </span>
+  `).join('');
+}
+
+function addCustomerLocation() {
+  const input = document.getElementById('c_locationInput');
+  const val = input.value.trim();
+  if (!val) return;
+  if (!currentCustomerLocations.includes(val)) {
+    currentCustomerLocations.push(val);
+    renderLocationChips();
+  }
+  input.value = '';
+  input.focus();
+}
+
+function removeCustomerLocation(idx) {
+  currentCustomerLocations.splice(idx, 1);
+  renderLocationChips();
+}
+
 function buildCustomerObject() {
   return {
     name: document.getElementById('c_name').value,
     phone: document.getElementById('c_phone').value,
     type: document.getElementById('c_type').value,
-    area: document.getElementById('c_area').value,
-    location: document.getElementById('c_location').value,
+    areaMin: document.getElementById('c_areaMin').value,
+    areaMax: document.getElementById('c_areaMax').value,
+    locations: [...currentCustomerLocations],
     priceMin: document.getElementById('c_priceMin').value,
     priceMax: document.getElementById('c_priceMax').value,
     depositMin: document.getElementById('c_depositMin').value,
@@ -677,10 +749,12 @@ function buildCustomerObject() {
 }
 
 function clearCustomerForm() {
-  ['c_name','c_phone','c_area','c_location','c_priceMin','c_priceMax','c_depositMin','c_depositMax','c_rentMin','c_rentMax'].forEach(id => {
+  ['c_name','c_phone','c_areaMin','c_areaMax','c_priceMin','c_priceMax','c_depositMin','c_depositMax','c_rentMin','c_rentMax'].forEach(id => {
     document.getElementById(id).value = '';
   });
   document.getElementById('c_type').value = 'sale';
+  currentCustomerLocations = [];
+  renderLocationChips();
   toggleCustomerFields();
   ['c_priceMinHint','c_priceMaxHint','c_depositMinHint','c_depositMaxHint','c_rentMinHint','c_rentMaxHint'].forEach(id => {
     document.getElementById(id).textContent = '';
@@ -724,8 +798,12 @@ function startEditCustomer(id) {
   document.getElementById('c_name').value = c.name || '';
   document.getElementById('c_phone').value = c.phone || '';
   document.getElementById('c_type').value = c.type || 'sale';
-  document.getElementById('c_area').value = c.area || '';
-  document.getElementById('c_location').value = c.location || '';
+  // پشتیبانی از داده‌ی قدیمی که فقط یه فیلد "area" داشت
+  document.getElementById('c_areaMin').value = c.areaMin || c.area || '';
+  document.getElementById('c_areaMax').value = c.areaMax || c.area || '';
+  // پشتیبانی از داده‌ی قدیمی که فقط یه فیلد "location" داشت
+  currentCustomerLocations = c.locations && c.locations.length ? [...c.locations] : (c.location ? [c.location] : []);
+  renderLocationChips();
   // پشتیبانی از داده‌ی قدیمی که فقط یه فیلد "budget" داشت
   document.getElementById('c_priceMin').value = c.priceMin || c.budget || '';
   document.getElementById('c_priceMax').value = c.priceMax || c.budget || '';
@@ -780,14 +858,20 @@ function rentEquivalentMillion(depositMillion, rentMillion) {
   return d + (r / RENT_RATIO);
 }
 
-// آیا متراژ ملک (یا ترکیبی از طبقاتش) با متراژ مدنظر مشتری جور در میاد؟
+// آیا متراژ ملک (یا ترکیبی از طبقاتش) توی بازه‌ی مدنظر مشتری جا می‌شه؟
 // خروجی: { ok: bool, note: 'توضیح در صورت تفکیک' }
-function checkAreaMatch(property, customerArea) {
-  if (isNaN(customerArea) || customerArea <= 0) return { ok: true, note: '' };
+function checkAreaMatch(property, areaMin, areaMax) {
+  const min = parseFloat(areaMin);
+  const max = parseFloat(areaMax);
+  if (isNaN(min) && isNaN(max)) return { ok: true, note: '' };
+
   const propArea = parseFloat(property.area);
   if (isNaN(propArea)) return { ok: true, note: '' };
 
-  if (Math.abs(propArea - customerArea) <= customerArea * TOLERANCE) {
+  const lo = !isNaN(min) ? min * (1 - TOLERANCE) : -Infinity;
+  const hi = !isNaN(max) ? max * (1 + TOLERANCE) : (!isNaN(min) ? min * (1 + TOLERANCE) : Infinity);
+
+  if (propArea >= lo && propArea <= hi) {
     return { ok: true, note: '' };
   }
 
@@ -796,8 +880,8 @@ function checkAreaMatch(property, customerArea) {
     const totalFloors = parseInt(property.totalFloors);
     for (let n = 1; n <= totalFloors; n++) {
       const candidateArea = n * propArea;
-      if (Math.abs(candidateArea - customerArea) <= customerArea * TOLERANCE) {
-        return { ok: true, note: `این ملک ${totalFloors} طبقه‌ی ${propArea} متری قابل تفکیکه — می‌تونید ${n} طبقه (≈ ${candidateArea} متر) رو به این مشتری پیشنهاد بدید.` };
+      if (candidateArea >= lo && candidateArea <= hi) {
+        return { ok: true, note: `این ملک ${totalFloors} طبقه‌ی ${propArea} متری قابل تفکیکه — می‌تونید ${n} طبقه (≈ ${candidateArea} متر) رو پیشنهاد بدید.` };
       }
     }
     return { ok: false, note: '' };
@@ -806,50 +890,60 @@ function checkAreaMatch(property, customerArea) {
   return { ok: false, note: '' };
 }
 
-function findMatchingProperties(customer) {
-  const custArea = parseFloat(customer.area);
+function checkCustomerLocationMatch(customer, property) {
+  const locs = (customer.locations && customer.locations.length) ? customer.locations : (customer.location ? [customer.location] : []);
+  if (locs.length === 0 || !property.location) return true;
+  const pLoc = property.location.trim().toLowerCase();
+  return locs.some(loc => {
+    const cLoc = loc.trim().toLowerCase();
+    return pLoc.includes(cLoc) || cLoc.includes(pLoc);
+  });
+}
 
+function checkBudgetMatch(customer, property) {
+  if (customer.type === 'sale') {
+    const propPrice = parseFloat(property.price);
+    const min = parseFloat(customer.priceMin);
+    const max = parseFloat(customer.priceMax);
+    if (isNaN(propPrice) || (isNaN(min) && isNaN(max))) return true;
+    const lo = !isNaN(min) ? min * (1 - TOLERANCE) : -Infinity;
+    const hi = !isNaN(max) ? max * (1 + TOLERANCE) : Infinity;
+    return propPrice >= lo && propPrice <= hi;
+  } else {
+    const propEquivalent = rentEquivalentMillion(parseToMillion(property.deposit), parseToMillion(property.rentAmount));
+    const hasRange = customer.depositMin || customer.depositMax || customer.rentMin || customer.rentMax;
+    if (!hasRange || isNaN(propEquivalent)) return true;
+    const minEq = rentEquivalentMillion(parseFloat(customer.depositMin) || 0, parseFloat(customer.rentMin) || 0);
+    const maxEq = rentEquivalentMillion(parseFloat(customer.depositMax) || 0, parseFloat(customer.rentMax) || 0);
+    const lo = minEq * (1 - TOLERANCE);
+    const hi = (maxEq || minEq) * (1 + TOLERANCE);
+    return propEquivalent >= lo && propEquivalent <= hi;
+  }
+}
+
+function findMatchingProperties(customer) {
   const results = [];
   allProperties.forEach(p => {
     if (p.type !== customer.type) return;
-
-    const areaCheck = checkAreaMatch(p, custArea);
+    const areaCheck = checkAreaMatch(p, customer.areaMin, customer.areaMax);
     if (!areaCheck.ok) return;
-
-    let budgetOk = true;
-    if (customer.type === 'sale') {
-      const propPrice = parseFloat(p.price);
-      const min = parseFloat(customer.priceMin);
-      const max = parseFloat(customer.priceMax);
-      if (!isNaN(propPrice) && (!isNaN(min) || !isNaN(max))) {
-        const lo = !isNaN(min) ? min * (1 - TOLERANCE) : -Infinity;
-        const hi = !isNaN(max) ? max * (1 + TOLERANCE) : Infinity;
-        budgetOk = propPrice >= lo && propPrice <= hi;
-      }
-    } else {
-      const propEquivalent = rentEquivalentMillion(parseToMillion(p.deposit), parseToMillion(p.rentAmount));
-      const minEq = rentEquivalentMillion(parseFloat(customer.depositMin) || 0, parseFloat(customer.rentMin) || 0);
-      const maxEq = rentEquivalentMillion(parseFloat(customer.depositMax) || 0, parseFloat(customer.rentMax) || 0);
-      const hasRange = customer.depositMin || customer.depositMax || customer.rentMin || customer.rentMax;
-      if (hasRange && !isNaN(propEquivalent)) {
-        const lo = minEq * (1 - TOLERANCE);
-        const hi = (maxEq || minEq) * (1 + TOLERANCE);
-        budgetOk = propEquivalent >= lo && propEquivalent <= hi;
-      }
-    }
-    if (!budgetOk) return;
-
-    let locationOk = true;
-    if (customer.location && p.location) {
-      const cLoc = customer.location.trim().toLowerCase();
-      const pLoc = p.location.trim().toLowerCase();
-      locationOk = pLoc.includes(cLoc) || cLoc.includes(pLoc);
-    }
-    if (!locationOk) return;
-
+    if (!checkBudgetMatch(customer, p)) return;
+    if (!checkCustomerLocationMatch(customer, p)) return;
     results.push({ property: p, note: areaCheck.note });
   });
+  return results;
+}
 
+function findMatchingCustomers(property) {
+  const results = [];
+  allCustomers.forEach(c => {
+    if (c.type !== property.type) return;
+    const areaCheck = checkAreaMatch(property, c.areaMin, c.areaMax);
+    if (!areaCheck.ok) return;
+    if (!checkBudgetMatch(c, property)) return;
+    if (!checkCustomerLocationMatch(c, property)) return;
+    results.push({ customer: c, note: areaCheck.note });
+  });
   return results;
 }
 
@@ -876,18 +970,56 @@ function toggleSuggestions(customerId) {
   }
 }
 
+function togglePropertyMatches(propertyId) {
+  const panel = document.getElementById('propmatch-' + propertyId);
+  if (!panel) return;
+  panel.classList.toggle('hidden');
+  if (!panel.classList.contains('hidden')) {
+    const property = allProperties.find(p => p.id === propertyId);
+    const matches = findMatchingCustomers(property);
+    if (matches.length === 0) {
+      panel.innerHTML = '<p class="text-zinc-500 text-sm p-3">مشتری متناسبی (با تلرانس فعلی) پیدا نشد.</p>';
+    } else {
+      panel.innerHTML = matches.map(({ customer: c, note }) => `
+        <div class="text-sm p-3 border-b border-zinc-800 last:border-0">
+          <span class="font-semibold text-amber-400">${c.name}</span>
+          ${c.phone ? ' — 📞 ' + c.phone : ''}
+          ${note ? `<div class="text-blue-300 text-xs mt-1">${note}</div>` : ''}
+        </div>
+      `).join('');
+    }
+  }
+}
+
 async function loadCustomers() {
   const res = await fetch('/api/customers');
-  const customers = await res.json();
-  allCustomers = customers;
+  allCustomers = await res.json();
+  renderCustomersList();
+}
+
+function renderCustomersList() {
+  const query = (document.getElementById('customerSearchInput').value || '').trim().toLowerCase();
   const list = document.getElementById('customersList');
 
-  if (customers.length === 0) {
+  const filtered = allCustomers.filter(c => {
+    if (!query) return true;
+    const locs = (c.locations && c.locations.length) ? c.locations.join(' ') : (c.location || '');
+    const text = `${c.name || ''} ${c.phone || ''} ${locs}`.toLowerCase();
+    return text.includes(query);
+  });
+
+  if (allCustomers.length === 0) {
     list.innerHTML = '<p class="text-zinc-500">هنوز مشتری‌ای ثبت نشده</p>';
     return;
   }
+  if (filtered.length === 0) {
+    list.innerHTML = '<p class="text-zinc-500">نتیجه‌ای برای این جستجو پیدا نشد</p>';
+    return;
+  }
 
-  list.innerHTML = customers.map(c => {
+  list.innerHTML = filtered.map(c => {
+    const locsText = (c.locations && c.locations.length) ? c.locations.join('، ') : (c.location || '');
+    const areaText = (c.areaMin || c.areaMax) ? `${c.areaMin || '؟'} تا ${c.areaMax || '؟'} متر` : (c.area ? c.area + ' متر' : '');
     const budgetText = c.type === 'sale'
       ? (c.priceMin || c.priceMax ? `بودجه: ${c.priceMin || '؟'} تا ${c.priceMax || '؟'} میلیارد` : (c.budget ? 'بودجه: ' + c.budget : ''))
       : ((c.depositMin || c.depositMax) ? `رهن: ${c.depositMin || '؟'} تا ${c.depositMax || '؟'} م.ت` : '') +
@@ -901,8 +1033,8 @@ async function loadCustomers() {
           <h4 class="font-semibold">${c.name}</h4>
           <p class="text-zinc-500 text-sm">
             ${c.phone ? '📞 ' + c.phone + ' — ' : ''}
-            ${c.location ? 'منطقه: ' + c.location + ' — ' : ''}
-            ${c.area ? 'متراژ: ' + c.area + ' متر — ' : ''}
+            ${locsText ? 'مناطق: ' + locsText + ' — ' : ''}
+            ${areaText ? 'متراژ: ' + areaText + ' — ' : ''}
             ${budgetText}
           </p>
         </div>
@@ -995,3 +1127,4 @@ checkAuth();
 
 </body>
 </html>
+
