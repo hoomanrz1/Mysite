@@ -141,6 +141,20 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 <script>
 let allRentProperties = [];
 
+function formatTomanPhrase(toman) {
+  toman = Math.round(parseFloat(toman) || 0);
+  // اگه عدد کوچیک بود، یعنی داده‌های قدیمی بر حسب میلیون بودن
+  if (toman > 0 && toman < 1000000) toman = toman * 1000000;
+  if (toman <= 0) return '—';
+  const billion = Math.floor(toman / 1000000000);
+  const million = Math.round((toman % 1000000000) / 1000000);
+  const parts = [];
+  if (billion > 0) parts.push(billion.toLocaleString('fa-IR') + ' میلیارد');
+  if (million > 0) parts.push(million.toLocaleString('fa-IR') + ' میلیون');
+  if (parts.length === 0) return toman.toLocaleString('fa-IR') + ' تومان';
+  return parts.join(' و ') + ' تومان';
+}
+
 function renderCards(properties) {
   const grid = document.getElementById('propertiesGrid');
   if (properties.length === 0) {
@@ -160,8 +174,8 @@ function renderCards(properties) {
             <p class="text-zinc-400 mt-1">${p.location || ''}</p>
           </div>
           <div class="text-left">
-            <span class="text-lg font-bold text-amber-400">ودیعه ${p.deposit} میلیون</span>
-            <span class="text-sm block">اجاره ${p.rentAmount} میلیون تومان</span>
+            <span class="text-lg font-bold text-amber-400">ودیعه ${formatTomanPhrase(p.deposit)}</span>
+            <span class="text-sm block">اجاره ${formatTomanPhrase(p.rentAmount)}</span>
           </div>
         </div>
         <div class="flex flex-wrap gap-6 mt-8 text-zinc-400 text-sm">
@@ -215,3 +229,4 @@ loadRentProperties();
 
 </body>
 </html>
+
