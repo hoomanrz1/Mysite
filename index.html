@@ -400,10 +400,23 @@ function shuffleArray(arr) {
   return a;
 }
 
+function formatTomanPhrase(toman) {
+  toman = Math.round(parseFloat(toman) || 0);
+  if (toman > 0 && toman < 1000000) toman = toman * 1000000;
+  if (toman <= 0) return '—';
+  const billion = Math.floor(toman / 1000000000);
+  const million = Math.round((toman % 1000000000) / 1000000);
+  const parts = [];
+  if (billion > 0) parts.push(billion.toLocaleString('fa-IR') + ' میلیارد');
+  if (million > 0) parts.push(million.toLocaleString('fa-IR') + ' میلیون');
+  if (parts.length === 0) return toman.toLocaleString('fa-IR') + ' تومان';
+  return parts.join(' و ') + ' تومان';
+}
+
 function renderRandomCard(p) {
   const priceBlock = p.type === 'sale'
     ? `<span class="text-2xl font-bold text-amber-400">${p.price}</span><span class="text-xs block text-zinc-400">میلیارد تومان</span>`
-    : `<span class="text-base font-bold text-amber-400">ودیعه ${p.deposit} م.ت</span><span class="text-xs block text-zinc-400">اجاره ${p.rentAmount} م.ت</span>`;
+    : `<span class="text-base font-bold text-amber-400">ودیعه ${formatTomanPhrase(p.deposit)}</span><span class="text-xs block text-zinc-400">اجاره ${formatTomanPhrase(p.rentAmount)}</span>`;
 
   return `
     <a href="property.html?id=${p.id}" class="bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 block hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl hover:shadow-amber-400/10">
@@ -480,3 +493,4 @@ buildMarquee();
 
 </body>
 </html>
+
