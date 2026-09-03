@@ -170,12 +170,20 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
       </label>
       <div id="divisibleFields" class="hidden grid grid-cols-1 md:grid-cols-2 gap-5 mt-4">
         <div>
-          <label class="block text-amber-400 text-sm mb-2">تعداد کل طبقات/واحدهای قابل تفکیک</label>
+          <label class="block text-amber-400 text-sm mb-2">تعداد کل طبقات/واحدهای ملک</label>
           <input id="p_totalFloors" type="number" placeholder="مثلا: 3" oninput="updateDivisibleSummary()" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
         </div>
         <div>
           <label class="block text-amber-400 text-sm mb-2">متراژ هر طبقه (متر)</label>
           <input id="p_areaPerFloor" type="number" placeholder="مثلا: 1200" oninput="updateDivisibleSummary()" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
+        </div>
+        <div>
+          <label class="block text-amber-400 text-sm mb-2">چند طبقه هم‌اکنون قابل واگذاری (خالی) است؟</label>
+          <input id="p_availableFloorsCount" type="number" placeholder="مثلا: 2" oninput="updateDivisibleSummary()" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
+        </div>
+        <div>
+          <label class="block text-amber-400 text-sm mb-2">این طبقات دقیقاً کدوم‌ها هستن؟</label>
+          <input id="p_whichFloors" type="text" placeholder="مثلا: طبقه دوم و سوم" oninput="updateDivisibleSummary()" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
         </div>
       </div>
       <div id="divisibleSummary" class="hidden mt-4 bg-zinc-900 border border-amber-400/30 rounded-xl p-4 text-sm text-amber-300"></div>
@@ -497,6 +505,8 @@ function updateDivisibleSummary() {
   const isDivisible = document.getElementById('p_divisible').checked;
   const totalFloors = parseInt(document.getElementById('p_totalFloors').value);
   const perFloor = parseFloat(document.getElementById('p_areaPerFloor').value);
+  const availableCount = document.getElementById('p_availableFloorsCount').value;
+  const whichFloors = document.getElementById('p_whichFloors').value.trim();
 
   if (!isDivisible || isNaN(totalFloors) || totalFloors < 1 || isNaN(perFloor) || perFloor <= 0) {
     summaryBox.classList.add('hidden');
@@ -509,10 +519,15 @@ function updateDivisibleSummary() {
     rows += `<div>• ${n} طبقه = ${(n * perFloor).toLocaleString('fa-IR')} متر</div>`;
   }
 
+  const availabilityLine = availableCount
+    ? `<div class="mt-3 pt-3 border-t border-amber-400/20 text-green-400">در حال حاضر <b>${availableCount}</b> طبقه موجود و قابل واگذاریه${whichFloors ? ' (' + whichFloors + ')' : ''}.</div>`
+    : (whichFloors ? `<div class="mt-3 pt-3 border-t border-amber-400/20 text-green-400">طبقات موجود: ${whichFloors}</div>` : '');
+
   summaryBox.classList.remove('hidden');
   summaryBox.innerHTML = `
     <div class="font-semibold mb-2">این ملک ${totalFloors} طبقه دارد، هر طبقه ${perFloor.toLocaleString('fa-IR')} متر (مجموع کل: ${(totalFloors * perFloor).toLocaleString('fa-IR')} متر). گزینه‌های قابل پیشنهاد:</div>
     ${rows}
+    ${availabilityLine}
   `;
 }
 
@@ -619,6 +634,8 @@ function fillForm(p) {
   document.getElementById('p_divisible').checked = !!p.divisible;
   document.getElementById('p_totalFloors').value = p.totalFloors || '';
   document.getElementById('p_areaPerFloor').value = p.areaPerFloor || '';
+  document.getElementById('p_availableFloorsCount').value = p.availableFloorsCount || '';
+  document.getElementById('p_whichFloors').value = p.whichFloors || '';
   toggleDivisible();
   updateDivisibleSummary();
   showNumberHint('p_price', 'p_priceHint', 'billion');
@@ -692,6 +709,8 @@ function buildPropertyObject() {
     divisible: document.getElementById('p_divisible').checked,
     totalFloors: document.getElementById('p_totalFloors').value,
     areaPerFloor: document.getElementById('p_areaPerFloor').value,
+    availableFloorsCount: document.getElementById('p_availableFloorsCount').value,
+    whichFloors: document.getElementById('p_whichFloors').value,
     extraFields: getExtraFields()
   };
 }
@@ -1254,3 +1273,4 @@ checkAuth();
 
 </body>
 </html>
+
