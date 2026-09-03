@@ -117,6 +117,11 @@ async function handleApi(request, env, url) {
       const apiRes = await fetch(`https://Api.BrsApi.ir/Market/Gold_Currency.php?key=${env.BRSAPI_KEY}`);
       const raw = await apiRes.json();
 
+      // حالت موقت برای دیباگ: با ?debug=1 داده خام رو نشون می‌ده
+      if (url.searchParams.get('debug') === '1') {
+        return new Response(JSON.stringify(raw, null, 2), { headers: cors });
+      }
+
       const currencyList = raw.currency || raw.Currency || [];
       const goldList = raw.gold || raw.Gold || [];
 
@@ -341,3 +346,4 @@ async function handleApi(request, env, url) {
 
   return new Response(JSON.stringify({ error: 'مسیر پیدا نشد' }), { status: 404, headers: cors });
 }
+
