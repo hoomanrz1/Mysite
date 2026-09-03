@@ -116,13 +116,31 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 
       <!-- Rent-only fields -->
       <div id="rentFields1" class="hidden">
-        <label class="block text-amber-400 text-sm mb-2">ودیعه (میلیون تومان)</label>
-        <input id="p_deposit" type="number" step="any" placeholder="مثلا: 500" oninput="showNumberHint('p_deposit', 'p_depositHint', 'million')" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+        <label class="block text-amber-400 text-sm mb-2">ودیعه</label>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <input id="p_depositBillion" type="number" placeholder="میلیارد" oninput="updateMoneyHint('deposit')" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+            <span class="text-xs text-zinc-500">میلیارد تومان</span>
+          </div>
+          <div>
+            <input id="p_depositMillion" type="number" placeholder="میلیون" oninput="updateMoneyHint('deposit')" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+            <span class="text-xs text-zinc-500">میلیون تومان</span>
+          </div>
+        </div>
         <div id="p_depositHint" class="number-hint"></div>
       </div>
       <div id="rentFields2" class="hidden">
-        <label class="block text-amber-400 text-sm mb-2">اجاره ماهانه (میلیون تومان)</label>
-        <input id="p_rentAmount" type="number" step="any" placeholder="مثلا: 15" oninput="showNumberHint('p_rentAmount', 'p_rentAmountHint', 'million')" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+        <label class="block text-amber-400 text-sm mb-2">اجاره ماهانه</label>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <input id="p_rentAmountBillion" type="number" placeholder="میلیارد" oninput="updateMoneyHint('rentAmount')" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+            <span class="text-xs text-zinc-500">میلیارد تومان</span>
+          </div>
+          <div>
+            <input id="p_rentAmountMillion" type="number" placeholder="میلیون" oninput="updateMoneyHint('rentAmount')" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+            <span class="text-xs text-zinc-500">میلیون تومان</span>
+          </div>
+        </div>
         <div id="p_rentAmountHint" class="number-hint"></div>
       </div>
 
@@ -278,30 +296,32 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
     <!-- Rent deposit/rent ranges -->
     <div id="c_rentFields" class="hidden mt-5 bg-zinc-950 border border-zinc-800 rounded-2xl p-5 space-y-5">
       <div>
-        <label class="block text-amber-400 text-sm mb-3">بازه رهن (میلیون تومان)</label>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <input id="c_depositMin" type="number" step="any" placeholder="از" oninput="showNumberHint('c_depositMin', 'c_depositMinHint', 'million')" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
-            <div id="c_depositMinHint" class="number-hint"></div>
-          </div>
-          <div>
-            <input id="c_depositMax" type="number" step="any" placeholder="تا" oninput="showNumberHint('c_depositMax', 'c_depositMaxHint', 'million')" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
-            <div id="c_depositMaxHint" class="number-hint"></div>
-          </div>
+        <label class="block text-amber-400 text-sm mb-3">بازه رهن — از</label>
+        <div class="grid grid-cols-2 gap-3">
+          <input id="c_depositMinBillion" type="number" placeholder="میلیارد" oninput="updateCustomerMoneyHint('depositMin')" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
+          <input id="c_depositMinMillion" type="number" placeholder="میلیون" oninput="updateCustomerMoneyHint('depositMin')" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
         </div>
+        <div id="c_depositMinHint" class="number-hint"></div>
+        <label class="block text-amber-400 text-sm mb-3 mt-4">بازه رهن — تا</label>
+        <div class="grid grid-cols-2 gap-3">
+          <input id="c_depositMaxBillion" type="number" placeholder="میلیارد" oninput="updateCustomerMoneyHint('depositMax')" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
+          <input id="c_depositMaxMillion" type="number" placeholder="میلیون" oninput="updateCustomerMoneyHint('depositMax')" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
+        </div>
+        <div id="c_depositMaxHint" class="number-hint"></div>
       </div>
       <div>
-        <label class="block text-amber-400 text-sm mb-3">بازه اجاره ماهانه (میلیون تومان)</label>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <input id="c_rentMin" type="number" step="any" placeholder="از" oninput="showNumberHint('c_rentMin', 'c_rentMinHint', 'million')" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
-            <div id="c_rentMinHint" class="number-hint"></div>
-          </div>
-          <div>
-            <input id="c_rentMax" type="number" step="any" placeholder="تا" oninput="showNumberHint('c_rentMax', 'c_rentMaxHint', 'million')" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
-            <div id="c_rentMaxHint" class="number-hint"></div>
-          </div>
+        <label class="block text-amber-400 text-sm mb-3">بازه اجاره ماهانه — از</label>
+        <div class="grid grid-cols-2 gap-3">
+          <input id="c_rentMinBillion" type="number" placeholder="میلیارد" oninput="updateCustomerMoneyHint('rentMin')" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
+          <input id="c_rentMinMillion" type="number" placeholder="میلیون" oninput="updateCustomerMoneyHint('rentMin')" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
         </div>
+        <div id="c_rentMinHint" class="number-hint"></div>
+        <label class="block text-amber-400 text-sm mb-3 mt-4">بازه اجاره ماهانه — تا</label>
+        <div class="grid grid-cols-2 gap-3">
+          <input id="c_rentMaxBillion" type="number" placeholder="میلیارد" oninput="updateCustomerMoneyHint('rentMax')" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
+          <input id="c_rentMaxMillion" type="number" placeholder="میلیون" oninput="updateCustomerMoneyHint('rentMax')" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
+        </div>
+        <div id="c_rentMaxHint" class="number-hint"></div>
       </div>
       <p class="text-zinc-500 text-xs">
         <i class="fas fa-circle-info ml-1"></i>
@@ -400,6 +420,56 @@ function showNumberHint(inputId, hintId, unit) {
   }
   const toman = unit === 'billion' ? val * 1000000000 : val * 1000000;
   hintEl.textContent = '= ' + toman.toLocaleString('fa-IR') + ' تومان (' + numberToPersianWords(toman) + ' تومان)';
+}
+
+// عبارت طبیعی فارسی از یه مبلغ بر حسب تومان می‌سازه، مثلا: «۵ میلیارد و ۵۰۰ میلیون تومان»
+// اگه بخشی صفر باشه، از عبارت حذف می‌شه (مثلا فقط «۵ میلیارد تومان»)
+function formatTomanPhrase(toman) {
+  toman = Math.round(parseFloat(toman) || 0);
+  if (toman <= 0) return '';
+  const billion = Math.floor(toman / 1000000000);
+  const million = Math.round((toman % 1000000000) / 1000000);
+  const parts = [];
+  if (billion > 0) parts.push(billion.toLocaleString('fa-IR') + ' میلیارد');
+  if (million > 0) parts.push(million.toLocaleString('fa-IR') + ' میلیون');
+  if (parts.length === 0) return toman.toLocaleString('fa-IR') + ' تومان';
+  return parts.join(' و ') + ' تومان';
+}
+
+// خوندن دو فیلد میلیارد/میلیون و برگردوندن مجموع به تومان
+function readMoneyFields(prefix) {
+  const billionEl = document.getElementById(prefix + 'Billion');
+  const millionEl = document.getElementById(prefix + 'Million');
+  const billion = parseFloat(billionEl ? billionEl.value : 0) || 0;
+  const million = parseFloat(millionEl ? millionEl.value : 0) || 0;
+  return billion * 1000000000 + million * 1000000;
+}
+
+// نوشتن یه مقدار تومان به دو فیلد میلیارد/میلیون (برای حالت ویرایش)
+function writeMoneyFields(prefix, toman) {
+  toman = Math.round(parseFloat(toman) || 0);
+  const billion = Math.floor(toman / 1000000000);
+  const million = Math.round((toman % 1000000000) / 1000000);
+  const billionEl = document.getElementById(prefix + 'Billion');
+  const millionEl = document.getElementById(prefix + 'Million');
+  if (billionEl) billionEl.value = billion > 0 ? billion : '';
+  if (millionEl) millionEl.value = million > 0 ? million : '';
+}
+
+// برای فیلدهای ملک (p_deposit / p_rentAmount)
+function updateMoneyHint(fieldName) {
+  const toman = readMoneyFields('p_' + fieldName);
+  const hintEl = document.getElementById('p_' + fieldName + 'Hint');
+  if (!hintEl) return;
+  hintEl.textContent = toman > 0 ? '= ' + formatTomanPhrase(toman) : '';
+}
+
+// برای فیلدهای بازه‌ی مشتری (c_depositMin / c_depositMax / c_rentMin / c_rentMax)
+function updateCustomerMoneyHint(fieldName) {
+  const toman = readMoneyFields('c_' + fieldName);
+  const hintEl = document.getElementById('c_' + fieldName + 'Hint');
+  if (!hintEl) return;
+  hintEl.textContent = toman > 0 ? '= ' + formatTomanPhrase(toman) : '';
 }
 
 // ---------- Tabs ----------
@@ -540,8 +610,8 @@ function fillForm(p) {
   document.getElementById('p_title').value = p.title || '';
   document.getElementById('p_location').value = p.location || '';
   document.getElementById('p_price').value = p.price || '';
-  document.getElementById('p_deposit').value = p.deposit || '';
-  document.getElementById('p_rentAmount').value = p.rentAmount || '';
+  writeMoneyFields('p_deposit', p.deposit || 0);
+  writeMoneyFields('p_rentAmount', p.rentAmount || 0);
   document.getElementById('p_area').value = p.area || '';
   document.getElementById('p_units').value = p.units || '';
   document.getElementById('p_floor').value = p.floor || '';
@@ -550,9 +620,10 @@ function fillForm(p) {
   document.getElementById('p_totalFloors').value = p.totalFloors || '';
   document.getElementById('p_areaPerFloor').value = p.areaPerFloor || '';
   toggleDivisible();
+  updateDivisibleSummary();
   showNumberHint('p_price', 'p_priceHint', 'billion');
-  showNumberHint('p_deposit', 'p_depositHint', 'million');
-  showNumberHint('p_rentAmount', 'p_rentAmountHint', 'million');
+  updateMoneyHint('deposit');
+  updateMoneyHint('rentAmount');
 
   if (p.images && p.images.length) {
     currentImages = [...p.images];
@@ -610,8 +681,8 @@ function buildPropertyObject() {
     title: document.getElementById('p_title').value,
     location: document.getElementById('p_location').value,
     price: document.getElementById('p_price').value,
-    deposit: document.getElementById('p_deposit').value,
-    rentAmount: document.getElementById('p_rentAmount').value,
+    deposit: readMoneyFields('p_deposit'),
+    rentAmount: readMoneyFields('p_rentAmount'),
     area: document.getElementById('p_area').value,
     images: currentImages,
     image: currentImages[0] || '',
@@ -700,7 +771,7 @@ function renderPropertiesList() {
           <span class="text-xs text-amber-400">${p.type === 'sale' ? 'فروش' : 'اجاره'}</span>
           ${p.divisible ? '<span class="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-lg mr-1">قابل تفکیک</span>' : ''}
           <h3 class="font-semibold">${p.title}</h3>
-          <p class="text-zinc-500 text-sm">${p.location || ''} — ${p.type === 'sale' ? (p.price + ' میلیارد تومان') : ('ودیعه ' + p.deposit + ' م.ت / اجاره ' + p.rentAmount + ' م.ت')}</p>
+          <p class="text-zinc-500 text-sm">${p.location || ''} — ${p.type === 'sale' ? (p.price + ' میلیارد تومان') : ('ودیعه ' + formatTomanPhrase(parseToMillion(p.deposit) * 1000000) + ' / اجاره ' + formatTomanPhrase(parseToMillion(p.rentAmount) * 1000000))}</p>
           ${p.divisible && p.totalFloors && p.areaPerFloor ? `<p class="text-blue-300 text-xs mt-1">کلاً ${parseFloat(p.area || 0).toLocaleString('fa-IR')} متر (${p.totalFloors} طبقه × ${parseFloat(p.areaPerFloor).toLocaleString('fa-IR')} متر) — می‌توان ۱ تا ${p.totalFloors} طبقه جداگانه پیشنهاد داد</p>` : ''}
         </div>
         <div class="flex gap-4">
@@ -773,15 +844,17 @@ function buildCustomerObject() {
     locations: [...currentCustomerLocations],
     priceMin: document.getElementById('c_priceMin').value,
     priceMax: document.getElementById('c_priceMax').value,
-    depositMin: document.getElementById('c_depositMin').value,
-    depositMax: document.getElementById('c_depositMax').value,
-    rentMin: document.getElementById('c_rentMin').value,
-    rentMax: document.getElementById('c_rentMax').value
+    depositMin: readMoneyFields('c_depositMin'),
+    depositMax: readMoneyFields('c_depositMax'),
+    rentMin: readMoneyFields('c_rentMin'),
+    rentMax: readMoneyFields('c_rentMax')
   };
 }
 
 function clearCustomerForm() {
-  ['c_name','c_phone','c_areaMin','c_areaMax','c_priceMin','c_priceMax','c_depositMin','c_depositMax','c_rentMin','c_rentMax'].forEach(id => {
+  ['c_name','c_phone','c_areaMin','c_areaMax','c_priceMin','c_priceMax',
+   'c_depositMinBillion','c_depositMinMillion','c_depositMaxBillion','c_depositMaxMillion',
+   'c_rentMinBillion','c_rentMinMillion','c_rentMaxBillion','c_rentMaxMillion'].forEach(id => {
     document.getElementById(id).value = '';
   });
   document.getElementById('c_type').value = 'sale';
@@ -839,17 +912,24 @@ function startEditCustomer(id) {
   // پشتیبانی از داده‌ی قدیمی که فقط یه فیلد "budget" داشت
   document.getElementById('c_priceMin').value = c.priceMin || c.budget || '';
   document.getElementById('c_priceMax').value = c.priceMax || c.budget || '';
-  document.getElementById('c_depositMin').value = c.depositMin || '';
-  document.getElementById('c_depositMax').value = c.depositMax || '';
-  document.getElementById('c_rentMin').value = c.rentMin || '';
-  document.getElementById('c_rentMax').value = c.rentMax || '';
+  // پشتیبانی از داده‌ی قدیمی: قبلاً این مقادیر «بر حسب میلیون» بودن (عدد ساده)؛ الان بر حسب تومان کامل ذخیره می‌شن.
+  // اگه عدد خیلی کوچیک بود (کمتر از یه میلیون)، یعنی مال فرمت قدیمیه، پس در میلیون ضرب می‌کنیم.
+  function normalizeOldMillion(val) {
+    val = parseFloat(val) || 0;
+    if (val > 0 && val < 1000000) return val * 1000000;
+    return val;
+  }
+  writeMoneyFields('c_depositMin', normalizeOldMillion(c.depositMin));
+  writeMoneyFields('c_depositMax', normalizeOldMillion(c.depositMax));
+  writeMoneyFields('c_rentMin', normalizeOldMillion(c.rentMin));
+  writeMoneyFields('c_rentMax', normalizeOldMillion(c.rentMax));
   toggleCustomerFields();
   showNumberHint('c_priceMin', 'c_priceMinHint', 'billion');
   showNumberHint('c_priceMax', 'c_priceMaxHint', 'billion');
-  showNumberHint('c_depositMin', 'c_depositMinHint', 'million');
-  showNumberHint('c_depositMax', 'c_depositMaxHint', 'million');
-  showNumberHint('c_rentMin', 'c_rentMinHint', 'million');
-  showNumberHint('c_rentMax', 'c_rentMaxHint', 'million');
+  updateCustomerMoneyHint('depositMin');
+  updateCustomerMoneyHint('depositMax');
+  updateCustomerMoneyHint('rentMin');
+  updateCustomerMoneyHint('rentMax');
   document.getElementById('customerFormTitle').textContent = 'ویرایش مشتری';
   document.getElementById('customerSubmitBtn').innerHTML = '<i class="fas fa-check ml-2"></i> ذخیره تغییرات';
   document.getElementById('customerCancelBtn').classList.remove('hidden');
@@ -873,15 +953,22 @@ async function deleteCustomer(id) {
 }
 
 // تبدیل متن آزاد قدیمی («500 میلیون») به عدد بر حسب میلیون تومان
-function parseToMillion(text) {
-  if (text === null || text === undefined || text === '') return NaN;
-  if (typeof text === 'number') return text;
-  const str = String(text);
+// یه عدد (چه بر حسب تومان کامل، چه فرمت قدیمی بر حسب میلیون، چه متن آزاد قدیمی) رو به «میلیون تومان» تبدیل می‌کنه
+function parseToMillion(value) {
+  if (value === null || value === undefined || value === '') return NaN;
+
+  if (typeof value === 'number') {
+    // اگه عدد بزرگ بود، یعنی از قبل بر حسب تومان کامل ذخیره شده (فرمت جدید) → تقسیم بر یک میلیون
+    // اگه عدد کوچیک بود، یعنی فرمت قدیمی بوده که خودش بر حسب میلیون بود
+    return value >= 1000000 ? value / 1000000 : value;
+  }
+
+  const str = String(value);
   const numMatch = str.match(/[\d.]+/);
   if (!numMatch) return NaN;
   const num = parseFloat(numMatch[0]);
   if (str.includes('میلیارد')) return num * 1000;
-  return num; // پیش‌فرض: میلیون تومان
+  return num; // پیش‌فرض: میلیون تومان (فرمت متنی قدیمی)
 }
 
 function rentEquivalentMillion(depositMillion, rentMillion) {
@@ -953,8 +1040,8 @@ function checkBudgetMatch(customer, property) {
     const propEquivalent = rentEquivalentMillion(parseToMillion(property.deposit), parseToMillion(property.rentAmount));
     const hasRange = customer.depositMin || customer.depositMax || customer.rentMin || customer.rentMax;
     if (!hasRange || isNaN(propEquivalent)) return true;
-    const minEq = rentEquivalentMillion(parseFloat(customer.depositMin) || 0, parseFloat(customer.rentMin) || 0);
-    const maxEq = rentEquivalentMillion(parseFloat(customer.depositMax) || 0, parseFloat(customer.rentMax) || 0);
+    const minEq = rentEquivalentMillion(parseToMillion(customer.depositMin) || 0, parseToMillion(customer.rentMin) || 0);
+    const maxEq = rentEquivalentMillion(parseToMillion(customer.depositMax) || 0, parseToMillion(customer.rentMax) || 0);
     const lo = minEq * (1 - TOLERANCE);
     const hi = (maxEq || minEq) * (1 + TOLERANCE);
     return propEquivalent >= lo && propEquivalent <= hi;
@@ -1001,7 +1088,7 @@ function toggleSuggestions(customerId) {
         <a href="property.html?id=${p.id}" target="_blank" class="block text-sm p-3 border-b border-zinc-800 last:border-0 hover:bg-zinc-800 rounded-lg">
           <span class="font-semibold text-amber-400">${p.title}</span>
           — ${p.location || '—'}،
-          ${p.type === 'sale' ? (p.price + ' میلیارد تومان') : ('ودیعه ' + p.deposit + ' م.ت / اجاره ' + p.rentAmount + ' م.ت')}
+          ${p.type === 'sale' ? (p.price + ' میلیارد تومان') : ('ودیعه ' + formatTomanPhrase(parseToMillion(p.deposit) * 1000000) + ' / اجاره ' + formatTomanPhrase(parseToMillion(p.rentAmount) * 1000000))}
           <i class="fas fa-arrow-up-left-from-square mr-1"></i>
           ${note ? `<div class="text-blue-300 text-xs mt-1">${note}</div>` : ''}
         </a>
@@ -1062,8 +1149,8 @@ function renderCustomersList() {
     const areaText = (c.areaMin || c.areaMax) ? `${c.areaMin || '؟'} تا ${c.areaMax || '؟'} متر` : (c.area ? c.area + ' متر' : '');
     const budgetText = c.type === 'sale'
       ? (c.priceMin || c.priceMax ? `بودجه: ${c.priceMin || '؟'} تا ${c.priceMax || '؟'} میلیارد` : (c.budget ? 'بودجه: ' + c.budget : ''))
-      : ((c.depositMin || c.depositMax) ? `رهن: ${c.depositMin || '؟'} تا ${c.depositMax || '؟'} م.ت` : '') +
-        ((c.rentMin || c.rentMax) ? ` / اجاره: ${c.rentMin || '؟'} تا ${c.rentMax || '؟'} م.ت` : '');
+      : ((c.depositMin || c.depositMax) ? `رهن: ${formatTomanPhrase(parseToMillion(c.depositMin) * 1000000) || '؟'} تا ${formatTomanPhrase(parseToMillion(c.depositMax) * 1000000) || '؟'}` : '') +
+        ((c.rentMin || c.rentMax) ? ` / اجاره: ${formatTomanPhrase(parseToMillion(c.rentMin) * 1000000) || '؟'} تا ${formatTomanPhrase(parseToMillion(c.rentMax) * 1000000) || '؟'}` : '');
 
     return `
     <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
