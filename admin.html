@@ -445,6 +445,23 @@ function formatTomanPhrase(toman) {
 }
 
 // خوندن دو فیلد میلیارد/میلیون و برگردوندن مجموع به تومان
+// تشخیص و تبدیل مقدار قدیمی (که به‌صورت متن آزاد یا فقط بر حسب میلیون ذخیره شده بود) به تومان کامل
+function normalizeOldMoneyValue(val) {
+  if (val === undefined || val === null || val === '') return 0;
+  if (typeof val === 'number') {
+    // اگه عدد کوچیکه (کمتر از یک میلیون)، یعنی فرمت قدیمی بر حسب "میلیون" بوده
+    return val > 0 && val < 1000000 ? val * 1000000 : val;
+  }
+  // فرمت خیلی قدیمی: متن آزاد مثل "500 میلیون تومان"
+  const text = String(val);
+  const numMatch = text.match(/[\d.]+/);
+  if (!numMatch) return 0;
+  let num = parseFloat(numMatch[0]);
+  if (text.includes('میلیارد')) return num * 1000000000;
+  if (text.includes('میلیون') || num < 1000000) return num * 1000000;
+  return num;
+}
+
 function readMoneyFields(prefix) {
   const billionEl = document.getElementById(prefix + 'Billion');
   const millionEl = document.getElementById(prefix + 'Million');
@@ -621,12 +638,13 @@ function clearExtraFields() {
 
 function fillForm(p) {
   document.getElementById('p_type').value = p.type;
+  toggleFields();
   document.getElementById('p_badge').value = p.badge || '';
   document.getElementById('p_title').value = p.title || '';
   document.getElementById('p_location').value = p.location || '';
   document.getElementById('p_price').value = p.price || '';
-  writeMoneyFields('p_deposit', p.deposit || 0);
-  writeMoneyFields('p_rentAmount', p.rentAmount || 0);
+  writeMoneyFields('p_deposit', normalizeOldMoneyValue(p.deposit));
+  writeMoneyFields('p_rentAmount', normalizeOldMoneyValue(p.rentAmount));
   document.getElementById('p_area').value = p.area || '';
   document.getElementById('p_units').value = p.units || '';
   document.getElementById('p_floor').value = p.floor || '';
