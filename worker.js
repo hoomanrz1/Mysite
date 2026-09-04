@@ -114,7 +114,7 @@ async function handleApi(request, env, url) {
         return new Response(JSON.stringify(cached.data), { headers: cors });
       }
 
-      const apiRes = await fetch(`https://Api.BrsApi.ir/Market/Gold_Currency.php?key=${env.BRSAPI_KEY}`);
+      const apiRes = await fetch('https://img.realestaterezaei.ir/prices');
       const raw = await apiRes.json();
 
       // حالت موقت برای دیباگ: با ?debug=1 داده خام رو نشون می‌ده
