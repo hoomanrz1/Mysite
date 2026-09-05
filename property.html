@@ -207,14 +207,16 @@ async function loadProperty() {
       ? `<span class="text-4xl font-bold text-amber-400">${p.price}</span><span class="text-lg block text-zinc-400">میلیارد تومان</span>`
       : `<span class="text-2xl font-bold text-amber-400">ودیعه ${formatTomanPhrase(p.deposit)}</span><span class="text-lg block text-zinc-400">اجاره ${formatTomanPhrase(p.rentAmount)}</span>`;
 
-    let baseDeposit = 0, baseRent = 0, maxConvertibleToman = 0;
+    let baseDeposit = 0, baseRent = 0, maxConvertibleToman = 0, maxConvertibleToDepositToman = 0;
     if (p.type === 'rent') {
       baseDeposit = normalizeMoneyForConversion(p.deposit);
       baseRent = normalizeMoneyForConversion(p.rentAmount);
       maxConvertibleToman = normalizeMoneyForConversion(p.maxConvertible);
+      maxConvertibleToDepositToman = normalizeMoneyForConversion(p.maxConvertibleToDeposit);
       baseDepositGlobal = baseDeposit;
       baseRentGlobal = baseRent;
       maxConvertibleGlobal = maxConvertibleToman;
+      maxConvertibleToDepositGlobal = maxConvertibleToDepositToman;
     }
 
     const images = (p.images && p.images.length) ? p.images : (p.image ? [p.image] : []);
@@ -267,7 +269,8 @@ async function loadProperty() {
     }
 
     let convertibleHtml = '';
-    if (p.type === 'rent' && p.convertible && maxConvertibleToman > 0) {
+    const hasAnyConversion = p.type === 'rent' && p.convertible && (maxConvertibleToman > 0 || maxConvertibleToDepositToman > 0);
+    if (hasAnyConversion) {
       convertibleHtml = `
         <div class="bg-zinc-900 border border-amber-400/30 rounded-2xl p-6 mb-10">
           <h3 class="font-bold text-amber-400 mb-4"><i class="fas fa-arrows-up-down ml-2"></i>ودیعه و اجارهٔ این ملک تا حدی قابل تبدیل است.</h3>
@@ -282,8 +285,11 @@ async function loadProperty() {
               <div id="convRent" class="text-2xl font-bold text-amber-400 mt-1">—</div>
             </div>
           </div>
-          <input id="convSlider" type="range" min="0" max="100" value="0" class="w-full accent-amber-400" oninput="updateConversion()">
-          <p class="text-zinc-500 text-xs text-center mt-2">برای تبدیل بکشید (حداکثر ${formatTomanPhrase(maxConvertibleToman)} از ودیعه قابل تبدیل به اجاره است)</p>
+          <input id="convSlider" type="range" min="-100" max="100" value="0" class="w-full accent-amber-400" oninput="updateConversion()">
+          <div class="flex justify-between text-zinc-500 text-xs mt-2">
+            <span>${maxConvertibleToDepositToman > 0 ? '← افزایش ودیعه (رهن کامل‌تر)' : ''}</span>
+            <span>${maxConvertibleToman > 0 ? 'افزایش اجاره →' : ''}</span>
+          </div>
         </div>
       `;
     }
@@ -319,7 +325,7 @@ async function loadProperty() {
       </button>
     `;
 
-    if (p.type === 'rent' && p.convertible && maxConvertibleToman > 0) {
+    if (hasAnyConversion) {
       updateConversion();
     }
   } catch (err) {
@@ -328,15 +334,26 @@ async function loadProperty() {
 }
 
 const RENT_RATIO = 0.03; // مطابق محاسبه‌گر رهن به اجاره
-let baseDepositGlobal = 0, baseRentGlobal = 0, maxConvertibleGlobal = 0;
+let baseDepositGlobal = 0, baseRentGlobal = 0, maxConvertibleGlobal = 0, maxConvertibleToDepositGlobal = 0;
 
 function updateConversion() {
   const slider = document.getElementById('convSlider');
   if (!slider) return;
-  const percent = parseFloat(slider.value) / 100;
-  const convertedAmount = maxConvertibleGlobal * percent;
-  const newDeposit = baseDepositGlobal - convertedAmount;
-  const newRent = baseRentGlobal + (convertedAmount * RENT_RATIO);
+  const percent = parseFloat(slider.value) / 100; // بین -۱ و +۱
+  let newDeposit, newRent;
+
+  if (percent >= 0) {
+    // سمت راست: کم‌کردن از ودیعه، اضافه‌کردن به اجاره
+    const convertedAmount = maxConvertibleGlobal * percent;
+    newDeposit = baseDepositGlobal - convertedAmount;
+    newRent = baseRentGlobal + (convertedAmount * RENT_RATIO);
+  } else {
+    // سمت چپ: کم‌کردن از اجاره، اضافه‌کردن به ودیعه
+    const rentReduction = maxConvertibleToDepositGlobal * (-percent);
+    newRent = baseRentGlobal - rentReduction;
+    newDeposit = baseDepositGlobal + (rentReduction / RENT_RATIO);
+  }
+
   document.getElementById('convDeposit').textContent = formatTomanPhrase(newDeposit);
   document.getElementById('convRent').textContent = formatTomanPhrase(newRent);
 }
