@@ -144,9 +144,26 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
         <div id="p_rentAmountHint" class="number-hint"></div>
       </div>
 
-      <div id="convertibleField" class="hidden md:col-span-2 flex items-center gap-3 bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
-        <input id="p_convertible" type="checkbox" class="w-5 h-5 accent-amber-400">
-        <label for="p_convertible" class="cursor-pointer">این ملک قابل تبدیل رهن به اجاره است (اسلایدر تبدیل به بازدیدکننده نشون داده می‌شه)</label>
+      <div id="convertibleField" class="hidden md:col-span-2 bg-zinc-950 border border-zinc-700 rounded-xl p-4">
+        <label class="flex items-center gap-3 cursor-pointer mb-3">
+          <input id="p_convertible" type="checkbox" onchange="toggleMaxConvertible()" class="w-5 h-5 accent-amber-400">
+          <span>این ملک قابل تبدیل رهن به اجاره است (اسلایدر تبدیل به بازدیدکننده نشون داده می‌شه)</span>
+        </label>
+        <div id="maxConvertibleFields" class="hidden mt-3 pt-3 border-t border-zinc-800">
+          <label class="block text-amber-400 text-sm mb-2">حداکثر مبلغی که از ودیعه می‌توان به اجاره تبدیل کرد (نه کل ودیعه)</label>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <input id="p_maxConvertibleBillion" type="number" placeholder="میلیارد" oninput="updateMoneyHint('maxConvertible')" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
+              <span class="text-xs text-zinc-500">میلیارد تومان</span>
+            </div>
+            <div>
+              <input id="p_maxConvertibleMillion" type="number" placeholder="میلیون" oninput="updateMoneyHint('maxConvertible')" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl py-3 px-4">
+              <span class="text-xs text-zinc-500">میلیون تومان</span>
+            </div>
+          </div>
+          <div id="p_maxConvertibleHint" class="number-hint"></div>
+          <p class="text-zinc-500 text-xs mt-2">مثال: اگه ودیعه ۱۴۰ میلیارده ولی فقط ۲۰ میلیاردش قابل تبدیله، همین ۲۰ میلیارد رو اینجا بنویسید — بازدیدکننده نمی‌تونه بیشتر از این مقدار تبدیل کنه.</p>
+        </div>
       </div>
 
       <div>
@@ -605,6 +622,11 @@ async function uploadImage() {
   fileInput.value = '';
 }
 
+function toggleMaxConvertible() {
+  const checked = document.getElementById('p_convertible').checked;
+  document.getElementById('maxConvertibleFields').classList.toggle('hidden', !checked);
+}
+
 function toggleFields() {
   const type = document.getElementById('p_type').value;
   document.getElementById('saleFields').classList.toggle('hidden', type !== 'sale');
@@ -652,6 +674,8 @@ function fillForm(p) {
   writeMoneyFields('p_deposit', normalizeOldMoneyValue(p.deposit));
   writeMoneyFields('p_rentAmount', normalizeOldMoneyValue(p.rentAmount));
   document.getElementById('p_convertible').checked = !!p.convertible;
+  writeMoneyFields('p_maxConvertible', normalizeOldMoneyValue(p.maxConvertible));
+  toggleMaxConvertible();
   document.getElementById('p_area').value = p.area || '';
   document.getElementById('p_units').value = p.units || '';
   document.getElementById('p_floor').value = p.floor || '';
@@ -726,6 +750,7 @@ function buildPropertyObject() {
     deposit: readMoneyFields('p_deposit'),
     rentAmount: readMoneyFields('p_rentAmount'),
     convertible: document.getElementById('p_convertible').checked,
+    maxConvertible: readMoneyFields('p_maxConvertible'),
     area: document.getElementById('p_area').value,
     images: currentImages,
     image: currentImages[0] || '',
@@ -1299,4 +1324,3 @@ checkAuth();
 
 </body>
 </html>
-
