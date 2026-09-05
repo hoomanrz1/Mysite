@@ -144,6 +144,11 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
         <div id="p_rentAmountHint" class="number-hint"></div>
       </div>
 
+      <div id="convertibleField" class="hidden md:col-span-2 flex items-center gap-3 bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+        <input id="p_convertible" type="checkbox" class="w-5 h-5 accent-amber-400">
+        <label for="p_convertible" class="cursor-pointer">این ملک قابل تبدیل رهن به اجاره است (اسلایدر تبدیل به بازدیدکننده نشون داده می‌شه)</label>
+      </div>
+
       <div>
         <label class="block text-amber-400 text-sm mb-2">متراژ کلی (فقط عدد - برای فیلتر جستجو)</label>
         <input id="p_area" type="number" placeholder="مثلا: 3600" oninput="updateDivisibleSummary()" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
@@ -605,6 +610,7 @@ function toggleFields() {
   document.getElementById('saleFields').classList.toggle('hidden', type !== 'sale');
   document.getElementById('rentFields1').classList.toggle('hidden', type !== 'rent');
   document.getElementById('rentFields2').classList.toggle('hidden', type !== 'rent');
+  document.getElementById('convertibleField').classList.toggle('hidden', type !== 'rent');
 }
 
 function addExtraFieldRow(label, value) {
@@ -645,6 +651,7 @@ function fillForm(p) {
   document.getElementById('p_price').value = p.price || '';
   writeMoneyFields('p_deposit', normalizeOldMoneyValue(p.deposit));
   writeMoneyFields('p_rentAmount', normalizeOldMoneyValue(p.rentAmount));
+  document.getElementById('p_convertible').checked = !!p.convertible;
   document.getElementById('p_area').value = p.area || '';
   document.getElementById('p_units').value = p.units || '';
   document.getElementById('p_floor').value = p.floor || '';
@@ -718,6 +725,7 @@ function buildPropertyObject() {
     price: document.getElementById('p_price').value,
     deposit: readMoneyFields('p_deposit'),
     rentAmount: readMoneyFields('p_rentAmount'),
+    convertible: document.getElementById('p_convertible').checked,
     area: document.getElementById('p_area').value,
     images: currentImages,
     image: currentImages[0] || '',
@@ -743,8 +751,8 @@ async function submitProperty() {
     document.getElementById('addMessage').innerHTML = '<span class="text-red-400">لطفا قیمت را وارد کنید</span>';
     return;
   }
-  if (property.type === 'rent' && (!property.deposit || !property.rentAmount)) {
-    document.getElementById('addMessage').innerHTML = '<span class="text-red-400">لطفا ودیعه و اجاره را وارد کنید</span>';
+  if (property.type === 'rent' && !property.deposit && !property.rentAmount) {
+    document.getElementById('addMessage').innerHTML = '<span class="text-red-400">لطفا حداقل یکی از ودیعه یا اجاره را وارد کنید</span>';
     return;
   }
 
