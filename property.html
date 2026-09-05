@@ -207,10 +207,14 @@ async function loadProperty() {
       ? `<span class="text-4xl font-bold text-amber-400">${p.price}</span><span class="text-lg block text-zinc-400">میلیارد تومان</span>`
       : `<span class="text-2xl font-bold text-amber-400">ودیعه ${formatTomanPhrase(p.deposit)}</span><span class="text-lg block text-zinc-400">اجاره ${formatTomanPhrase(p.rentAmount)}</span>`;
 
+    let baseDeposit = 0, baseRent = 0, maxConvertibleToman = 0;
     if (p.type === 'rent') {
-      const depositToman = normalizeMoneyForConversion(p.deposit);
-      const rentToman = normalizeMoneyForConversion(p.rentAmount);
-      conversionTotal = depositToman + (rentToman / RENT_RATIO);
+      baseDeposit = normalizeMoneyForConversion(p.deposit);
+      baseRent = normalizeMoneyForConversion(p.rentAmount);
+      maxConvertibleToman = normalizeMoneyForConversion(p.maxConvertible);
+      baseDepositGlobal = baseDeposit;
+      baseRentGlobal = baseRent;
+      maxConvertibleGlobal = maxConvertibleToman;
     }
 
     const images = (p.images && p.images.length) ? p.images : (p.image ? [p.image] : []);
@@ -263,10 +267,10 @@ async function loadProperty() {
     }
 
     let convertibleHtml = '';
-    if (p.type === 'rent' && p.convertible) {
+    if (p.type === 'rent' && p.convertible && maxConvertibleToman > 0) {
       convertibleHtml = `
         <div class="bg-zinc-900 border border-amber-400/30 rounded-2xl p-6 mb-10">
-          <h3 class="font-bold text-amber-400 mb-4"><i class="fas fa-arrows-up-down ml-2"></i>ودیعه و اجارهٔ این ملک قابل تبدیل است.</h3>
+          <h3 class="font-bold text-amber-400 mb-4"><i class="fas fa-arrows-up-down ml-2"></i>ودیعه و اجارهٔ این ملک تا حدی قابل تبدیل است.</h3>
           <div class="flex justify-between text-center mb-4">
             <div>
               <div class="text-zinc-400 text-sm">ودیعه (تومان)</div>
@@ -279,7 +283,7 @@ async function loadProperty() {
             </div>
           </div>
           <input id="convSlider" type="range" min="0" max="100" value="0" class="w-full accent-amber-400" oninput="updateConversion()">
-          <p class="text-zinc-500 text-xs text-center mt-2">برای تبدیل بکشید (چپ: ودیعهٔ کامل ← راست: اجارهٔ بیشتر)</p>
+          <p class="text-zinc-500 text-xs text-center mt-2">برای تبدیل بکشید (حداکثر ${formatTomanPhrase(maxConvertibleToman)} از ودیعه قابل تبدیل به اجاره است)</p>
         </div>
       `;
     }
@@ -315,7 +319,7 @@ async function loadProperty() {
       </button>
     `;
 
-    if (p.type === 'rent' && p.convertible) {
+    if (p.type === 'rent' && p.convertible && maxConvertibleToman > 0) {
       updateConversion();
     }
   } catch (err) {
@@ -324,14 +328,15 @@ async function loadProperty() {
 }
 
 const RENT_RATIO = 0.03; // مطابق محاسبه‌گر رهن به اجاره
-let conversionTotal = 0;
+let baseDepositGlobal = 0, baseRentGlobal = 0, maxConvertibleGlobal = 0;
 
 function updateConversion() {
   const slider = document.getElementById('convSlider');
-  if (!slider || !conversionTotal) return;
+  if (!slider) return;
   const percent = parseFloat(slider.value) / 100;
-  const newDeposit = conversionTotal * (1 - percent);
-  const newRent = (conversionTotal * percent) * RENT_RATIO;
+  const convertedAmount = maxConvertibleGlobal * percent;
+  const newDeposit = baseDepositGlobal - convertedAmount;
+  const newRent = baseRentGlobal + (convertedAmount * RENT_RATIO);
   document.getElementById('convDeposit').textContent = formatTomanPhrase(newDeposit);
   document.getElementById('convRent').textContent = formatTomanPhrase(newRent);
 }
@@ -357,3 +362,4 @@ loadProperty();
 
 </body>
 </html>
+
