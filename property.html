@@ -166,6 +166,12 @@ function copyVisitText() {
   });
 }
 
+function normalizeMoneyForConversion(val) {
+  let toman = Math.round(parseFloat(val) || 0);
+  if (toman > 0 && toman < 1000000) toman = toman * 1000000;
+  return toman;
+}
+
 function formatTomanPhrase(toman) {
   toman = Math.round(parseFloat(toman) || 0);
   if (toman > 0 && toman < 1000000) toman = toman * 1000000;
@@ -200,6 +206,12 @@ async function loadProperty() {
     const priceBlock = p.type === 'sale'
       ? `<span class="text-4xl font-bold text-amber-400">${p.price}</span><span class="text-lg block text-zinc-400">میلیارد تومان</span>`
       : `<span class="text-2xl font-bold text-amber-400">ودیعه ${formatTomanPhrase(p.deposit)}</span><span class="text-lg block text-zinc-400">اجاره ${formatTomanPhrase(p.rentAmount)}</span>`;
+
+    if (p.type === 'rent') {
+      const depositToman = normalizeMoneyForConversion(p.deposit);
+      const rentToman = normalizeMoneyForConversion(p.rentAmount);
+      conversionTotal = depositToman + (rentToman / RENT_RATIO);
+    }
 
     const images = (p.images && p.images.length) ? p.images : (p.image ? [p.image] : []);
     const mainImage = images[0] || 'https://via.placeholder.com/1000x600?text=بدون+عکس';
@@ -250,6 +262,28 @@ async function loadProperty() {
       `).join('');
     }
 
+    let convertibleHtml = '';
+    if (p.type === 'rent' && p.convertible) {
+      convertibleHtml = `
+        <div class="bg-zinc-900 border border-amber-400/30 rounded-2xl p-6 mb-10">
+          <h3 class="font-bold text-amber-400 mb-4"><i class="fas fa-arrows-up-down ml-2"></i>ودیعه و اجارهٔ این ملک قابل تبدیل است.</h3>
+          <div class="flex justify-between text-center mb-4">
+            <div>
+              <div class="text-zinc-400 text-sm">ودیعه (تومان)</div>
+              <div id="convDeposit" class="text-2xl font-bold text-amber-400 mt-1">—</div>
+            </div>
+            <div class="border-r border-zinc-800"></div>
+            <div>
+              <div class="text-zinc-400 text-sm">اجارهٔ ماهانه (تومان)</div>
+              <div id="convRent" class="text-2xl font-bold text-amber-400 mt-1">—</div>
+            </div>
+          </div>
+          <input id="convSlider" type="range" min="0" max="100" value="0" class="w-full accent-amber-400" oninput="updateConversion()">
+          <p class="text-zinc-500 text-xs text-center mt-2">برای تبدیل بکشید (چپ: ودیعهٔ کامل ← راست: اجارهٔ بیشتر)</p>
+        </div>
+      `;
+    }
+
     container.innerHTML = `
       <a href="${p.type === 'sale' ? 'sale.html' : 'rent.html'}" class="inline-flex items-center gap-2 text-amber-400 hover:text-amber-300 mb-8">
         <i class="fas fa-arrow-right"></i> بازگشت به لیست ${p.type === 'sale' ? 'فروش' : 'اجاره'}
@@ -267,6 +301,7 @@ async function loadProperty() {
         </div>
         <div class="text-left">${priceBlock}</div>
       </div>
+      ${convertibleHtml}
       <div class="grid grid-cols-2 md:grid-cols-4 gap-5 mb-10">
         ${p.units ? `<div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 text-center"><i class="fas fa-building text-amber-400 mb-2"></i><div>${p.units}</div></div>` : ''}
         ${p.area ? `<div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 text-center"><i class="fas fa-vector-square text-amber-400 mb-2"></i><div>${p.area} متر</div></div>` : ''}
@@ -279,9 +314,26 @@ async function loadProperty() {
         <i class="fas fa-calendar-check ml-2"></i> هماهنگی برای بازدید این ملک
       </button>
     `;
+
+    if (p.type === 'rent' && p.convertible) {
+      updateConversion();
+    }
   } catch (err) {
     container.innerHTML = '<p class="text-red-400 text-center py-20">خطا در بارگذاری اطلاعات ملک.</p>';
   }
+}
+
+const RENT_RATIO = 0.03; // مطابق محاسبه‌گر رهن به اجاره
+let conversionTotal = 0;
+
+function updateConversion() {
+  const slider = document.getElementById('convSlider');
+  if (!slider || !conversionTotal) return;
+  const percent = parseFloat(slider.value) / 100;
+  const newDeposit = conversionTotal * (1 - percent);
+  const newRent = (conversionTotal * percent) * RENT_RATIO;
+  document.getElementById('convDeposit').textContent = formatTomanPhrase(newDeposit);
+  document.getElementById('convRent').textContent = formatTomanPhrase(newRent);
 }
 
 function switchMainImage(url, thumbEl) {
@@ -305,4 +357,3 @@ loadProperty();
 
 </body>
 </html>
-
