@@ -78,6 +78,9 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
     <button id="tabBtnCustomers" onclick="switchTab('customers')" class="tab-btn flex-1 py-3 rounded-xl font-bold transition text-zinc-300">
       <i class="fas fa-users ml-2"></i> مشتریان
     </button>
+    <button id="tabBtnOwners" onclick="switchTab('owners')" class="tab-btn flex-1 py-3 rounded-xl font-bold transition text-zinc-300">
+      <i class="fas fa-key ml-2"></i> مالکین
+    </button>
   </div>
 
   <!-- ================= PROPERTIES TAB ================= -->
@@ -238,7 +241,7 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
       <label id="addImageLabel" class="inline-flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white px-5 py-3 rounded-xl cursor-pointer">
         <i class="fas fa-upload"></i>
         <span id="uploadLabel">افزودن عکس</span>
-        <input id="p_imageFile" type="file" accept="image/*" class="hidden" onchange="uploadImage()">
+        <input id="p_imageFile" type="file" accept="image/*" multiple class="hidden" onchange="uploadImage()">
       </label>
     </div>
 
@@ -403,6 +406,52 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
   </div>
   <!-- ================= END CUSTOMERS TAB ================= -->
 
+  <!-- ================= OWNERS TAB (فقط پنل ادمین - هرگز به سایت عمومی نمی‌ره) ================= -->
+  <div id="tabOwners" class="hidden">
+
+  <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 mb-10">
+    <h2 id="ownerFormTitle" class="text-xl font-bold mb-6">افزودن مالک جدید</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">نام مالک</label>
+        <input id="o_name" type="text" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">شماره تماس</label>
+        <input id="o_phone" type="text" placeholder="مثلا: 09121234567" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+      <div>
+        <label class="block text-amber-400 text-sm mb-2">توضیحات (شماره دوم، نگهبانی و...)</label>
+        <input id="o_description" type="text" placeholder="مثلا: شماره نگهبانی: 02188889999" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+      </div>
+    </div>
+    <div class="flex gap-4 mt-6">
+      <button id="ownerSubmitBtn" onclick="submitOwner()" class="bg-amber-400 hover:bg-amber-300 text-black font-bold py-3 px-8 rounded-2xl transition">
+        <i class="fas fa-plus ml-2"></i> افزودن مالک
+      </button>
+      <button id="ownerCancelBtn" onclick="cancelOwnerEdit()" class="hidden bg-zinc-700 hover:bg-zinc-600 text-white font-bold py-3 px-8 rounded-2xl transition">
+        لغو ویرایش
+      </button>
+    </div>
+    <p id="ownerMessage" class="mt-4 text-sm"></p>
+  </div>
+
+  <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="font-bold">لیست مالکین</h3>
+      <div class="relative w-64">
+        <input id="ownerSearchInput" type="text" placeholder="جستجو نام، شماره..." oninput="renderOwnersList()" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-2 px-4 pr-9 text-sm">
+        <i class="fas fa-magnifying-glass absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm"></i>
+      </div>
+    </div>
+    <div id="ownersList" class="space-y-3">
+      <p class="text-zinc-500">در حال بارگذاری...</p>
+    </div>
+  </div>
+
+  </div>
+  <!-- ================= END OWNERS TAB ================= -->
+
 </div>
 
 <script>
@@ -540,8 +589,10 @@ function updateCustomerMoneyHint(fieldName) {
 function switchTab(tab) {
   document.getElementById('tabProperties').classList.toggle('hidden', tab !== 'properties');
   document.getElementById('tabCustomers').classList.toggle('hidden', tab !== 'customers');
+  document.getElementById('tabOwners').classList.toggle('hidden', tab !== 'owners');
   document.getElementById('tabBtnProperties').classList.toggle('active', tab === 'properties');
   document.getElementById('tabBtnCustomers').classList.toggle('active', tab === 'customers');
+  document.getElementById('tabBtnOwners').classList.toggle('active', tab === 'owners');
 }
 
 // ---------- Properties ----------
@@ -611,31 +662,41 @@ function removeImage(idx) {
 
 async function uploadImage() {
   const fileInput = document.getElementById('p_imageFile');
-  const file = fileInput.files[0];
-  if (!file) return;
-  if (currentImages.length >= MAX_IMAGES) { fileInput.value = ''; return; }
+  const files = Array.from(fileInput.files || []);
+  if (files.length === 0) return;
 
   const label = document.getElementById('uploadLabel');
-  label.textContent = 'در حال آپلود...';
-  const formData = new FormData();
-  formData.append('image', file);
+  let uploaded = 0;
+  let failed = 0;
 
-  try {
-    const res = await fetch('/api/upload', { method: 'POST', body: formData });
-    const data = await res.json();
-    if (data.url) {
-      currentImages.push(data.url);
-      renderImagesGrid();
-      label.textContent = 'آپلود موفق ✓';
-      setTimeout(() => { label.textContent = 'افزودن عکس'; }, 1500);
-    } else {
-      label.textContent = 'خطا: ' + (data.error || 'ناموفق');
-      setTimeout(() => { label.textContent = 'افزودن عکس'; }, 3000);
+  for (const file of files) {
+    if (currentImages.length >= MAX_IMAGES) break;
+
+    label.textContent = `در حال آپلود (${uploaded + failed + 1} از ${files.length})...`;
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.url) {
+        currentImages.push(data.url);
+        renderImagesGrid();
+        uploaded++;
+      } else {
+        failed++;
+      }
+    } catch (err) {
+      failed++;
     }
-  } catch (err) {
-    label.textContent = 'خطا در آپلود';
-    setTimeout(() => { label.textContent = 'افزودن عکس'; }, 3000);
   }
+
+  if (failed === 0) {
+    label.textContent = `${uploaded} عکس آپلود شد ✓`;
+  } else {
+    label.textContent = `${uploaded} موفق، ${failed} ناموفق`;
+  }
+  setTimeout(() => { label.textContent = 'افزودن عکس'; }, 2500);
   fileInput.value = '';
 }
 
@@ -1273,6 +1334,160 @@ function renderCustomersList() {
 }
 
 // ---------- Auth ----------
+// ---------- Owners (فقط پنل ادمین) ----------
+let editingOwnerId = null;
+let allOwners = [];
+
+function buildOwnerObject() {
+  return {
+    name: document.getElementById('o_name').value,
+    phone: document.getElementById('o_phone').value,
+    description: document.getElementById('o_description').value
+  };
+}
+
+function clearOwnerForm() {
+  document.getElementById('o_name').value = '';
+  document.getElementById('o_phone').value = '';
+  document.getElementById('o_description').value = '';
+}
+
+async function submitOwner() {
+  const owner = buildOwnerObject();
+  const msg = document.getElementById('ownerMessage');
+
+  if (!owner.name || !owner.phone) {
+    msg.innerHTML = '<span class="text-red-400">نام و شماره تماس الزامیه</span>';
+    return;
+  }
+
+  let res;
+  if (editingOwnerId) {
+    res = await fetch('/api/owners/' + editingOwnerId, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(owner)
+    });
+  } else {
+    res = await fetch('/api/owners', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(owner)
+    });
+  }
+
+  const data = await res.json();
+  if (data.success) {
+    msg.innerHTML = '<span class="text-green-400">' + (editingOwnerId ? 'مالک بروزرسانی شد' : 'مالک اضافه شد') + '</span>';
+    cancelOwnerEdit();
+    await loadOwners();
+    renderPropertiesList(); // برای به‌روز شدن لیست کشویی مالک در فرم ملک
+  } else {
+    msg.innerHTML = '<span class="text-red-400">' + (data.error || 'خطا در ثبت') + '</span>';
+  }
+}
+
+function startEditOwner(id) {
+  const o = allOwners.find(x => x.id === id);
+  if (!o) return;
+  editingOwnerId = id;
+  document.getElementById('o_name').value = o.name || '';
+  document.getElementById('o_phone').value = o.phone || '';
+  document.getElementById('o_description').value = o.description || '';
+  document.getElementById('ownerFormTitle').textContent = 'ویرایش مالک';
+  document.getElementById('ownerSubmitBtn').innerHTML = '<i class="fas fa-check ml-2"></i> ذخیره تغییرات';
+  document.getElementById('ownerCancelBtn').classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function cancelOwnerEdit() {
+  editingOwnerId = null;
+  clearOwnerForm();
+  document.getElementById('ownerFormTitle').textContent = 'افزودن مالک جدید';
+  document.getElementById('ownerSubmitBtn').innerHTML = '<i class="fas fa-plus ml-2"></i> افزودن مالک';
+  document.getElementById('ownerCancelBtn').classList.add('hidden');
+  document.getElementById('ownerMessage').innerHTML = '';
+}
+
+async function deleteOwner(id) {
+  if (!confirm('آیا از حذف این مالک مطمئن هستید؟ (لینک این مالک به ملک‌هایی که بهش وصله هم برداشته می‌شه)')) return;
+  await fetch('/api/owners/' + id, { method: 'DELETE' });
+  if (editingOwnerId === id) cancelOwnerEdit();
+  await loadOwners();
+  renderPropertiesList();
+}
+
+async function loadOwners() {
+  const res = await fetch('/api/owners');
+  if (!res.ok) return;
+  allOwners = await res.json();
+  renderOwnersList();
+  populateOwnerSelect();
+}
+
+function renderOwnersList() {
+  const query = (document.getElementById('ownerSearchInput').value || '').trim().toLowerCase();
+  const list = document.getElementById('ownersList');
+
+  const filtered = allOwners.filter(o => {
+    if (!query) return true;
+    return (o.name || '').toLowerCase().includes(query) ||
+           (o.phone || '').toLowerCase().includes(query) ||
+           (o.description || '').toLowerCase().includes(query);
+  });
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<p class="text-zinc-500">مالکی پیدا نشد</p>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(o => {
+    const linkedCount = allProperties.filter(p => p.ownerId === o.id).length;
+    return `
+    <div class="flex justify-between items-center bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
+      <div>
+        <h4 class="font-semibold">${o.name}</h4>
+        <p class="text-zinc-500 text-sm">📞 ${o.phone || '—'}${o.description ? ' — ' + o.description : ''}</p>
+        ${linkedCount > 0 ? `<p class="text-amber-400 text-xs mt-1">مالک ${linkedCount} ملک ثبت‌شده</p>` : ''}
+      </div>
+      <div class="flex gap-4">
+        <button onclick="startEditOwner('${o.id}')" class="text-amber-400 hover:text-amber-300">
+          <i class="fas fa-pen"></i>
+        </button>
+        <button onclick="deleteOwner('${o.id}')" class="text-red-400 hover:text-red-300">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  `;
+  }).join('');
+}
+
+function populateOwnerSelect() {
+  const select = document.getElementById('p_ownerId');
+  if (!select) return;
+  const current = select.value;
+  select.innerHTML = '<option value="">— بدون مالک ثبت‌شده —</option>' +
+    allOwners.map(o => `<option value="${o.id}">${o.name} (${o.phone || '—'})</option>`).join('');
+  select.value = current;
+}
+
+function toggleOwnerPanel(propertyId) {
+  const panel = document.getElementById('owner-' + propertyId);
+  if (!panel) return;
+  panel.classList.toggle('hidden');
+  if (!panel.classList.contains('hidden')) {
+    const property = allProperties.find(p => p.id === propertyId);
+    const owner = allOwners.find(o => o.id === property.ownerId);
+    if (!owner) {
+      panel.innerHTML = '<p class="text-zinc-500 text-sm p-3">مالکی برای این ملک ثبت نشده.</p>';
+    } else {
+      panel.innerHTML = `
+        <div class="text-sm p-3">
+          <span class="font-semibold text-amber-400">${owner.name}</span>
+          — 📞 ${owner.phone || '—'}${owner.description ? ' — ' + owner.description : ''}
+        </div>
+      `;
+    }
+  }
+}
+
 async function checkAuth() {
   const res = await fetch('/api/check-auth');
   const data = await res.json();
@@ -1281,6 +1496,7 @@ async function checkAuth() {
     document.getElementById('dashboard').classList.remove('hidden');
     loadProperties();
     loadCustomers();
+    loadOwners();
   }
 }
 
@@ -1295,6 +1511,7 @@ async function login() {
     document.getElementById('dashboard').classList.remove('hidden');
     loadProperties();
     loadCustomers();
+    loadOwners();
   } else {
     document.getElementById('loginError').classList.remove('hidden');
   }
