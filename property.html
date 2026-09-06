@@ -1,408 +1,281 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="جزئیات کامل ملک - املاک راد">
-<title>جزئیات ملک | املاک راد</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
-<style>
-body { font-family: 'Vazirmatn', system-ui, sans-serif; }
-.gold-gradient {
-  background: linear-gradient(135deg, #d4af37, #f5e8c7, #d4af37);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-.nav-link { position: relative; }
-.nav-link:after {
-  content: '';
-  position: absolute;
-  width: 0;
-  height: 2px;
-  bottom: -6px;
-  right: 0;
-  background: linear-gradient(to left, #d4af37, #f5e8c7);
-  transition: all 0.3s ease;
-}
-.nav-link:hover:after { width: 100%; right: auto; left: 0; }
-.luxury-btn { transition: all 0.4s ease; }
-.luxury-btn:hover { background: #d4af37; color: #111827; transform: translateY(-3px); }
-.modal-overlay {
-  background: rgba(0,0,0,0.8);
-}
-.protected-image {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
-  -webkit-touch-callout: none;
-  pointer-events: none;
-}
-.protected-image-wrap {
-  position: relative;
-}
-</style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="آشنایی با رضایی، مشاور مستغلات اداری، تجاری و مسکونی در جردن، میرداماد و ونک با بیش از ۱۵ سال تجربه.">
+    <meta property="og:title" content="درباره ما | املاک راد - مشاور مستغلات جردن، میرداماد، ونک">
+    <meta property="og:description" content="آشنایی با رضایی، مشاور مستغلات اداری و تجاری با بیش از ۱۵ سال تجربه.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://realestaterezaei.ir/about.html">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="درباره ما | املاک راد - مشاور مستغلات جردن، میرداماد، ونک">
+    <meta name="twitter:description" content="آشنایی با رضایی، مشاور مستغلات اداری و تجاری با بیش از ۱۵ سال تجربه.">
+    <title>درباره ما | املاک راد - مشاور مستغلات اداری</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Vazirmatn', system-ui, sans-serif;
+        }
+        .gold-gradient {
+            background: linear-gradient(135deg, #d4af37, #f5e8c7, #d4af37);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .nav-link {
+            position: relative;
+        }
+        .nav-link:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -6px;
+            right: 0;
+            background: linear-gradient(to left, #d4af37, #f5e8c7);
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover:after {
+            width: 100%;
+            right: auto;
+            left: 0;
+        }
+        .luxury-btn {
+            transition: all 0.4s ease;
+        }
+        .luxury-btn:hover {
+            background: #d4af37;
+            color: #111827;
+            transform: translateY(-3px);
+        }
+        .feature-card {
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(212, 175, 55, 0.5);
+        }
+    </style>
 </head>
 <body class="bg-zinc-950 text-zinc-200">
 
-<!-- Navbar -->
-<nav class="bg-black/90 backdrop-blur-lg border-b border-zinc-800 fixed w-full z-50">
-<div class="max-w-7xl mx-auto px-8">
-<div class="flex justify-between items-center py-6">
-<a href="index.html" class="flex items-center gap-4">
-<div><span class="text-3xl font-bold tracking-tighter">املاک راد</span></div>
-</a>
-<div class="hidden md:flex items-center gap-10 text-lg">
-<a href="index.html" class="nav-link font-medium hover:text-amber-400">خانه</a>
-<a href="sale.html" class="nav-link font-medium hover:text-amber-400">فروش</a>
-<a href="rent.html" class="nav-link font-medium hover:text-amber-400">اجاره</a>
-<a href="calculator.html" class="nav-link font-medium hover:text-amber-400">محاسبه گر املاک</a>
-<a href="about.html" class="nav-link font-medium hover:text-amber-400">درباره ما</a>
-</div>
-<div class="flex items-center gap-4">
-<a href="tel:09124096970" class="hidden sm:flex luxury-btn bg-amber-400 text-black px-8 py-3.5 rounded-2xl font-semibold items-center gap-2">
-<i class="fas fa-phone"></i> تماس با ما
-</a>
-<button onclick="document.getElementById('mobileMenu').classList.toggle('hidden')" class="md:hidden w-11 h-11 flex items-center justify-center rounded-full border border-zinc-700 text-xl">
-<i class="fas fa-bars"></i>
-</button>
-</div>
-</div>
-</div>
-<div id="mobileMenu" class="hidden md:hidden flex flex-col gap-1 pb-6 px-2 text-lg">
-<a href="index.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">خانه</a>
-<a href="sale.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">فروش</a>
-<a href="rent.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">اجاره</a>
-<a href="calculator.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">محاسبه گر املاک</a>
-<a href="about.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">درباره ما</a>
-<a href="tel:09124096970" class="mt-2 bg-amber-400 text-black text-center py-3 rounded-xl font-semibold">
-<i class="fas fa-phone ml-2"></i> تماس با ما
-</a>
-</div>
-</nav>
+    <!-- Navbar -->
+    <nav class="bg-black/90 backdrop-blur-lg border-b border-zinc-800 fixed w-full z-50">
+        <div class="max-w-7xl mx-auto px-8">
+            <div class="flex justify-between items-center py-6">
+                <a href="index.html" class="flex items-center gap-4">
+                    <span class="text-3xl font-bold tracking-tighter">املاک راد</span>
+                </a>
 
-<!-- Property Detail -->
-<section class="pt-32 pb-24 px-6">
-<div id="propertyContent" class="max-w-5xl mx-auto">
-<p class="text-zinc-500 text-center py-20">در حال بارگذاری اطلاعات ملک...</p>
-</div>
-</section>
+                <div class="hidden md:flex items-center gap-10 text-lg">
+                    <a href="index.html" class="nav-link font-medium hover:text-amber-400">خانه</a>
+                    <a href="sale.html" class="nav-link font-medium hover:text-amber-400">فروش</a>
+                    <a href="rent.html" class="nav-link font-medium hover:text-amber-400">اجاره</a>
+                    <a href="calculator.html" class="nav-link font-medium hover:text-amber-400">محاسبه گر املاک</a>
+                    <a href="about.html" class="nav-link font-medium text-amber-400">درباره ما</a>
+                </div>
 
-<!-- Visit Request Modal -->
-<div id="visitModal" class="hidden fixed inset-0 modal-overlay z-[100] flex items-center justify-center p-4">
-<div class="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-lg w-full max-h-[85vh] overflow-y-auto p-8">
-<div class="flex justify-between items-center mb-6">
-<h3 class="text-xl font-bold text-amber-400">هماهنگی برای بازدید ملک</h3>
-<button onclick="document.getElementById('visitModal').classList.add('hidden')" class="text-zinc-400 hover:text-white text-2xl">&times;</button>
-</div>
-<textarea id="visitTemplateText" readonly class="w-full bg-zinc-950 border border-zinc-700 rounded-2xl p-4 text-sm leading-loose h-72 resize-none"></textarea>
-<div class="flex gap-3 mt-4">
-<button onclick="copyVisitText()" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-semibold py-3 rounded-2xl">
-<i class="fas fa-copy ml-2"></i> کپی متن
-</button>
-</div>
-<p id="copyMsg" class="text-green-400 text-sm text-center mt-2 hidden">متن کپی شد ✓</p>
-<div class="border-t border-zinc-800 mt-6 pt-6 text-center">
-<p class="text-zinc-400 mb-3">به واتساپ ارسال فرمایید</p>
-<a id="whatsappVisitLink" href="#" target="_blank" class="inline-flex items-center gap-3 bg-green-600 hover:bg-green-500 text-white font-bold px-8 py-4 rounded-2xl">
-<i class="fab fa-whatsapp text-2xl"></i> ۰۹۱۲۴۰۹۶۹۷۰
-</a>
-</div>
-</div>
-</div>
-
-<!-- Footer -->
-<footer class="bg-black py-20 border-t border-zinc-900">
-<div class="max-w-7xl mx-auto px-8">
-<div class="flex flex-col md:flex-row justify-between items-center gap-8">
-<div class="flex items-center gap-4">
-<div class="text-3xl font-bold">املاک راد</div>
-</div>
-<div class="text-center md:text-right">
-<p>تلفن تماس: <span class="text-amber-400">۰۹۱۲۴۰۹۶۹۷۰</span></p>
-<p class="text-zinc-500 text-sm mt-2">© ۱۴۰۵ املاک راد - تمامی حقوق محفوظ است</p>
-</div>
-</div>
-</div>
-</footer>
-
-<script>
-function getIdFromUrl() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get('id');
-}
-
-function buildVisitTemplate(title) {
-  return `موضوع: درخواست بازدید از ساختمان...........
-
-با سلام و احترام
-بدین‌وسیله به استحضار می‌رساند، شرکت ............... در نظر دارد به‌منظور بررسی و ارزیابی ملک معرفی‌شده بازدید به عمل بیاوریم.
-لذا هماهنگی‌های لازم جهت فراهم شدن امکان بازدید کارشناسان این شرکت در تاریخ و ساعت مورد توافق انجام پذیرد.
-
-با احترام
-نام و سمت نماینده شرکت: ..........................
-تعداد بازدید کننده‌ها و اسامی: ..........................
-شماره تماس: ..........................
-تاریخ: ..........................
-مهر و امضا`;
-}
-
-function openVisitModal(title) {
-  const text = buildVisitTemplate(title);
-  document.getElementById('visitTemplateText').value = text;
-  document.getElementById('whatsappVisitLink').href = 'https://wa.me/989124096970?text=' + encodeURIComponent(text);
-  document.getElementById('visitModal').classList.remove('hidden');
-}
-
-function copyVisitText() {
-  const textarea = document.getElementById('visitTemplateText');
-  textarea.select();
-  navigator.clipboard.writeText(textarea.value).then(() => {
-    const msg = document.getElementById('copyMsg');
-    msg.classList.remove('hidden');
-    setTimeout(() => msg.classList.add('hidden'), 2000);
-  });
-}
-
-function normalizeMoneyForConversion(val) {
-  let toman = Math.round(parseFloat(val) || 0);
-  if (toman > 0 && toman < 1000000) toman = toman * 1000000;
-  return toman;
-}
-
-function formatTomanPhrase(toman) {
-  toman = Math.round(parseFloat(toman) || 0);
-  if (toman > 0 && toman < 1000000) toman = toman * 1000000;
-  if (toman <= 0) return '—';
-  const billion = Math.floor(toman / 1000000000);
-  const million = Math.round((toman % 1000000000) / 1000000);
-  const parts = [];
-  if (billion > 0) parts.push(billion.toLocaleString('fa-IR') + ' میلیارد');
-  if (million > 0) parts.push(million.toLocaleString('fa-IR') + ' میلیون');
-  if (parts.length === 0) return toman.toLocaleString('fa-IR') + ' تومان';
-  return parts.join(' و ') + ' تومان';
-}
-
-async function loadProperty() {
-  const id = getIdFromUrl();
-  const container = document.getElementById('propertyContent');
-
-  if (!id) {
-    container.innerHTML = '<p class="text-red-400 text-center py-20">آدرس ملک نامعتبر است.</p>';
-    return;
-  }
-
-  try {
-    const res = await fetch('/api/properties/' + id);
-    if (!res.ok) {
-      container.innerHTML = '<p class="text-red-400 text-center py-20">این ملک پیدا نشد یا حذف شده است.</p>';
-      return;
-    }
-    const p = await res.json();
-    document.title = p.title + ' | املاک راد';
-
-    const priceBlock = p.type === 'sale'
-      ? `<span class="text-4xl font-bold text-amber-400">${p.price}</span><span class="text-lg block text-zinc-400">میلیارد تومان</span>`
-      : `<div class="flex flex-col gap-1">
-           <div><span class="text-xs text-zinc-500">ودیعه</span> <span class="text-2xl font-bold text-amber-400">${formatTomanPhrase(p.deposit)}</span></div>
-           <div><span class="text-xs text-zinc-500">اجاره</span> <span class="text-2xl font-bold text-amber-400">${formatTomanPhrase(p.rentAmount)}</span></div>
-         </div>`;
-
-    let baseDeposit = 0, baseRent = 0, maxConvertibleToman = 0, maxConvertibleToDepositToman = 0;
-    if (p.type === 'rent') {
-      baseDeposit = normalizeMoneyForConversion(p.deposit);
-      baseRent = normalizeMoneyForConversion(p.rentAmount);
-      maxConvertibleToman = normalizeMoneyForConversion(p.maxConvertible);
-      maxConvertibleToDepositToman = normalizeMoneyForConversion(p.maxConvertibleToDeposit);
-      baseDepositGlobal = baseDeposit;
-      baseRentGlobal = baseRent;
-      maxConvertibleGlobal = maxConvertibleToman;
-      maxConvertibleToDepositGlobal = maxConvertibleToDepositToman;
-    }
-
-    const images = (p.images && p.images.length) ? p.images : (p.image ? [p.image] : []);
-    const mainImage = images[0] || 'https://via.placeholder.com/1000x600?text=بدون+عکس';
-
-    const thumbsHtml = images.length > 1 ? `
-      <div class="flex gap-3 mt-4 overflow-x-auto pb-2">
-        ${images.map((img, idx) => `
-          <div class="protected-image-wrap flex-shrink-0 w-24 h-20 rounded-xl overflow-hidden border-2 cursor-pointer thumb-item ${idx === 0 ? 'border-amber-400' : 'border-zinc-800'}" onclick="switchMainImage('${img.replace(/'/g, "\\'")}', this)">
-            <img src="${img}" class="protected-image w-full h-full object-cover" alt="عکس ${idx + 1}" oncontextmenu="return false" ondragstart="return false">
-          </div>
-        `).join('')}
-      </div>
-    ` : '';
-
-    let divisibleHtml = '';
-    if (p.divisible && p.totalFloors && p.areaPerFloor) {
-      const totalFloors = parseInt(p.totalFloors);
-      const perFloor = parseFloat(p.areaPerFloor);
-      let rows = '';
-      for (let n = 1; n <= totalFloors; n++) {
-        rows += `<div class="flex justify-between border-b border-zinc-800 last:border-0 py-2 text-sm">
-          <span>${n} طبقه</span><span class="text-amber-400">${(n * perFloor).toLocaleString('fa-IR')} متر</span>
-        </div>`;
-      }
-      const availabilityLine = p.availableFloorsCount
-        ? `<div class="mt-4 pt-4 border-t border-amber-400/20 text-green-400 text-sm font-semibold">
-             <i class="fas fa-circle-check ml-1"></i>
-             در حال حاضر ${p.availableFloorsCount} طبقه موجود و قابل ${p.type === 'sale' ? 'خرید' : 'اجاره'}ست${p.whichFloors ? ' (' + p.whichFloors + ')' : ''}.
-           </div>`
-        : (p.whichFloors ? `<div class="mt-4 pt-4 border-t border-amber-400/20 text-green-400 text-sm font-semibold"><i class="fas fa-circle-check ml-1"></i> طبقات موجود: ${p.whichFloors}</div>` : '');
-      divisibleHtml = `
-        <div class="bg-zinc-900 border border-amber-400/30 rounded-2xl p-6 mb-10">
-          <h3 class="font-bold text-amber-400 mb-2"><i class="fas fa-layer-group ml-2"></i>این ملک قابل تفکیک است</h3>
-          <p class="text-zinc-400 text-sm mb-4">در مجموع ${totalFloors} طبقه‌ی مستقل، هر طبقه ${perFloor.toLocaleString('fa-IR')} متر — می‌توان به‌صورت جداگانه ${p.type === 'sale' ? 'خریداری' : 'اجاره'} کرد:</p>
-          ${rows}
-          ${availabilityLine}
-        </div>
-      `;
-    }
-
-    let extraHtml = '';
-    if (p.extraFields && p.extraFields.length > 0) {
-      extraHtml = p.extraFields.filter(f => f.label || f.value).map(f => `
-        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-          <div class="text-amber-400 text-sm mb-1">${f.label || ''}</div>
-          <div class="text-lg">${f.value || ''}</div>
-        </div>
-      `).join('');
-    }
-
-    let convertibleHtml = '';
-    const hasAnyConversion = p.type === 'rent' && p.convertible && (maxConvertibleToman > 0 || maxConvertibleToDepositToman > 0);
-    if (hasAnyConversion) {
-      convertibleHtml = `
-        <div class="bg-zinc-900 border border-amber-400/30 rounded-2xl p-6 mb-10">
-          <h3 class="font-bold text-amber-400 mb-4"><i class="fas fa-arrows-up-down ml-2"></i>ودیعه و اجارهٔ این ملک تا حدی قابل تبدیل است.</h3>
-          <div class="flex justify-between text-center mb-4">
-            <div>
-              <div class="text-zinc-400 text-sm">ودیعه (تومان)</div>
-              <div id="convDeposit" class="text-2xl font-bold text-amber-400 mt-1">—</div>
+                <div class="flex items-center gap-4">
+                    <a href="tel:09124096970" 
+                       class="hidden sm:flex luxury-btn bg-amber-400 text-black px-8 py-3.5 rounded-2xl font-semibold items-center gap-2">
+                        <i class="fas fa-phone"></i>
+                        تماس با ما
+                    </a>
+                    <button onclick="document.getElementById('mobileMenu').classList.toggle('hidden')"
+                        class="md:hidden w-11 h-11 flex items-center justify-center rounded-full border border-zinc-700 text-xl">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
             </div>
-            <div class="border-r border-zinc-800"></div>
-            <div>
-              <div class="text-zinc-400 text-sm">اجارهٔ ماهانه (تومان)</div>
-              <div id="convRent" class="text-2xl font-bold text-amber-400 mt-1">—</div>
+            <div id="mobileMenu" class="hidden md:hidden flex flex-col gap-1 pb-6 px-2 text-lg">
+                <a href="index.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">خانه</a>
+                <a href="sale.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">فروش</a>
+                <a href="rent.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">اجاره</a>
+                <a href="calculator.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">محاسبه گر املاک</a>
+                <a href="about.html" class="py-3 px-4 rounded-xl text-amber-400">درباره ما</a>
+                <a href="tel:09124096970" class="mt-2 bg-amber-400 text-black text-center py-3 rounded-xl font-semibold">
+                    <i class="fas fa-phone ml-2"></i> تماس با ما
+                </a>
             </div>
-          </div>
-          <input id="convSlider" type="range" min="-100" max="100" value="0" class="w-full accent-amber-400" oninput="updateConversion()">
-          <div class="flex justify-between text-zinc-500 text-xs mt-2">
-            <span>${maxConvertibleToDepositToman > 0 ? '← افزایش ودیعه (رهن کامل‌تر)' : ''}</span>
-            <span>${maxConvertibleToman > 0 ? 'افزایش اجاره →' : ''}</span>
-          </div>
         </div>
-      `;
-    }
+    </nav>
 
-    container.innerHTML = `
-      <a href="${p.type === 'sale' ? 'sale.html' : 'rent.html'}" class="inline-flex items-center gap-2 text-amber-400 hover:text-amber-300 mb-8">
-        <i class="fas fa-arrow-right"></i> بازگشت به لیست ${p.type === 'sale' ? 'فروش' : 'اجاره'}
-      </a>
-      <div class="protected-image-wrap rounded-3xl overflow-hidden mb-2 border border-zinc-800 bg-zinc-900 flex items-center justify-center">
-        <img id="mainPropertyImage" src="${mainImage}" class="protected-image w-full max-h-[550px] object-contain" alt="${p.title}" oncontextmenu="return false" ondragstart="return false">
-      </div>
-      ${thumbsHtml}
-      ${divisibleHtml}
-      <div class="flex flex-col md:flex-row justify-between md:items-center gap-6 mb-10 mt-8">
-        <div>
-          <span class="text-xs font-bold bg-amber-400/10 text-amber-400 px-4 py-2 rounded-2xl">${p.badge || (p.type === 'sale' ? 'فروش' : 'اجاره')}</span>
-          <h1 class="text-4xl font-bold mt-4">${p.title}</h1>
-          <p class="text-zinc-400 text-lg mt-2"><i class="fas fa-location-dot ml-1"></i> ${p.location || ''}</p>
+    <!-- Hero -->
+    <section class="pt-36 pb-16 bg-gradient-to-b from-zinc-900 to-zinc-950 text-center">
+        <div class="max-w-4xl mx-auto px-8">
+            <div class="inline-flex items-center gap-2 bg-amber-400/10 border border-amber-400/30 text-amber-400 px-5 py-2 rounded-full text-sm mb-6">
+                <i class="fas fa-building"></i>
+                بیش از ۱۵ سال تجربه در مستغلات اداری و تجاری
+            </div>
+            <h1 class="text-5xl md:text-6xl font-black mb-6">درباره <span class="gold-gradient">املاک راد</span></h1>
+            <p class="text-xl text-zinc-400">مشاور تخصصی مستغلات اداری، تجاری و مسکونی در جردن، میرداماد و ونک</p>
         </div>
-        <div class="text-left">${priceBlock}</div>
-      </div>
-      ${convertibleHtml}
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-5 mb-10">
-        ${p.units ? `<div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 text-center"><i class="fas fa-building text-amber-400 mb-2"></i><div>${p.units}</div></div>` : ''}
-        ${p.area ? `<div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 text-center"><i class="fas fa-vector-square text-amber-400 mb-2"></i><div>${p.area} متر</div></div>` : ''}
-        ${p.floor ? `<div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 text-center"><i class="fas fa-layer-group text-amber-400 mb-2"></i><div>${p.floor}</div></div>` : ''}
-        ${p.parking ? `<div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 text-center"><i class="fas fa-square-parking text-amber-400 mb-2"></i><div>${p.parking}</div></div>` : ''}
-      </div>
-      ${extraHtml ? `<div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">${extraHtml}</div>` : ''}
-      <div class="flex flex-col sm:flex-row gap-4">
-        <button onclick="openVisitModal('${(p.title || '').replace(/'/g, "\\'")}')"
-          class="flex-1 luxury-btn bg-amber-400 hover:bg-amber-300 text-black font-bold text-lg py-5 rounded-2xl">
-          <i class="fas fa-calendar-check ml-2"></i> هماهنگی برای بازدید این ملک
-        </button>
-        <button onclick="shareProperty('${id}', '${(p.title || '').replace(/'/g, "\\'")}')"
-          class="sm:w-48 flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white font-semibold py-5 rounded-2xl transition">
-          <i class="fas fa-share-nodes"></i> اشتراک‌گذاری
-        </button>
-      </div>
-    `;
+    </section>
 
-    if (hasAnyConversion) {
-      updateConversion();
-    }
-  } catch (err) {
-    container.innerHTML = '<p class="text-red-400 text-center py-20">خطا در بارگذاری اطلاعات ملک.</p>';
-  }
-}
+    <!-- About Content -->
+    <section class="py-20">
+        <div class="max-w-6xl mx-auto px-8">
+            <div class="grid md:grid-cols-2 gap-16 items-center">
+                <!-- Visual (office/skyline illustration instead of a placeholder stock photo) -->
+                <div class="relative order-2 md:order-1">
+                    <div class="rounded-3xl overflow-hidden border border-zinc-800 shadow-2xl bg-gradient-to-br from-zinc-900 to-black aspect-[4/5] flex items-center justify-center">
+                        <svg viewBox="0 0 400 500" class="w-full h-full">
+                            <defs>
+                                <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#18181b"/>
+                                    <stop offset="100%" stop-color="#09090b"/>
+                                </linearGradient>
+                                <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#fbbf24"/>
+                                    <stop offset="100%" stop-color="#ca8a04"/>
+                                </linearGradient>
+                            </defs>
+                            <rect width="400" height="500" fill="url(#skyGrad)"/>
+                            <rect x="40" y="220" width="70" height="230" fill="#27272a"/>
+                            <rect x="120" y="160" width="80" height="290" fill="url(#goldGrad)" opacity="0.9"/>
+                            <rect x="210" y="200" width="65" height="250" fill="#27272a"/>
+                            <rect x="285" y="120" width="75" height="330" fill="#3f3f46"/>
+                            <g fill="#09090b" opacity="0.6">
+                                <rect x="130" y="180" width="14" height="14"/><rect x="155" y="180" width="14" height="14"/><rect x="180" y="180" width="14" height="14"/>
+                                <rect x="130" y="210" width="14" height="14"/><rect x="155" y="210" width="14" height="14"/><rect x="180" y="210" width="14" height="14"/>
+                                <rect x="130" y="240" width="14" height="14"/><rect x="155" y="240" width="14" height="14"/><rect x="180" y="240" width="14" height="14"/>
+                                <rect x="295" y="140" width="14" height="14"/><rect x="320" y="140" width="14" height="14"/><rect x="345" y="140" width="14" height="14"/>
+                                <rect x="295" y="170" width="14" height="14"/><rect x="320" y="170" width="14" height="14"/><rect x="345" y="170" width="14" height="14"/>
+                            </g>
+                            <circle cx="200" cy="70" r="34" fill="url(#goldGrad)"/>
+                            <text x="200" y="82" font-family="Tahoma" font-size="34" font-weight="900" fill="#111827" text-anchor="middle">ر</text>
+                        </svg>
+                    </div>
+                    <div class="absolute -bottom-6 -left-6 bg-zinc-900 border border-amber-400/50 rounded-3xl p-6 max-w-xs shadow-xl">
+                        <p class="italic text-amber-400">"صداقت، تخصص و تعهد، اصول کار من است"</p>
+                    </div>
+                </div>
 
-const RENT_RATIO = 0.03; // مطابق محاسبه‌گر رهن به اجاره
-let baseDepositGlobal = 0, baseRentGlobal = 0, maxConvertibleGlobal = 0, maxConvertibleToDepositGlobal = 0;
+                <div class="order-1 md:order-2">
+                    <div class="text-amber-400 text-sm tracking-widest mb-4">مشاور تخصصی مستغلات اداری</div>
+                    <h2 class="text-5xl font-bold leading-tight">رضایی</h2>
 
-function updateConversion() {
-  const slider = document.getElementById('convSlider');
-  if (!slider) return;
-  const percent = parseFloat(slider.value) / 100; // بین -۱ و +۱
-  let newDeposit, newRent;
+                    <div class="mt-8 space-y-6 text-lg leading-relaxed text-zinc-300">
+                        <p>
+                            با بیش از ۱۵ سال تجربه در بازار مستغلات اداری و تجاری تهران، به‌ویژه در مناطق جردن، میرداماد و ونک،
+                            املاک راد را تأسیس کردم تا خدمات تخصصی و شفافی به کسب‌وکارها و سرمایه‌گذاران ارائه دهم.
+                        </p>
+                        <p>
+                            تمرکز اصلی من روی دفاتر کار، فضاهای اداری و مستغلات تجاریه — هر ملک رو شخصاً بازدید و بررسی می‌کنم
+                            تا مطمئن بشم دقیقاً متناسب با نیاز کسب‌وکار شماست.
+                        </p>
+                    </div>
 
-  if (percent >= 0) {
-    // سمت راست: کم‌کردن از ودیعه، اضافه‌کردن به اجاره
-    const convertedAmount = maxConvertibleGlobal * percent;
-    newDeposit = baseDepositGlobal - convertedAmount;
-    newRent = baseRentGlobal + (convertedAmount * RENT_RATIO);
-  } else {
-    // سمت چپ: کم‌کردن از اجاره، اضافه‌کردن به ودیعه
-    const rentReduction = maxConvertibleToDepositGlobal * (-percent);
-    newRent = baseRentGlobal - rentReduction;
-    newDeposit = baseDepositGlobal + (rentReduction / RENT_RATIO);
-  }
+                    <div class="mt-10 grid grid-cols-3 gap-6 text-center">
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl py-5">
+                            <div class="text-3xl font-bold text-amber-400">۱۵+</div>
+                            <div class="text-xs text-zinc-400 mt-1">سال تجربه</div>
+                        </div>
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl py-5">
+                            <div class="text-3xl font-bold text-amber-400">۳۲۰+</div>
+                            <div class="text-xs text-zinc-400 mt-1">معامله موفق</div>
+                        </div>
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl py-5">
+                            <div class="text-3xl font-bold text-amber-400">۹۸٪</div>
+                            <div class="text-xs text-zinc-400 mt-1">رضایت مشتریان</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-  document.getElementById('convDeposit').textContent = formatTomanPhrase(newDeposit);
-  document.getElementById('convRent').textContent = formatTomanPhrase(newRent);
-}
+    <!-- Why Choose Us -->
+    <section class="py-20 bg-zinc-900">
+        <div class="max-w-6xl mx-auto px-8">
+            <div class="text-center mb-14">
+                <h2 class="text-4xl font-bold">چرا <span class="gold-gradient">املاک راد</span>؟</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="feature-card bg-zinc-950 border border-zinc-800 rounded-3xl p-8 text-center">
+                    <div class="w-16 h-16 mx-auto bg-amber-400/10 rounded-2xl flex items-center justify-center text-amber-400 text-2xl mb-6">
+                        <i class="fas fa-building-user"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">تخصص در مستغلات اداری</h3>
+                    <p class="text-zinc-400 text-sm leading-relaxed">تمرکز اصلی من روی دفاتر کار و فضاهای تجاریه، نه هر نوع ملکی — می‌دونم دقیقاً یه کسب‌وکار به چی نیاز داره.</p>
+                </div>
+                <div class="feature-card bg-zinc-950 border border-zinc-800 rounded-3xl p-8 text-center">
+                    <div class="w-16 h-16 mx-auto bg-amber-400/10 rounded-2xl flex items-center justify-center text-amber-400 text-2xl mb-6">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">شفافیت کامل</h3>
+                    <p class="text-zinc-400 text-sm leading-relaxed">تمام اطلاعات ملک، قیمت و شرایط معامله شفاف و بدون واسطه در اختیار شما قرار می‌گیرد.</p>
+                </div>
+                <div class="feature-card bg-zinc-950 border border-zinc-800 rounded-3xl p-8 text-center">
+                    <div class="w-16 h-16 mx-auto bg-amber-400/10 rounded-2xl flex items-center justify-center text-amber-400 text-2xl mb-6">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">مشاوره اختصاصی</h3>
+                    <p class="text-zinc-400 text-sm leading-relaxed">از جستجو تا امضای قرارداد، در تمام مراحل همراه و پاسخگوی شما هستم.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-async function shareProperty(id, title) {
-  const url = window.location.origin + '/property.html?id=' + id;
-  if (navigator.share) {
-    try {
-      await navigator.share({ title: title, url: url });
-    } catch (err) {
-      // کاربر لغو کرد یا خطا داد - کاری لازم نیست
-    }
-  } else {
-    try {
-      await navigator.clipboard.writeText(url);
-      alert('لینک آگهی کپی شد ✓');
-    } catch (err) {
-      prompt('لینک آگهی:', url);
-    }
-  }
-}
+    <!-- CTA Contact -->
+    <section class="py-24 bg-zinc-950 text-center">
+        <div class="max-w-xl mx-auto px-6">
+            <h2 class="text-4xl font-bold mb-8">برای مشاوره اختصاصی تماس بگیرید</h2>
 
-function switchMainImage(url, thumbEl) {
-  document.getElementById('mainPropertyImage').src = url;
-  document.querySelectorAll('.thumb-item').forEach(t => t.classList.remove('border-amber-400'));
-  document.querySelectorAll('.thumb-item').forEach(t => t.classList.add('border-zinc-800'));
-  thumbEl.classList.remove('border-zinc-800');
-  thumbEl.classList.add('border-amber-400');
-}
+            <a href="tel:09124096970"
+               class="luxury-btn inline-flex items-center gap-4 bg-amber-400 text-black text-2xl font-bold px-12 py-6 rounded-3xl mb-6">
+                📞 ۰۹۱۲۴۰۹۶۹۷۰
+            </a>
 
-// جلوگیری از راست‌کلیک و درگ‌کردن روی کل صفحه (به‌خصوص عکس‌ها)
-document.addEventListener('contextmenu', function(e) {
-  if (e.target.tagName === 'IMG') e.preventDefault();
-});
-document.addEventListener('dragstart', function(e) {
-  if (e.target.tagName === 'IMG') e.preventDefault();
-});
+            <p class="text-zinc-400">
+                یا از طریق
+                <a href="https://wa.me/989124096970?text=درخواست مشاوره برای امور ملکی را دارم" target="_blank" class="text-green-400 hover:text-green-300 font-semibold">واتساپ</a>
+                پیام دهید
+            </p>
+        </div>
+    </section>
 
-loadProperty();
-</script>
+    <!-- Contact Info -->
+    <section class="py-20 bg-zinc-900">
+        <div class="max-w-4xl mx-auto px-8">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                <a href="https://maps.app.goo.gl/PBtKxx859Zrjvkgw7?g_st=ac" target="_blank"
+                    class="feature-card flex flex-col items-center text-center gap-3 bg-zinc-950 border border-zinc-800 rounded-2xl p-6">
+                    <div class="w-12 h-12 bg-amber-400/10 rounded-xl flex items-center justify-center text-amber-400 text-xl">
+                        <i class="fas fa-location-dot"></i>
+                    </div>
+                    <div class="text-zinc-400 text-xs">آدرس دفتر</div>
+                    <div class="font-semibold text-sm">جردن، بلوار گلشهر، پلاک ۲۰</div>
+                </a>
+                <a href="tel:02122055550"
+                    class="feature-card flex flex-col items-center text-center gap-3 bg-zinc-950 border border-zinc-800 rounded-2xl p-6">
+                    <div class="w-12 h-12 bg-amber-400/10 rounded-xl flex items-center justify-center text-amber-400 text-xl">
+                        <i class="fas fa-phone-volume"></i>
+                    </div>
+                    <div class="text-zinc-400 text-xs">تلفن دفتر</div>
+                    <div class="font-semibold text-sm" dir="ltr">021 2205 5550</div>
+                </a>
+                <a href="tel:09124096970"
+                    class="feature-card flex flex-col items-center text-center gap-3 bg-zinc-950 border border-zinc-800 rounded-2xl p-6">
+                    <div class="w-12 h-12 bg-amber-400/10 rounded-xl flex items-center justify-center text-amber-400 text-xl">
+                        <i class="fas fa-mobile-screen-button"></i>
+                    </div>
+                    <div class="text-zinc-400 text-xs">همراه</div>
+                    <div class="font-semibold text-sm" dir="ltr">0912 409 6970</div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black py-12 text-center text-zinc-500">
+        <p>© ۱۴۰۵ املاک راد - تمامی حقوق محفوظ است</p>
+    </footer>
 
 </body>
 </html>
+
