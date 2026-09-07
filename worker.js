@@ -101,6 +101,12 @@ async function isAuthed(request, env) {
   return match[1] === currentHash;
 }
 
+// اطلاعات خصوصی (مثل مالک ملک) هرگز نباید به بازدیدکننده‌ی عمومی سایت برسه
+function stripPrivateFields(property) {
+  const { ownerId, ...rest } = property;
+  return rest;
+}
+
 async function handleApi(request, env, url) {
   const cors = {
     'Content-Type': 'application/json'
@@ -237,7 +243,9 @@ async function handleApi(request, env, url) {
     const type = url.searchParams.get('type');
     const data = (await env.PROPERTIES_KV.get('properties', 'json')) || [];
     const filtered = type ? data.filter(p => p.type === type) : data;
-    return new Response(JSON.stringify(filtered), { headers: cors });
+    const authed = await isAuthed(request, env);
+    const output = authed ? filtered : filtered.map(stripPrivateFields);
+    return new Response(JSON.stringify(output), { headers: cors });
   }
 
   // دریافت یک ملک با شناسه (برای صفحه اختصاصی آگهی)
@@ -248,7 +256,8 @@ async function handleApi(request, env, url) {
     if (!property) {
       return new Response(JSON.stringify({ error: 'ملک پیدا نشد' }), { status: 404, headers: cors });
     }
-    return new Response(JSON.stringify(property), { headers: cors });
+    const authed = await isAuthed(request, env);
+    return new Response(JSON.stringify(authed ? property : stripPrivateFields(property)), { headers: cors });
   }
 
   // افزودن ملک جدید (فقط ادمین)
@@ -344,6 +353,56 @@ async function handleApi(request, env, url) {
     return new Response(JSON.stringify({ success: true }), { headers: cors });
   }
 
+  // دریافت لیست مالکین (فقط ادمین - کاملاً خصوصی)
+  if (url.pathname === '/api/owners' && request.method === 'GET') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const owners = (await env.PROPERTIES_KV.get('owners', 'json')) || [];
+    return new Response(JSON.stringify(owners), { headers: cors });
+  }
+
+  // افزودن مالک جدید (فقط ادمین)
+  if (url.pathname === '/api/owners' && request.method === 'POST') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const newOwner = await request.json();
+    const owners = (await env.PROPERTIES_KV.get('owners', 'json')) || [];
+    newOwner.id = Date.now().toString();
+    owners.unshift(newOwner);
+    await env.PROPERTIES_KV.put('owners', JSON.stringify(owners));
+    return new Response(JSON.stringify({ success: true, id: newOwner.id }), { headers: cors });
+  }
+
+  // ویرایش مالک (فقط ادمین)
+  if (url.pathname.startsWith('/api/owners/') && request.method === 'PUT') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const id = url.pathname.split('/').pop();
+    const updates = await request.json();
+    let owners = (await env.PROPERTIES_KV.get('owners', 'json')) || [];
+    const index = owners.findIndex(o => o.id === id);
+    if (index === -1) {
+      return new Response(JSON.stringify({ error: 'مالک پیدا نشد' }), { status: 404, headers: cors });
+    }
+    owners[index] = { ...owners[index], ...updates, id };
+    await env.PROPERTIES_KV.put('owners', JSON.stringify(owners));
+    return new Response(JSON.stringify({ success: true }), { headers: cors });
+  }
+
+  // حذف مالک (فقط ادمین)
+  if (url.pathname.startsWith('/api/owners/') && request.method === 'DELETE') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const id = url.pathname.split('/').pop();
+    let owners = (await env.PROPERTIES_KV.get('owners', 'json')) || [];
+    owners = owners.filter(o => o.id !== id);
+    await env.PROPERTIES_KV.put('owners', JSON.stringify(owners));
+    return new Response(JSON.stringify({ success: true }), { headers: cors });
+  }
+
   return new Response(JSON.stringify({ error: 'مسیر پیدا نشد' }), { status: 404, headers: cors });
 }
-
