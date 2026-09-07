@@ -925,6 +925,9 @@ function renderPropertiesList() {
           ${p.divisible && p.totalFloors && p.areaPerFloor ? `<p class="text-blue-300 text-xs mt-1">کلاً ${parseFloat(p.area || 0).toLocaleString('fa-IR')} متر (${p.totalFloors} طبقه × ${parseFloat(p.areaPerFloor).toLocaleString('fa-IR')} متر) — می‌توان ۱ تا ${p.totalFloors} طبقه جداگانه پیشنهاد داد</p>` : ''}
         </div>
         <div class="flex gap-4">
+          <button onclick="toggleOwnerPanel('${p.id}')" class="text-purple-400 hover:text-purple-300" title="مالک ملک">
+            <i class="fas fa-id-card"></i>
+          </button>
           <button onclick="togglePropertyMatches('${p.id}')" class="text-green-400 hover:text-green-300" title="مشتریان متناسب">
             <i class="fas fa-user-check"></i>
           </button>
@@ -940,6 +943,7 @@ function renderPropertiesList() {
         </div>
       </div>
       <div id="propmatch-${p.id}" class="hidden mt-4 bg-zinc-900 rounded-xl"></div>
+      <div id="owner-${p.id}" class="hidden mt-4 bg-zinc-900 rounded-xl p-4"></div>
     </div>
   `).join('');
 }
@@ -1473,19 +1477,61 @@ function toggleOwnerPanel(propertyId) {
   if (!panel) return;
   panel.classList.toggle('hidden');
   if (!panel.classList.contains('hidden')) {
-    const property = allProperties.find(p => p.id === propertyId);
-    const owner = allOwners.find(o => o.id === property.ownerId);
-    if (!owner) {
-      panel.innerHTML = '<p class="text-zinc-500 text-sm p-3">مالکی برای این ملک ثبت نشده.</p>';
-    } else {
-      panel.innerHTML = `
-        <div class="text-sm p-3">
-          <span class="font-semibold text-amber-400">${owner.name}</span>
-          — 📞 ${owner.phone || '—'}${owner.description ? ' — ' + owner.description : ''}
-        </div>
-      `;
-    }
+    renderOwnerPanel(propertyId);
   }
+}
+
+function renderOwnerPanel(propertyId) {
+  const panel = document.getElementById('owner-' + propertyId);
+  const property = allProperties.find(p => p.id === propertyId);
+  const owner = allOwners.find(o => o.id === property.ownerId);
+
+  const currentLine = owner
+    ? `<div class="text-sm mb-3 p-3 bg-zinc-950 rounded-xl">
+         <span class="text-zinc-500">مالک فعلی:</span>
+         <span class="font-semibold text-amber-400">${owner.name}</span>
+         — 📞 ${owner.phone || '—'}${owner.description ? ' — ' + owner.description : ''}
+       </div>`
+    : `<div class="text-sm text-zinc-500 mb-3">هنوز مالکی برای این ملک ثبت نشده.</div>`;
+
+  const options = allOwners.map(o => `<option value="${o.id}" ${property.ownerId === o.id ? 'selected' : ''}>${o.name} — ${o.phone || ''}</option>`).join('');
+
+  panel.innerHTML = `
+    ${currentLine}
+    <div class="flex gap-2">
+      <select id="ownerSelect-${propertyId}" class="flex-1 bg-zinc-950 border border-zinc-700 rounded-xl py-2 px-3 text-sm">
+        <option value="">— انتخاب مالک —</option>
+        ${options}
+      </select>
+      <button onclick="assignOwner('${propertyId}')" class="bg-amber-400 hover:bg-amber-300 text-black text-sm font-semibold px-4 rounded-xl">ثبت</button>
+      ${owner ? `<button onclick="unassignOwner('${propertyId}')" class="bg-zinc-700 hover:bg-zinc-600 text-white text-sm px-4 rounded-xl">حذف لینک</button>` : ''}
+    </div>
+  `;
+}
+
+async function assignOwner(propertyId) {
+  const select = document.getElementById('ownerSelect-' + propertyId);
+  const ownerId = select.value;
+  if (!ownerId) return;
+  await fetch('/api/properties/' + propertyId, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ownerId })
+  });
+  await loadProperties();
+  document.getElementById('owner-' + propertyId).classList.remove('hidden');
+  renderOwnerPanel(propertyId);
+}
+
+async function unassignOwner(propertyId) {
+  await fetch('/api/properties/' + propertyId, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ownerId: '' })
+  });
+  await loadProperties();
+  document.getElementById('owner-' + propertyId).classList.remove('hidden');
+  renderOwnerPanel(propertyId);
 }
 
 async function checkAuth() {
