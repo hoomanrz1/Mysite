@@ -245,6 +245,30 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
       </label>
     </div>
 
+    <!-- Owner (private - admin only) -->
+    <div class="mt-8 pt-6 border-t border-zinc-800">
+      <label class="text-amber-400 font-semibold flex items-center gap-2">
+        <i class="fas fa-lock text-xs"></i> مالک ملک (فقط برای شما قابل مشاهده است، هیچ‌جای عمومی سایت نشون داده نمی‌شه)
+      </label>
+      <div class="flex gap-2 mt-3">
+        <select id="p_ownerId" class="flex-1 bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+          <option value="">— بدون مالک ثبت‌شده —</option>
+        </select>
+        <button type="button" onclick="document.getElementById('newOwnerInlineForm').classList.toggle('hidden')" class="bg-zinc-800 hover:bg-zinc-700 text-white px-4 rounded-xl">
+          <i class="fas fa-plus ml-1"></i> مالک جدید
+        </button>
+      </div>
+      <div id="newOwnerInlineForm" class="hidden mt-4 bg-zinc-950 border border-zinc-800 rounded-xl p-4 space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <input id="inlineOwnerName" type="text" placeholder="نام مالک" class="bg-zinc-900 border border-zinc-700 rounded-xl py-2 px-3 text-sm">
+          <input id="inlineOwnerPhone" type="text" placeholder="شماره تماس" class="bg-zinc-900 border border-zinc-700 rounded-xl py-2 px-3 text-sm">
+          <input id="inlineOwnerDescription" type="text" placeholder="توضیحات (اختیاری)" class="bg-zinc-900 border border-zinc-700 rounded-xl py-2 px-3 text-sm">
+        </div>
+        <button type="button" onclick="createInlineOwner()" class="bg-amber-400 hover:bg-amber-300 text-black text-sm font-semibold px-4 py-2 rounded-xl">ثبت مالک و انتخابش کن</button>
+        <p id="inlineOwnerMessage" class="text-sm"></p>
+      </div>
+    </div>
+
     <!-- Custom extra fields -->
     <div class="mt-8 pt-6 border-t border-zinc-800">
       <div class="flex justify-between items-center mb-4">
@@ -748,6 +772,8 @@ function fillForm(p) {
   document.getElementById('p_badge').value = p.badge || '';
   document.getElementById('p_title').value = p.title || '';
   document.getElementById('p_location').value = p.location || '';
+  populateOwnerSelect();
+  document.getElementById('p_ownerId').value = p.ownerId || '';
   document.getElementById('p_price').value = p.price || '';
   writeMoneyFields('p_deposit', normalizeOldMoneyValue(p.deposit));
   writeMoneyFields('p_rentAmount', normalizeOldMoneyValue(p.rentAmount));
@@ -796,6 +822,12 @@ function clearForm() {
   clearExtraFields();
   toggleFields();
   ['p_priceHint','p_depositHint','p_rentAmountHint'].forEach(id => document.getElementById(id).textContent = '');
+  document.getElementById('p_ownerId').value = '';
+  document.getElementById('newOwnerInlineForm').classList.add('hidden');
+  document.getElementById('inlineOwnerName').value = '';
+  document.getElementById('inlineOwnerPhone').value = '';
+  document.getElementById('inlineOwnerDescription').value = '';
+  document.getElementById('inlineOwnerMessage').textContent = '';
 }
 
 function startEdit(id) {
@@ -831,6 +863,7 @@ function buildPropertyObject() {
     convertible: document.getElementById('p_convertible').checked,
     maxConvertible: readMoneyFields('p_maxConvertible'),
     maxConvertibleToDeposit: readMoneyFields('p_maxConvertibleToDeposit'),
+    ownerId: document.getElementById('p_ownerId').value,
     area: document.getElementById('p_area').value,
     images: currentImages,
     image: currentImages[0] || '',
@@ -1442,25 +1475,64 @@ function renderOwnersList() {
   }
 
   list.innerHTML = filtered.map(o => {
-    const linkedCount = allProperties.filter(p => p.ownerId === o.id).length;
+    const linkedProperties = allProperties.filter(p => p.ownerId === o.id);
     return `
-    <div class="flex justify-between items-center bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
-      <div>
-        <h4 class="font-semibold">${o.name}</h4>
-        <p class="text-zinc-500 text-sm">📞 ${o.phone || '—'}${o.description ? ' — ' + o.description : ''}</p>
-        ${linkedCount > 0 ? `<p class="text-amber-400 text-xs mt-1">مالک ${linkedCount} ملک ثبت‌شده</p>` : ''}
+    <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
+      <div class="flex justify-between items-center">
+        <div>
+          <h4 class="font-semibold">${o.name}</h4>
+          <p class="text-zinc-500 text-sm">📞 ${o.phone || '—'}${o.description ? ' — ' + o.description : ''}</p>
+          ${linkedProperties.length > 0 ? `<p class="text-amber-400 text-xs mt-1">مالک ${linkedProperties.length} ملک: ${linkedProperties.map(p => p.title).join('، ')}</p>` : ''}
+        </div>
+        <div class="flex gap-4">
+          <button onclick="toggleOwnerLinkPanel('${o.id}')" class="text-purple-400 hover:text-purple-300" title="لینک به ملک">
+            <i class="fas fa-link"></i>
+          </button>
+          <button onclick="startEditOwner('${o.id}')" class="text-amber-400 hover:text-amber-300">
+            <i class="fas fa-pen"></i>
+          </button>
+          <button onclick="deleteOwner('${o.id}')" class="text-red-400 hover:text-red-300">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
       </div>
-      <div class="flex gap-4">
-        <button onclick="startEditOwner('${o.id}')" class="text-amber-400 hover:text-amber-300">
-          <i class="fas fa-pen"></i>
-        </button>
-        <button onclick="deleteOwner('${o.id}')" class="text-red-400 hover:text-red-300">
-          <i class="fas fa-trash"></i>
-        </button>
-      </div>
+      <div id="ownerlink-${o.id}" class="hidden mt-4 bg-zinc-900 rounded-xl p-4"></div>
     </div>
   `;
   }).join('');
+}
+
+function toggleOwnerLinkPanel(ownerId) {
+  const panel = document.getElementById('ownerlink-' + ownerId);
+  if (!panel) return;
+  panel.classList.toggle('hidden');
+  if (!panel.classList.contains('hidden')) {
+    const options = allProperties.map(p => `<option value="${p.id}" ${p.ownerId === ownerId ? 'selected' : ''}>${p.title} (${p.location || ''})</option>`).join('');
+    panel.innerHTML = `
+      <label class="block text-amber-400 text-sm mb-2">این مالک صاحب کدوم ملکه؟</label>
+      <div class="flex gap-2">
+        <select id="propSelect-${ownerId}" class="flex-1 bg-zinc-950 border border-zinc-700 rounded-xl py-2 px-3 text-sm">
+          <option value="">— انتخاب ملک —</option>
+          ${options}
+        </select>
+        <button onclick="linkOwnerToProperty('${ownerId}')" class="bg-amber-400 hover:bg-amber-300 text-black text-sm font-semibold px-4 rounded-xl">لینک کن</button>
+      </div>
+    `;
+  }
+}
+
+async function linkOwnerToProperty(ownerId) {
+  const select = document.getElementById('propSelect-' + ownerId);
+  const propertyId = select.value;
+  if (!propertyId) return;
+  await fetch('/api/properties/' + propertyId, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ownerId })
+  });
+  await loadProperties();
+  renderOwnersList();
+  toggleOwnerLinkPanel(ownerId);
 }
 
 function populateOwnerSelect() {
@@ -1470,6 +1542,41 @@ function populateOwnerSelect() {
   select.innerHTML = '<option value="">— بدون مالک ثبت‌شده —</option>' +
     allOwners.map(o => `<option value="${o.id}">${o.name} (${o.phone || '—'})</option>`).join('');
   select.value = current;
+}
+
+async function createInlineOwner() {
+  const name = document.getElementById('inlineOwnerName').value.trim();
+  const phone = document.getElementById('inlineOwnerPhone').value.trim();
+  const description = document.getElementById('inlineOwnerDescription').value.trim();
+  const msg = document.getElementById('inlineOwnerMessage');
+
+  if (!name) {
+    msg.innerHTML = '<span class="text-red-400">نام مالک را وارد کنید</span>';
+    return;
+  }
+
+  const res = await fetch('/api/owners', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, phone, description })
+  });
+  const data = await res.json();
+
+  if (data.success) {
+    await loadOwners();
+    populateOwnerSelect();
+    document.getElementById('p_ownerId').value = data.id;
+    document.getElementById('inlineOwnerName').value = '';
+    document.getElementById('inlineOwnerPhone').value = '';
+    document.getElementById('inlineOwnerDescription').value = '';
+    msg.innerHTML = '<span class="text-green-400">مالک ثبت و انتخاب شد ✓</span>';
+    setTimeout(() => {
+      document.getElementById('newOwnerInlineForm').classList.add('hidden');
+      msg.innerHTML = '';
+    }, 1500);
+  } else {
+    msg.innerHTML = '<span class="text-red-400">' + (data.error || 'خطا در ثبت مالک') + '</span>';
+  }
 }
 
 function toggleOwnerPanel(propertyId) {
@@ -1606,4 +1713,3 @@ checkAuth();
 
 </body>
 </html>
-
