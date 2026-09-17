@@ -7,12 +7,56 @@ export default {
     }
 
     if (url.pathname === '/property.html' || url.pathname === '/property') {
-      return handlePropertyPage(request, env, url);
+      const response = await handlePropertyPage(request, env, url);
+      ctx.waitUntil(trackVisit(env, 'property'));
+      return response;
+    }
+
+    const page = getPageName(url.pathname);
+    if (page && request.method === 'GET') {
+      ctx.waitUntil(trackVisit(env, page));
     }
 
     return env.ASSETS.fetch(request);
   }
 };
+
+function getPageName(pathname) {
+  const map = {
+    '/': 'home',
+    '/index.html': 'home',
+    '/sale.html': 'sale',
+    '/sale': 'sale',
+    '/rent.html': 'rent',
+    '/rent': 'rent',
+    '/about.html': 'about',
+    '/about': 'about',
+    '/calculator.html': 'calculator',
+    '/calculator': 'calculator'
+  };
+  return map[pathname] || null;
+}
+
+async function trackVisit(env, page) {
+  try {
+    const stats = (await env.PROPERTIES_KV.get('site_stats', 'json')) || { total: 0, daily: {}, pages: {} };
+    stats.total = (stats.total || 0) + 1;
+
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Tehran' }); // YYYY-MM-DD به وقت تهران
+    stats.daily[today] = (stats.daily[today] || 0) + 1;
+    stats.pages[page] = (stats.pages[page] || 0) + 1;
+
+    // فقط ۳۰ روز اخیر رو نگه می‌داریم که حجم داده زیاد نشه
+    const dates = Object.keys(stats.daily).sort();
+    if (dates.length > 30) {
+      dates.slice(0, dates.length - 30).forEach(d => delete stats.daily[d]);
+    }
+
+    await env.PROPERTIES_KV.put('site_stats', JSON.stringify(stats));
+  } catch (err) {
+    // ثبت آمار هیچ‌وقت نباید باعث خرابی سایت بشه، پس خطاش رو نادیده می‌گیریم
+  }
+}
 
 function escapeHtml(str) {
   return String(str || '')
@@ -112,7 +156,42 @@ async function handleApi(request, env, url) {
     'Content-Type': 'application/json'
   };
 
-  // قیمت‌های لحظه‌ای (دلار، یورو، طلا، سکه) - با کش ۱۰ دقیقه‌ای برای صرفه‌جویی در سهمیه API
+  // ثبت بازدید صفحه (عمومی - هرکسی که سایت رو باز کنه، یه بار درخواست می‌فرسته)
+  if (url.pathname === '/api/track' && request.method === 'POST') {
+    try {
+      const body = await request.json().catch(() => ({}));
+      const page = (body.page || 'unknown').toString().slice(0, 50);
+      const today = new Date().toISOString().slice(0, 10);
+
+      const stats = (await env.PROPERTIES_KV.get('site_stats', 'json')) || { total: 0, daily: {}, pages: {} };
+      stats.total = (stats.total || 0) + 1;
+      stats.daily = stats.daily || {};
+      stats.daily[today] = (stats.daily[today] || 0) + 1;
+      stats.pages = stats.pages || {};
+      stats.pages[page] = (stats.pages[page] || 0) + 1;
+
+      const dailyKeys = Object.keys(stats.daily).sort();
+      if (dailyKeys.length > 90) {
+        dailyKeys.slice(0, dailyKeys.length - 90).forEach(k => delete stats.daily[k]);
+      }
+
+      await env.PROPERTIES_KV.put('site_stats', JSON.stringify(stats));
+      return new Response(JSON.stringify({ success: true }), { headers: cors });
+    } catch (err) {
+      return new Response(JSON.stringify({ success: false }), { headers: cors });
+    }
+  }
+
+  // آمار بازدید سایت (فقط ادمین)
+  if (url.pathname === '/api/stats' && request.method === 'GET') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const stats = (await env.PROPERTIES_KV.get('site_stats', 'json')) || { total: 0, daily: {}, pages: {} };
+    return new Response(JSON.stringify(stats), { headers: cors });
+  }
+
+  // قیمت‌های لحظه‌ای (دلار، یورو، طلا، سکه) - با کش ۲ دقیقه‌ای برای صرفه‌جویی در سهمیه API
   if (url.pathname === '/api/prices' && request.method === 'GET') {
     try {
       const cached = await env.PROPERTIES_KV.get('prices_cache', 'json');
@@ -123,7 +202,6 @@ async function handleApi(request, env, url) {
       const apiRes = await fetch('https://img.realestaterezaei.ir/prices');
       const raw = await apiRes.json();
 
-      // حالت موقت برای دیباگ: با ?debug=1 داده خام رو نشون می‌ده
       if (url.searchParams.get('debug') === '1') {
         return new Response(JSON.stringify(raw, null, 2), { headers: cors });
       }
