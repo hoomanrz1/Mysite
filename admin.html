@@ -47,6 +47,24 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
     </div>
   </div>
 
+  <!-- Site Stats (فقط پنل ادمین) -->
+  <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 mb-8">
+    <h2 class="text-xl font-bold mb-6"><i class="fas fa-chart-line text-amber-400 ml-2"></i>آمار بازدید سایت</h2>
+    <div id="statsSummary" class="grid grid-cols-2 md:grid-cols-4 gap-5 mb-6">
+      <p class="text-zinc-500 col-span-full">در حال بارگذاری...</p>
+    </div>
+    <div id="statsDetails" class="hidden grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div>
+        <h3 class="text-sm text-zinc-400 mb-3">۷ روز اخیر</h3>
+        <div id="statsDaily" class="space-y-2"></div>
+      </div>
+      <div>
+        <h3 class="text-sm text-zinc-400 mb-3">بازدید به تفکیک صفحه</h3>
+        <div id="statsPages" class="space-y-2"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Change Password -->
   <div id="passwordCard" class="hidden bg-zinc-900 border border-zinc-800 rounded-3xl p-8 mb-8">
     <h2 class="text-xl font-bold mb-6">تغییر رمز عبور</h2>
@@ -479,6 +497,65 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 </div>
 
 <script>
+// ---------- Site Stats ----------
+async function loadStats() {
+  try {
+    const res = await fetch('/api/stats');
+    if (!res.ok) return;
+    const stats = await res.json();
+    const today = new Date().toISOString().slice(0, 10);
+    const todayCount = (stats.daily && stats.daily[today]) || 0;
+
+    const dailyEntries = Object.entries(stats.daily || {}).sort((a, b) => b[0].localeCompare(a[0]));
+    const last7 = dailyEntries.slice(0, 7);
+    const last7Total = last7.reduce((sum, [, c]) => sum + c, 0);
+
+    document.getElementById('statsSummary').innerHTML = `
+      <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 text-center">
+        <div class="text-3xl font-bold text-amber-400">${(stats.total || 0).toLocaleString('fa-IR')}</div>
+        <div class="text-xs text-zinc-400 mt-1">کل بازدید از ابتدا</div>
+      </div>
+      <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 text-center">
+        <div class="text-3xl font-bold text-amber-400">${todayCount.toLocaleString('fa-IR')}</div>
+        <div class="text-xs text-zinc-400 mt-1">بازدید امروز</div>
+      </div>
+      <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 text-center">
+        <div class="text-3xl font-bold text-amber-400">${last7Total.toLocaleString('fa-IR')}</div>
+        <div class="text-xs text-zinc-400 mt-1">۷ روز اخیر</div>
+      </div>
+      <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 text-center">
+        <div class="text-3xl font-bold text-amber-400">${Object.keys(stats.pages || {}).length.toLocaleString('fa-IR')}</div>
+        <div class="text-xs text-zinc-400 mt-1">صفحات ردیابی‌شده</div>
+      </div>
+    `;
+
+    const pageLabels = { index: 'خانه', sale: 'فروش', rent: 'اجاره', about: 'درباره ما', calculator: 'محاسبه‌گر', property: 'صفحه ملک' };
+
+    document.getElementById('statsDaily').innerHTML = last7.length
+      ? last7.map(([date, count]) => `
+          <div class="flex justify-between items-center bg-zinc-950 border border-zinc-800 rounded-xl py-2 px-4 text-sm">
+            <span class="text-zinc-400">${date}</span>
+            <span class="font-bold text-amber-400">${count.toLocaleString('fa-IR')}</span>
+          </div>
+        `).join('')
+      : '<p class="text-zinc-500 text-sm">هنوز داده‌ای ثبت نشده</p>';
+
+    const pageEntries = Object.entries(stats.pages || {}).sort((a, b) => b[1] - a[1]);
+    document.getElementById('statsPages').innerHTML = pageEntries.length
+      ? pageEntries.map(([page, count]) => `
+          <div class="flex justify-between items-center bg-zinc-950 border border-zinc-800 rounded-xl py-2 px-4 text-sm">
+            <span class="text-zinc-400">${pageLabels[page] || page}</span>
+            <span class="font-bold text-amber-400">${count.toLocaleString('fa-IR')}</span>
+          </div>
+        `).join('')
+      : '<p class="text-zinc-500 text-sm">هنوز داده‌ای ثبت نشده</p>';
+
+    document.getElementById('statsDetails').classList.remove('hidden');
+  } catch (err) {
+    document.getElementById('statsSummary').innerHTML = '<p class="text-zinc-500 col-span-full">خطا در بارگذاری آمار</p>';
+  }
+}
+
 // ---------- ابزار نمایش عدد به‌صورت خوانا (رفع ابهام واحد) ----------
 function numberToPersianWords(num) {
   if (isNaN(num) || num === 0) return 'صفر';
@@ -542,8 +619,6 @@ function showNumberHint(inputId, hintId, unit) {
   hintEl.textContent = '= ' + toman.toLocaleString('fa-IR') + ' تومان (' + numberToPersianWords(toman) + ' تومان)';
 }
 
-// عبارت طبیعی فارسی از یه مبلغ بر حسب تومان می‌سازه، مثلا: «۵ میلیارد و ۵۰۰ میلیون تومان»
-// اگه بخشی صفر باشه، از عبارت حذف می‌شه (مثلا فقط «۵ میلیارد تومان»)
 function formatTomanPhrase(toman) {
   toman = Math.round(parseFloat(toman) || 0);
   if (toman <= 0) return '';
@@ -556,15 +631,11 @@ function formatTomanPhrase(toman) {
   return parts.join(' و ') + ' تومان';
 }
 
-// خوندن دو فیلد میلیارد/میلیون و برگردوندن مجموع به تومان
-// تشخیص و تبدیل مقدار قدیمی (که به‌صورت متن آزاد یا فقط بر حسب میلیون ذخیره شده بود) به تومان کامل
 function normalizeOldMoneyValue(val) {
   if (val === undefined || val === null || val === '') return 0;
   if (typeof val === 'number') {
-    // اگه عدد کوچیکه (کمتر از یک میلیون)، یعنی فرمت قدیمی بر حسب "میلیون" بوده
     return val > 0 && val < 1000000 ? val * 1000000 : val;
   }
-  // فرمت خیلی قدیمی: متن آزاد مثل "500 میلیون تومان"
   const text = String(val);
   const numMatch = text.match(/[\d.]+/);
   if (!numMatch) return 0;
@@ -582,7 +653,6 @@ function readMoneyFields(prefix) {
   return billion * 1000000000 + million * 1000000;
 }
 
-// نوشتن یه مقدار تومان به دو فیلد میلیارد/میلیون (برای حالت ویرایش)
 function writeMoneyFields(prefix, toman) {
   toman = Math.round(parseFloat(toman) || 0);
   const billion = Math.floor(toman / 1000000000);
@@ -593,7 +663,6 @@ function writeMoneyFields(prefix, toman) {
   if (millionEl) millionEl.value = million > 0 ? million : '';
 }
 
-// برای فیلدهای ملک (p_deposit / p_rentAmount)
 function updateMoneyHint(fieldName) {
   const toman = readMoneyFields('p_' + fieldName);
   const hintEl = document.getElementById('p_' + fieldName + 'Hint');
@@ -601,7 +670,6 @@ function updateMoneyHint(fieldName) {
   hintEl.textContent = toman > 0 ? '= ' + formatTomanPhrase(toman) : '';
 }
 
-// برای فیلدهای بازه‌ی مشتری (c_depositMin / c_depositMax / c_rentMin / c_rentMax)
 function updateCustomerMoneyHint(fieldName) {
   const toman = readMoneyFields('c_' + fieldName);
   const hintEl = document.getElementById('c_' + fieldName + 'Hint');
@@ -985,8 +1053,8 @@ function renderPropertiesList() {
 let editingCustomerId = null;
 let allCustomers = [];
 let currentCustomerLocations = [];
-const RENT_RATIO = 0.03; // مطابق محاسبه‌گر: هر ۱۰۰ میلیون رهن = ۳ میلیون اجاره
-const TOLERANCE = 0.25; // ۲۵٪ تلرانس برای همه مقایسه‌های تقریبی
+const RENT_RATIO = 0.03;
+const TOLERANCE = 0.25;
 
 function toggleCustomerFields() {
   const type = document.getElementById('c_type').value;
@@ -1090,17 +1158,12 @@ function startEditCustomer(id) {
   document.getElementById('c_name').value = c.name || '';
   document.getElementById('c_phone').value = c.phone || '';
   document.getElementById('c_type').value = c.type || 'sale';
-  // پشتیبانی از داده‌ی قدیمی که فقط یه فیلد "area" داشت
   document.getElementById('c_areaMin').value = c.areaMin || c.area || '';
   document.getElementById('c_areaMax').value = c.areaMax || c.area || '';
-  // پشتیبانی از داده‌ی قدیمی که فقط یه فیلد "location" داشت
   currentCustomerLocations = c.locations && c.locations.length ? [...c.locations] : (c.location ? [c.location] : []);
   renderLocationChips();
-  // پشتیبانی از داده‌ی قدیمی که فقط یه فیلد "budget" داشت
   document.getElementById('c_priceMin').value = c.priceMin || c.budget || '';
   document.getElementById('c_priceMax').value = c.priceMax || c.budget || '';
-  // پشتیبانی از داده‌ی قدیمی: قبلاً این مقادیر «بر حسب میلیون» بودن (عدد ساده)؛ الان بر حسب تومان کامل ذخیره می‌شن.
-  // اگه عدد خیلی کوچیک بود (کمتر از یه میلیون)، یعنی مال فرمت قدیمیه، پس در میلیون ضرب می‌کنیم.
   function normalizeOldMillion(val) {
     val = parseFloat(val) || 0;
     if (val > 0 && val < 1000000) return val * 1000000;
@@ -1139,23 +1202,17 @@ async function deleteCustomer(id) {
   loadCustomers();
 }
 
-// تبدیل متن آزاد قدیمی («500 میلیون») به عدد بر حسب میلیون تومان
-// یه عدد (چه بر حسب تومان کامل، چه فرمت قدیمی بر حسب میلیون، چه متن آزاد قدیمی) رو به «میلیون تومان» تبدیل می‌کنه
 function parseToMillion(value) {
   if (value === null || value === undefined || value === '') return NaN;
-
   if (typeof value === 'number') {
-    // اگه عدد بزرگ بود، یعنی از قبل بر حسب تومان کامل ذخیره شده (فرمت جدید) → تقسیم بر یک میلیون
-    // اگه عدد کوچیک بود، یعنی فرمت قدیمی بوده که خودش بر حسب میلیون بود
     return value >= 1000000 ? value / 1000000 : value;
   }
-
   const str = String(value);
   const numMatch = str.match(/[\d.]+/);
   if (!numMatch) return NaN;
   const num = parseFloat(numMatch[0]);
   if (str.includes('میلیارد')) return num * 1000;
-  return num; // پیش‌فرض: میلیون تومان (فرمت متنی قدیمی)
+  return num;
 }
 
 function rentEquivalentMillion(depositMillion, rentMillion) {
@@ -1164,8 +1221,6 @@ function rentEquivalentMillion(depositMillion, rentMillion) {
   return d + (r / RENT_RATIO);
 }
 
-// آیا متراژ ملک (یا ترکیبی از طبقاتش) توی بازه‌ی مدنظر مشتری جا می‌شه؟
-// خروجی: { ok: bool, note: 'توضیح در صورت تفکیک' }
 function checkAreaMatch(property, areaMin, areaMax) {
   const min = parseFloat(areaMin);
   const max = parseFloat(areaMax);
@@ -1181,7 +1236,6 @@ function checkAreaMatch(property, areaMin, areaMax) {
     return { ok: true, note: '' };
   }
 
-  // بررسی حالت تفکیک‌پذیر (چند طبقه مستقل) - همه‌ی گزینه‌های ممکن رو لیست می‌کنیم
   if (property.divisible && property.totalFloors && property.areaPerFloor) {
     const totalFloors = parseInt(property.totalFloors);
     const perFloor = parseFloat(property.areaPerFloor);
@@ -1370,7 +1424,6 @@ function renderCustomersList() {
   }).join('');
 }
 
-// ---------- Auth ----------
 // ---------- Owners (فقط پنل ادمین) ----------
 let editingOwnerId = null;
 let allOwners = [];
@@ -1414,7 +1467,7 @@ async function submitOwner() {
     msg.innerHTML = '<span class="text-green-400">' + (editingOwnerId ? 'مالک بروزرسانی شد' : 'مالک اضافه شد') + '</span>';
     cancelOwnerEdit();
     await loadOwners();
-    renderPropertiesList(); // برای به‌روز شدن لیست کشویی مالک در فرم ملک
+    renderPropertiesList();
   } else {
     msg.innerHTML = '<span class="text-red-400">' + (data.error || 'خطا در ثبت') + '</span>';
   }
@@ -1650,6 +1703,7 @@ async function checkAuth() {
     loadProperties();
     loadCustomers();
     loadOwners();
+    loadStats();
   }
 }
 
@@ -1665,6 +1719,7 @@ async function login() {
     loadProperties();
     loadCustomers();
     loadOwners();
+    loadStats();
   } else {
     document.getElementById('loginError').classList.remove('hidden');
   }
