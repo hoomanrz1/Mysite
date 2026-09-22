@@ -536,7 +536,16 @@ function buildMarquee() {
 // (قبلاً موقع تغییر سایز صفحه در گوشی، دوباره ساخته می‌شد و باعث قطع‌شدن مداوم می‌شد)
 buildMarquee();
 </script>
-
+<script>
+(function(){
+  var payload = JSON.stringify({page: 'index'});
+  if (navigator.sendBeacon) {
+    navigator.sendBeacon('/api/track', new Blob([payload], {type: 'application/json'}));
+  } else {
+    fetch('/api/track', {method:'POST', headers:{'Content-Type':'application/json'}, body: payload}).catch(function(){});
+  }
+})();
+</script>
 </body>
 </html>
 
