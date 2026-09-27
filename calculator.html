@@ -4,15 +4,15 @@
 <meta charset="UTF-8">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="محاسبه‌گر آنلاین تبدیل رهن به اجاره و اجاره به رهن بر اساس عرف بازار مسکن ایران. ابزار رایگان املاک راد.">
-<meta property="og:title" content="محاسبه‌گر تبدیل رهن به اجاره | املاک راد">
-<meta property="og:description" content="محاسبه‌گر آنلاین تبدیل رهن به اجاره و اجاره به رهن. ابزار رایگان املاک راد.">
+<meta name="description" content="محاسبه‌گر آنلاین تبدیل رهن به اجاره و محاسبه‌ی کمیسیون معاملات ملکی بر اساس عرف بازار مسکن ایران. ابزار رایگان املاک راد.">
+<meta property="og:title" content="محاسبه‌گر تبدیل رهن به اجاره و کمیسیون | املاک راد">
+<meta property="og:description" content="محاسبه‌گر آنلاین تبدیل رهن به اجاره و محاسبه‌ی کمیسیون معاملات ملکی. ابزار رایگان املاک راد.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://realestaterezaei.ir/calculator.html">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="محاسبه‌گر تبدیل رهن به اجاره | املاک راد">
-<meta name="twitter:description" content="محاسبه‌گر آنلاین تبدیل رهن به اجاره و اجاره به رهن. ابزار رایگان املاک راد.">
-<title>محاسبه‌گر تبدیل رهن به اجاره | املاک راد</title>
+<meta name="twitter:title" content="محاسبه‌گر تبدیل رهن به اجاره و کمیسیون | املاک راد">
+<meta name="twitter:description" content="محاسبه‌گر آنلاین تبدیل رهن به اجاره و محاسبه‌ی کمیسیون معاملات ملکی. ابزار رایگان املاک راد.">
+<title>محاسبه‌گر رهن به اجاره و کمیسیون | املاک راد</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -52,7 +52,6 @@ body {
   transform: translateY(-3px);
 }
 
-/* ---- استایل اصلی خود محاسبه‌گر (بدون تغییر منطق) ---- */
 .calc-wrapper {
   max-width: 650px;
   width: 100%;
@@ -157,6 +156,45 @@ body {
   color: #71717a;
   margin-top: 20px;
 }
+.commission-type-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 40px;
+  font-weight: bold;
+  border: 2px solid #3f3f46;
+  background: #09090b;
+  color: #a1a1aa;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.commission-type-btn.active {
+  background: #d4af37;
+  color: #111827;
+  border-color: #d4af37;
+}
+.commission-split {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+}
+.commission-split > div {
+  flex: 1;
+  background: #18181b;
+  border: 1px solid #3f3f46;
+  border-radius: 20px;
+  padding: 14px;
+  text-align: center;
+}
+.commission-split .party-label {
+  font-size: 0.8rem;
+  color: #a1a1aa;
+  margin-bottom: 6px;
+}
+.commission-split .party-amount {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #d4af37;
+}
 </style>
 </head>
 <body class="bg-zinc-950 text-zinc-200">
@@ -204,10 +242,10 @@ class="md:hidden w-11 h-11 flex items-center justify-center rounded-full border 
 <!-- Page Header -->
 <section class="pt-40 pb-12 bg-zinc-950 text-center">
 <h1 class="text-5xl md:text-6xl font-black mb-4">
-محاسبه‌گر <span class="gold-gradient">تبدیل رهن به اجاره</span>
+محاسبه‌گر <span class="gold-gradient">املاک</span>
 </h1>
 <p class="text-xl text-zinc-400 max-w-2xl mx-auto">
-بر اساس عرف بازار (هر ۱۰۰ میلیون رهن = ۳ میلیون اجاره)
+تبدیل رهن به اجاره و محاسبه‌ی کمیسیون معامله
 </p>
 </section>
 
@@ -250,6 +288,69 @@ class="md:hidden w-11 h-11 flex items-center justify-center rounded-full border 
 عدد را تایپ کنید - خودکار جدا می‌شود و معادل حروف نمایش داده می‌شود
 </div>
 
+<!-- کمیسیون املاک -->
+<div class="calc-card mt-10">
+<div class="calc-card-title">🧾 محاسبه‌گر کمیسیون معامله</div>
+
+<div style="display:flex; gap:10px; margin-bottom:20px;">
+<button type="button" id="commTypeSaleBtn" class="commission-type-btn active" onclick="setCommissionType('sale')">فروش</button>
+<button type="button" id="commTypeRentBtn" class="commission-type-btn" onclick="setCommissionType('rent')">رهن و اجاره</button>
+</div>
+
+<div id="commSaleFields">
+<div class="calc-input-group">
+<label>💵 مبلغ کل معامله (تومان)</label>
+<input type="text" id="commPrice" placeholder="مثال: 15,000,000,000">
+</div>
+</div>
+
+<div id="commRentFields" style="display:none;">
+<div class="calc-input-group">
+<label>💰 مبلغ رهن (تومان)</label>
+<input type="text" id="commRahn" placeholder="مثال: 500,000,000">
+</div>
+<div class="calc-input-group">
+<label>🏷️ اجاره ماهانه (تومان)</label>
+<input type="text" id="commEjare" placeholder="مثال: 15,000,000">
+</div>
+</div>
+
+<button id="calcCommissionBtn" class="calc-btn">محاسبه کمیسیون</button>
+
+<div class="calc-result">
+📊 کمیسیون کل (بدون مالیات):
+<span class="number" id="commBaseNumber">-- تومان</span>
+<div class="persian-text" id="commBaseText">---</div>
+</div>
+
+<div class="calc-result">
+🧮 مالیات ارزش افزوده (۱۰٪):
+<span class="number" id="commTaxNumber">-- تومان</span>
+</div>
+
+<div class="calc-result">
+💼 کمیسیون کل (با مالیات):
+<span class="number" id="commTotalNumber">-- تومان</span>
+<div class="persian-text" id="commTotalText">---</div>
+</div>
+
+<div class="commission-split">
+<div>
+<div class="party-label" id="commParty1Label">سهم فروشنده</div>
+<div class="party-amount" id="commParty1Amount">-- تومان</div>
+</div>
+<div>
+<div class="party-label" id="commParty2Label">سهم خریدار</div>
+<div class="party-amount" id="commParty2Amount">-- تومان</div>
+</div>
+</div>
+
+<div class="calc-info" style="margin-top:16px;">
+⚡ فروش: ۰.۵٪ از کل مبلغ معامله (نصف از خریدار، نصف از فروشنده) + ۱۰٪ مالیات<br>
+اجاره: ۲۵٪ از اجارهٔ ماهانهٔ معادل (بعد از تبدیل رهن به اجاره) + ۱۰٪ مالیات، بین موجر و مستأجر تقسیم می‌شود
+</div>
+</div>
+
 </div>
 </section>
 
@@ -271,6 +372,9 @@ class="md:hidden w-11 h-11 flex items-center justify-center rounded-full border 
 <script>
 (function() {
 const RATIO = 0.03;
+const COMMISSION_TAX_RATE = 0.10;
+const SALE_COMMISSION_RATE = 0.005;
+const RENT_COMMISSION_RATE = 0.25;
 
 const rahnInput = document.getElementById('rahnAmount');
 const rentInput = document.getElementById('rentAmount');
@@ -286,6 +390,9 @@ if (num === null || num === undefined || isNaN(num)) return '';
 return Math.round(num).toLocaleString('en-US');
 }
 
+// آرایه‌ی درست اعداد صدگانه فارسی (دویست، سیصد، ...) - نه دوصد/سه‌صد
+const hundredsWords = ['', 'صد', 'دویست', 'سیصد', 'چهارصد', 'پانصد', 'ششصد', 'هفتصد', 'هشتصد', 'نهصد'];
+
 function numberToPersianWords(num) {
 if (isNaN(num) || num === 0) return 'صفر تومان';
 
@@ -299,7 +406,7 @@ function convertLessThanThousand(n) {
 if (n === 0) return '';
 let result = '';
 if (n >= 100) {
-result += ones[Math.floor(n / 100)] + 'صد';
+result += hundredsWords[Math.floor(n / 100)];
 n %= 100;
 if (n > 0) result += ' و ';
 }
@@ -359,6 +466,14 @@ inputElement.value = formatWithComma(numericValue);
 }
 }
 
+function attachLiveFormatting(inputEl) {
+  inputEl.addEventListener('input', function() {
+    let numericOnly = this.value.replace(/[^0-9]/g, '');
+    let num = numericOnly === '' ? NaN : parseInt(numericOnly, 10);
+    this.value = isNaN(num) ? '' : formatWithComma(num);
+  });
+}
+
 function updateAll() {
 let rahnVal = getRawNumberFromInput(rahnInput);
 let rentVal = getRawNumberFromInput(rentInput);
@@ -382,33 +497,10 @@ rahnResultText.innerHTML = '---';
 }
 }
 
-rahnInput.addEventListener('input', function(e) {
-let raw = this.value;
-let numericOnly = raw.replace(/[^0-9]/g, '');
-let num = numericOnly === '' ? NaN : parseInt(numericOnly, 10);
-
-if (!isNaN(num)) {
-this.value = formatWithComma(num);
-} else {
-this.value = '';
-}
-
-updateAll();
-});
-
-rentInput.addEventListener('input', function(e) {
-let raw = this.value;
-let numericOnly = raw.replace(/[^0-9]/g, '');
-let num = numericOnly === '' ? NaN : parseInt(numericOnly, 10);
-
-if (!isNaN(num)) {
-this.value = formatWithComma(num);
-} else {
-this.value = '';
-}
-
-updateAll();
-});
+attachLiveFormatting(rahnInput);
+attachLiveFormatting(rentInput);
+rahnInput.addEventListener('input', updateAll);
+rentInput.addEventListener('input', updateAll);
 
 convertToRentBtn.addEventListener('click', function() {
 let rahnVal = getRawNumberFromInput(rahnInput);
@@ -426,26 +518,79 @@ updateAll();
 }
 });
 
-let initRahn = getRawNumberFromInput(rahnInput);
-if (!isNaN(initRahn)) setInputFormatted(rahnInput, initRahn);
-let initRent = getRawNumberFromInput(rentInput);
-if (!isNaN(initRent)) setInputFormatted(rentInput, initRent);
 updateAll();
 
 rahnInput.addEventListener('keypress', function(e) {
-if (e.key === 'Enter') {
-let val = getRawNumberFromInput(rahnInput);
-if (!isNaN(val)) setInputFormatted(rahnInput, val);
-updateAll();
-}
+if (e.key === 'Enter') { updateAll(); }
 });
 rentInput.addEventListener('keypress', function(e) {
-if (e.key === 'Enter') {
-let val = getRawNumberFromInput(rentInput);
-if (!isNaN(val)) setInputFormatted(rentInput, val);
-updateAll();
-}
+if (e.key === 'Enter') { updateAll(); }
 });
+
+// ---------------- کمیسیون املاک ----------------
+let commissionType = 'sale';
+const commPrice = document.getElementById('commPrice');
+const commRahn = document.getElementById('commRahn');
+const commEjare = document.getElementById('commEjare');
+
+attachLiveFormatting(commPrice);
+attachLiveFormatting(commRahn);
+attachLiveFormatting(commEjare);
+
+window.setCommissionType = function(type) {
+  commissionType = type;
+  document.getElementById('commTypeSaleBtn').classList.toggle('active', type === 'sale');
+  document.getElementById('commTypeRentBtn').classList.toggle('active', type === 'rent');
+  document.getElementById('commSaleFields').style.display = type === 'sale' ? 'block' : 'none';
+  document.getElementById('commRentFields').style.display = type === 'rent' ? 'block' : 'none';
+  document.getElementById('commParty1Label').textContent = type === 'sale' ? 'سهم فروشنده' : 'سهم موجر (مالک)';
+  document.getElementById('commParty2Label').textContent = type === 'sale' ? 'سهم خریدار' : 'سهم مستأجر';
+  resetCommissionResult();
+};
+
+function resetCommissionResult() {
+  document.getElementById('commBaseNumber').textContent = '-- تومان';
+  document.getElementById('commBaseText').textContent = '---';
+  document.getElementById('commTaxNumber').textContent = '-- تومان';
+  document.getElementById('commTotalNumber').textContent = '-- تومان';
+  document.getElementById('commTotalText').textContent = '---';
+  document.getElementById('commParty1Amount').textContent = '-- تومان';
+  document.getElementById('commParty2Amount').textContent = '-- تومان';
+}
+
+function calculateCommission() {
+  let baseCommission = NaN;
+
+  if (commissionType === 'sale') {
+    const price = getRawNumberFromInput(commPrice);
+    if (isNaN(price) || price <= 0) { resetCommissionResult(); return; }
+    baseCommission = price * SALE_COMMISSION_RATE;
+  } else {
+    const rahnVal = getRawNumberFromInput(commRahn) || 0;
+    const ejareVal = getRawNumberFromInput(commEjare) || 0;
+    if (rahnVal <= 0 && ejareVal <= 0) { resetCommissionResult(); return; }
+    const equivalentMonthlyRent = ejareVal + (rahnVal * RATIO);
+    baseCommission = equivalentMonthlyRent * RENT_COMMISSION_RATE;
+  }
+
+  const tax = baseCommission * COMMISSION_TAX_RATE;
+  const total = baseCommission + tax;
+  const perParty = total / 2;
+
+  document.getElementById('commBaseNumber').textContent = formatWithComma(baseCommission) + ' تومان';
+  document.getElementById('commBaseText').textContent = numberToPersianWords(baseCommission);
+  document.getElementById('commTaxNumber').textContent = formatWithComma(tax) + ' تومان';
+  document.getElementById('commTotalNumber').textContent = formatWithComma(total) + ' تومان';
+  document.getElementById('commTotalText').textContent = numberToPersianWords(total);
+  document.getElementById('commParty1Amount').textContent = formatWithComma(perParty) + ' تومان';
+  document.getElementById('commParty2Amount').textContent = formatWithComma(perParty) + ' تومان';
+}
+
+document.getElementById('calcCommissionBtn').addEventListener('click', calculateCommission);
+commPrice.addEventListener('input', calculateCommission);
+commRahn.addEventListener('input', calculateCommission);
+commEjare.addEventListener('input', calculateCommission);
+
 })();
 </script>
 <script>
@@ -460,4 +605,3 @@ updateAll();
 </script>
 </body>
 </html>
-
