@@ -347,7 +347,7 @@ class="md:hidden w-11 h-11 flex items-center justify-center rounded-full border 
 
 <div class="calc-info" style="margin-top:16px;">
 ⚡ فروش: ۰.۵٪ از کل مبلغ معامله (نصف از خریدار، نصف از فروشنده) + ۱۰٪ مالیات<br>
-اجاره: ۲۵٪ از اجارهٔ ماهانهٔ معادل (بعد از تبدیل رهن به اجاره) + ۱۰٪ مالیات، بین موجر و مستأجر تقسیم می‌شود
+اجاره: از هر طرف (موجر و مستأجر) معادل ۷.۵ روز اجارهٔ ماهانهٔ معادل (بعد از تبدیل رهن به اجاره) + ۱۰٪ مالیات بر ارزش افزوده — در مجموع ۱۵ روز اجاره تقسیم بر ۲ طرف
 </div>
 </div>
 
@@ -374,7 +374,11 @@ class="md:hidden w-11 h-11 flex items-center justify-center rounded-full border 
 const RATIO = 0.03;
 const COMMISSION_TAX_RATE = 0.10;
 const SALE_COMMISSION_RATE = 0.005;
-const RENT_COMMISSION_RATE = 0.25;
+// کمیسیون اجاره: هر طرف (موجر/مستأجر) ۷.۵ روز اجاره می‌دهد.
+// ۷.۵ روز از ۳۰ روز = ۰.۲۵ سهم هر طرف؛ مجموع دو طرف = ۱۵ روز از ۳۰ روز = ۰.۵
+// این مقدار بعداً در calculateCommission() با perParty = total / 2 بین دو طرف تقسیم می‌شود
+// و به هر طرف دقیقاً ۷.۵ روز اجاره + مالیات سهم خودش می‌رسد.
+const RENT_COMMISSION_RATE = 0.5;
 
 const rahnInput = document.getElementById('rahnAmount');
 const rentInput = document.getElementById('rentAmount');
@@ -569,12 +573,15 @@ function calculateCommission() {
     const rahnVal = getRawNumberFromInput(commRahn) || 0;
     const ejareVal = getRawNumberFromInput(commEjare) || 0;
     if (rahnVal <= 0 && ejareVal <= 0) { resetCommissionResult(); return; }
+    // اجارهٔ ماهانهٔ معادل = اجارهٔ نقدی + معادل اجارهٔ رهن (رهن × ۰.۰۳)
     const equivalentMonthlyRent = ejareVal + (rahnVal * RATIO);
+    // کمیسیون کل (دو طرف، بدون مالیات) = معادل ۱۵ روز اجاره از ۳۰ روز = اجارهٔ ماهانه × ۰.۵
     baseCommission = equivalentMonthlyRent * RENT_COMMISSION_RATE;
   }
 
   const tax = baseCommission * COMMISSION_TAX_RATE;
   const total = baseCommission + tax;
+  // سهم هر طرف: نصف کمیسیونِ کل (با مالیات) => برای اجاره یعنی دقیقاً ۷.۵ روز اجاره + مالیات سهم خودش
   const perParty = total / 2;
 
   document.getElementById('commBaseNumber').textContent = formatWithComma(baseCommission) + ' تومان';
