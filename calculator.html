@@ -4,201 +4,160 @@
 <meta charset="UTF-8">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="محاسبه‌گر آنلاین تبدیل رهن به اجاره و محاسبه‌ی کمیسیون معاملات ملکی بر اساس عرف بازار مسکن ایران. ابزار رایگان املاک راد.">
-<meta property="og:title" content="محاسبه‌گر تبدیل رهن به اجاره و کمیسیون | املاک راد">
-<meta property="og:description" content="محاسبه‌گر آنلاین تبدیل رهن به اجاره و محاسبه‌ی کمیسیون معاملات ملکی. ابزار رایگان املاک راد.">
+<meta name="description" content="محاسبه‌گر آنلاین تبدیل رهن به اجاره بر اساس عرف بازار مسکن ایران. ابزار رایگان املاک راد.">
+<meta property="og:title" content="محاسبه‌گر تبدیل رهن به اجاره | املاک راد">
+<meta property="og:description" content="محاسبه‌گر آنلاین تبدیل رهن به اجاره. ابزار رایگان املاک راد.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://realestaterezaei.ir/calculator.html">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="محاسبه‌گر تبدیل رهن به اجاره و کمیسیون | املاک راد">
-<meta name="twitter:description" content="محاسبه‌گر آنلاین تبدیل رهن به اجاره و محاسبه‌ی کمیسیون معاملات ملکی. ابزار رایگان املاک راد.">
-<title>محاسبه‌گر رهن به اجاره و کمیسیون | املاک راد</title>
+<meta name="twitter:title" content="محاسبه‌گر تبدیل رهن به اجاره | املاک راد">
+<meta name="twitter:description" content="محاسبه‌گر آنلاین تبدیل رهن به اجاره. ابزار رایگان املاک راد.">
+<title>محاسبه‌گر رهن به اجاره | املاک راد</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 body {
-  font-family: 'Vazirmatn', system-ui, sans-serif;
+font-family: 'Vazirmatn', system-ui, sans-serif;
 }
 .gold-gradient {
-  background: linear-gradient(135deg, #d4af37, #f5e8c7, #d4af37);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+background: linear-gradient(135deg, #d4af37, #f5e8c7, #d4af37);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
 }
 .nav-link {
-  position: relative;
+position: relative;
 }
 .nav-link:after {
-  content: '';
-  position: absolute;
-  width: 0;
-  height: 2px;
-  bottom: -6px;
-  right: 0;
-  background: linear-gradient(to left, #d4af37, #f5e8c7);
-  transition: all 0.3s ease;
+content: '';
+position: absolute;
+width: 0;
+height: 2px;
+bottom: -6px;
+right: 0;
+background: linear-gradient(to left, #d4af37, #f5e8c7);
+transition: all 0.3s ease;
 }
 .nav-link:hover:after {
-  width: 100%;
-  right: auto;
-  left: 0;
+width: 100%;
+right: auto;
+left: 0;
 }
 .luxury-btn {
-  transition: all 0.4s ease;
+transition: all 0.4s ease;
 }
 .luxury-btn:hover {
-  background: #d4af37;
-  color: #111827;
-  transform: translateY(-3px);
+background: #d4af37;
+color: #111827;
+transform: translateY(-3px);
 }
-
 .calc-wrapper {
-  max-width: 650px;
-  width: 100%;
-  margin: 0 auto;
+max-width: 650px;
+width: 100%;
+margin: 0 auto;
 }
 .calc-card {
-  background: #18181b;
-  border: 1px solid #3f3f46;
-  border-radius: 24px;
-  padding: 20px;
-  margin-bottom: 25px;
+background: #18181b;
+border: 1px solid #3f3f46;
+border-radius: 24px;
+padding: 20px;
+margin-bottom: 25px;
 }
 .calc-card-title {
-  font-size: 1.4rem;
-  font-weight: bold;
-  color: #d4af37;
-  margin-bottom: 20px;
-  border-right: 5px solid #d4af37;
-  padding-right: 12px;
+font-size: 1.4rem;
+font-weight: bold;
+color: #d4af37;
+margin-bottom: 20px;
+border-right: 5px solid #d4af37;
+padding-right: 12px;
 }
 .calc-input-group {
-  margin-bottom: 18px;
+margin-bottom: 18px;
 }
 .calc-input-group label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: #e4e4e7;
+display: block;
+font-weight: 600;
+margin-bottom: 8px;
+color: #e4e4e7;
 }
 .calc-input-group input {
-  width: 100%;
-  padding: 14px 16px;
-  font-size: 1.1rem;
-  border: 2px solid #3f3f46;
-  border-radius: 40px;
-  outline: none;
-  transition: 0.2s;
-  background: #09090b;
-  color: #fafafa;
-  direction: ltr;
-  text-align: right;
-  font-family: monospace;
+width: 100%;
+padding: 14px 16px;
+font-size: 1.1rem;
+border: 2px solid #3f3f46;
+border-radius: 40px;
+outline: none;
+transition: 0.2s;
+background: #09090b;
+color: #fafafa;
+direction: ltr;
+text-align: right;
+font-family: monospace;
 }
 .calc-input-group input:focus {
-  border-color: #d4af37;
-  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+border-color: #d4af37;
+box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
 }
 .calc-btn {
-  width: 100%;
-  background: #d4af37;
-  color: #111827;
-  border: none;
-  padding: 14px;
-  font-size: 1rem;
-  font-weight: bold;
-  border-radius: 40px;
-  cursor: pointer;
-  transition: 0.2s;
-  margin-top: 10px;
+width: 100%;
+background: #d4af37;
+color: #111827;
+border: none;
+padding: 14px;
+font-size: 1rem;
+font-weight: bold;
+border-radius: 40px;
+cursor: pointer;
+transition: 0.2s;
+margin-top: 10px;
 }
 .calc-btn:hover {
-  background: #f5e8c7;
-  transform: scale(0.97);
+background: #f5e8c7;
+transform: scale(0.97);
 }
 .calc-result {
-  background: #09090b;
-  padding: 18px;
-  border-radius: 24px;
-  margin-top: 20px;
-  text-align: center;
-  border-right: 6px solid #d4af37;
+background: #09090b;
+padding: 18px;
+border-radius: 24px;
+margin-top: 20px;
+text-align: center;
+border-right: 6px solid #d4af37;
 }
 .calc-result .number {
-  font-size: 1.6rem;
-  font-weight: 800;
-  color: #d4af37;
-  display: block;
-  margin-top: 8px;
-  word-break: break-word;
+font-size: 1.6rem;
+font-weight: 800;
+color: #d4af37;
+display: block;
+margin-top: 8px;
+word-break: break-word;
 }
 .calc-result .persian-text {
-  font-size: 0.9rem;
-  color: #e4e4e7;
-  margin-top: 8px;
-  font-weight: 500;
-  background: #27272a;
-  display: inline-block;
-  padding: 5px 12px;
-  border-radius: 30px;
+font-size: 0.9rem;
+color: #e4e4e7;
+margin-top: 8px;
+font-weight: 500;
+background: #27272a;
+display: inline-block;
+padding: 5px 12px;
+border-radius: 30px;
 }
 .calc-info {
-  background: #27272a;
-  border-radius: 20px;
-  padding: 14px;
-  font-size: 0.85rem;
-  color: #d4af37;
-  text-align: center;
+background: #27272a;
+border-radius: 20px;
+padding: 14px;
+font-size: 0.85rem;
+color: #d4af37;
+text-align: center;
 }
 .calc-footer-note {
-  text-align: center;
-  font-size: 0.75rem;
-  color: #71717a;
-  margin-top: 20px;
-}
-.commission-type-btn {
-  flex: 1;
-  padding: 12px;
-  border-radius: 40px;
-  font-weight: bold;
-  border: 2px solid #3f3f46;
-  background: #09090b;
-  color: #a1a1aa;
-  cursor: pointer;
-  transition: 0.2s;
-}
-.commission-type-btn.active {
-  background: #d4af37;
-  color: #111827;
-  border-color: #d4af37;
-}
-.commission-split {
-  display: flex;
-  gap: 12px;
-  margin-top: 14px;
-}
-.commission-split > div {
-  flex: 1;
-  background: #18181b;
-  border: 1px solid #3f3f46;
-  border-radius: 20px;
-  padding: 14px;
-  text-align: center;
-}
-.commission-split .party-label {
-  font-size: 0.8rem;
-  color: #a1a1aa;
-  margin-bottom: 6px;
-}
-.commission-split .party-amount {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #d4af37;
+text-align: center;
+font-size: 0.75rem;
+color: #71717a;
+margin-top: 20px;
 }
 </style>
 </head>
 <body class="bg-zinc-950 text-zinc-200">
-
 <!-- Navbar -->
 <nav class="bg-black/90 backdrop-blur-lg border-b border-zinc-800 fixed w-full z-50">
 <div class="max-w-7xl mx-auto px-8">
@@ -213,6 +172,7 @@ body {
 <a href="sale.html" class="nav-link font-medium hover:text-amber-400">فروش</a>
 <a href="rent.html" class="nav-link font-medium hover:text-amber-400">اجاره</a>
 <a href="calculator.html" class="nav-link font-medium hover:text-amber-400">محاسبه گر املاک</a>
+<a href="commission.html" class="nav-link font-medium hover:text-amber-400">کمیسیون</a>
 <a href="about.html" class="nav-link font-medium hover:text-amber-400">درباره ما</a>
 </div>
 <div class="flex items-center gap-4">
@@ -232,6 +192,7 @@ class="md:hidden w-11 h-11 flex items-center justify-center rounded-full border 
 <a href="sale.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">فروش</a>
 <a href="rent.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">اجاره</a>
 <a href="calculator.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">محاسبه گر املاک</a>
+<a href="commission.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">کمیسیون</a>
 <a href="about.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">درباره ما</a>
 <a href="tel:09124096970" class="mt-2 bg-amber-400 text-black text-center py-3 rounded-xl font-semibold">
 <i class="fas fa-phone ml-2"></i> تماس با ما
@@ -245,7 +206,7 @@ class="md:hidden w-11 h-11 flex items-center justify-center rounded-full border 
 محاسبه‌گر <span class="gold-gradient">املاک</span>
 </h1>
 <p class="text-xl text-zinc-400 max-w-2xl mx-auto">
-تبدیل رهن به اجاره و محاسبه‌ی کمیسیون معامله
+تبدیل رهن به اجاره
 </p>
 </section>
 
@@ -288,67 +249,10 @@ class="md:hidden w-11 h-11 flex items-center justify-center rounded-full border 
 عدد را تایپ کنید - خودکار جدا می‌شود و معادل حروف نمایش داده می‌شود
 </div>
 
-<!-- کمیسیون املاک -->
-<div class="calc-card mt-10">
-<div class="calc-card-title">🧾 محاسبه‌گر کمیسیون معامله</div>
-
-<div style="display:flex; gap:10px; margin-bottom:20px;">
-<button type="button" id="commTypeSaleBtn" class="commission-type-btn active" onclick="setCommissionType('sale')">فروش</button>
-<button type="button" id="commTypeRentBtn" class="commission-type-btn" onclick="setCommissionType('rent')">رهن و اجاره</button>
-</div>
-
-<div id="commSaleFields">
-<div class="calc-input-group">
-<label>💵 مبلغ کل معامله (تومان)</label>
-<input type="text" id="commPrice" placeholder="مثال: 15,000,000,000">
-</div>
-</div>
-
-<div id="commRentFields" style="display:none;">
-<div class="calc-input-group">
-<label>💰 مبلغ رهن (تومان)</label>
-<input type="text" id="commRahn" placeholder="مثال: 500,000,000">
-</div>
-<div class="calc-input-group">
-<label>🏷️ اجاره ماهانه (تومان)</label>
-<input type="text" id="commEjare" placeholder="مثال: 15,000,000">
-</div>
-</div>
-
-<button id="calcCommissionBtn" class="calc-btn">محاسبه کمیسیون</button>
-
-<div class="calc-result">
-📊 کمیسیون کل (بدون مالیات):
-<span class="number" id="commBaseNumber">-- تومان</span>
-<div class="persian-text" id="commBaseText">---</div>
-</div>
-
-<div class="calc-result">
-🧮 مالیات ارزش افزوده (۱۰٪):
-<span class="number" id="commTaxNumber">-- تومان</span>
-</div>
-
-<div class="calc-result">
-💼 کمیسیون کل (با مالیات):
-<span class="number" id="commTotalNumber">-- تومان</span>
-<div class="persian-text" id="commTotalText">---</div>
-</div>
-
-<div class="commission-split">
-<div>
-<div class="party-label" id="commParty1Label">سهم فروشنده</div>
-<div class="party-amount" id="commParty1Amount">-- تومان</div>
-</div>
-<div>
-<div class="party-label" id="commParty2Label">سهم خریدار</div>
-<div class="party-amount" id="commParty2Amount">-- تومان</div>
-</div>
-</div>
-
-<div class="calc-info" style="margin-top:16px;">
-⚡ فروش: ۰.۵٪ از کل مبلغ معامله (نصف از خریدار، نصف از فروشنده) + ۱۰٪ مالیات<br>
-اجاره: از هر طرف (موجر و مستأجر) معادل ۷.۵ روز اجارهٔ ماهانهٔ معادل (بعد از تبدیل رهن به اجاره) + ۱۰٪ مالیات بر ارزش افزوده — در مجموع ۱۵ روز اجاره تقسیم بر ۲ طرف
-</div>
+<div class="calc-info" style="margin-top:20px;">
+🧾 برای محاسبه‌ی کمیسیون معامله، از صفحه‌ی
+<a href="commission.html" style="color:#d4af37; text-decoration:underline;">محاسبه‌گر کمیسیون</a>
+استفاده کنید.
 </div>
 
 </div>
@@ -372,13 +276,6 @@ class="md:hidden w-11 h-11 flex items-center justify-center rounded-full border 
 <script>
 (function() {
 const RATIO = 0.03;
-const COMMISSION_TAX_RATE = 0.10;
-const SALE_COMMISSION_RATE = 0.005;
-// کمیسیون اجاره: هر طرف (موجر/مستأجر) ۷.۵ روز اجاره می‌دهد.
-// ۷.۵ روز از ۳۰ روز = ۰.۲۵ سهم هر طرف؛ مجموع دو طرف = ۱۵ روز از ۳۰ روز = ۰.۵
-// این مقدار بعداً در calculateCommission() با perParty = total / 2 بین دو طرف تقسیم می‌شود
-// و به هر طرف دقیقاً ۷.۵ روز اجاره + مالیات سهم خودش می‌رسد.
-const RENT_COMMISSION_RATE = 0.5;
 
 const rahnInput = document.getElementById('rahnAmount');
 const rentInput = document.getElementById('rentAmount');
@@ -394,14 +291,11 @@ if (num === null || num === undefined || isNaN(num)) return '';
 return Math.round(num).toLocaleString('en-US');
 }
 
-// آرایه‌ی درست اعداد صدگانه فارسی (دویست، سیصد، ...) - نه دوصد/سه‌صد
 const hundredsWords = ['', 'صد', 'دویست', 'سیصد', 'چهارصد', 'پانصد', 'ششصد', 'هفتصد', 'هشتصد', 'نهصد'];
 
 function numberToPersianWords(num) {
 if (isNaN(num) || num === 0) return 'صفر تومان';
-
 num = Math.round(num);
-
 const ones = ['', 'یک', 'دو', 'سه', 'چهار', 'پنج', 'شش', 'هفت', 'هشت', 'نه'];
 const tens = ['', '', 'بیست', 'سی', 'چهل', 'پنجاه', 'شصت', 'هفتاد', 'هشتاد', 'نود'];
 const teens = ['ده', 'یازده', 'دوازده', 'سیزده', 'چهارده', 'پانزده', 'شانزده', 'هفده', 'هجده', 'نوزده'];
@@ -431,11 +325,10 @@ const units = [
 { name: 'میلیون', value: 1000000 },
 { name: 'هزار', value: 1000 },
 { name: '', value: 1 }
- ];
+];
 
 let parts = [];
 let remaining = num;
-
 for (let unit of units) {
 if (remaining >= unit.value) {
 let amount = Math.floor(remaining / unit.value);
@@ -450,7 +343,6 @@ parts.push(amountText);
 remaining %= unit.value;
 }
 }
-
 if (parts.length === 0) return 'صفر تومان';
 return parts.join(' و ') + ' تومان';
 }
@@ -471,11 +363,11 @@ inputElement.value = formatWithComma(numericValue);
 }
 
 function attachLiveFormatting(inputEl) {
-  inputEl.addEventListener('input', function() {
-    let numericOnly = this.value.replace(/[^0-9]/g, '');
-    let num = numericOnly === '' ? NaN : parseInt(numericOnly, 10);
-    this.value = isNaN(num) ? '' : formatWithComma(num);
-  });
+inputEl.addEventListener('input', function() {
+let numericOnly = this.value.replace(/[^0-9]/g, '');
+let num = numericOnly === '' ? NaN : parseInt(numericOnly, 10);
+this.value = isNaN(num) ? '' : formatWithComma(num);
+});
 }
 
 function updateAll() {
@@ -530,84 +422,16 @@ if (e.key === 'Enter') { updateAll(); }
 rentInput.addEventListener('keypress', function(e) {
 if (e.key === 'Enter') { updateAll(); }
 });
-
-// ---------------- کمیسیون املاک ----------------
-let commissionType = 'sale';
-const commPrice = document.getElementById('commPrice');
-const commRahn = document.getElementById('commRahn');
-const commEjare = document.getElementById('commEjare');
-
-attachLiveFormatting(commPrice);
-attachLiveFormatting(commRahn);
-attachLiveFormatting(commEjare);
-
-window.setCommissionType = function(type) {
-  commissionType = type;
-  document.getElementById('commTypeSaleBtn').classList.toggle('active', type === 'sale');
-  document.getElementById('commTypeRentBtn').classList.toggle('active', type === 'rent');
-  document.getElementById('commSaleFields').style.display = type === 'sale' ? 'block' : 'none';
-  document.getElementById('commRentFields').style.display = type === 'rent' ? 'block' : 'none';
-  document.getElementById('commParty1Label').textContent = type === 'sale' ? 'سهم فروشنده' : 'سهم موجر (مالک)';
-  document.getElementById('commParty2Label').textContent = type === 'sale' ? 'سهم خریدار' : 'سهم مستأجر';
-  resetCommissionResult();
-};
-
-function resetCommissionResult() {
-  document.getElementById('commBaseNumber').textContent = '-- تومان';
-  document.getElementById('commBaseText').textContent = '---';
-  document.getElementById('commTaxNumber').textContent = '-- تومان';
-  document.getElementById('commTotalNumber').textContent = '-- تومان';
-  document.getElementById('commTotalText').textContent = '---';
-  document.getElementById('commParty1Amount').textContent = '-- تومان';
-  document.getElementById('commParty2Amount').textContent = '-- تومان';
-}
-
-function calculateCommission() {
-  let baseCommission = NaN;
-
-  if (commissionType === 'sale') {
-    const price = getRawNumberFromInput(commPrice);
-    if (isNaN(price) || price <= 0) { resetCommissionResult(); return; }
-    baseCommission = price * SALE_COMMISSION_RATE;
-  } else {
-    const rahnVal = getRawNumberFromInput(commRahn) || 0;
-    const ejareVal = getRawNumberFromInput(commEjare) || 0;
-    if (rahnVal <= 0 && ejareVal <= 0) { resetCommissionResult(); return; }
-    // اجارهٔ ماهانهٔ معادل = اجارهٔ نقدی + معادل اجارهٔ رهن (رهن × ۰.۰۳)
-    const equivalentMonthlyRent = ejareVal + (rahnVal * RATIO);
-    // کمیسیون کل (دو طرف، بدون مالیات) = معادل ۱۵ روز اجاره از ۳۰ روز = اجارهٔ ماهانه × ۰.۵
-    baseCommission = equivalentMonthlyRent * RENT_COMMISSION_RATE;
-  }
-
-  const tax = baseCommission * COMMISSION_TAX_RATE;
-  const total = baseCommission + tax;
-  // سهم هر طرف: نصف کمیسیونِ کل (با مالیات) => برای اجاره یعنی دقیقاً ۷.۵ روز اجاره + مالیات سهم خودش
-  const perParty = total / 2;
-
-  document.getElementById('commBaseNumber').textContent = formatWithComma(baseCommission) + ' تومان';
-  document.getElementById('commBaseText').textContent = numberToPersianWords(baseCommission);
-  document.getElementById('commTaxNumber').textContent = formatWithComma(tax) + ' تومان';
-  document.getElementById('commTotalNumber').textContent = formatWithComma(total) + ' تومان';
-  document.getElementById('commTotalText').textContent = numberToPersianWords(total);
-  document.getElementById('commParty1Amount').textContent = formatWithComma(perParty) + ' تومان';
-  document.getElementById('commParty2Amount').textContent = formatWithComma(perParty) + ' تومان';
-}
-
-document.getElementById('calcCommissionBtn').addEventListener('click', calculateCommission);
-commPrice.addEventListener('input', calculateCommission);
-commRahn.addEventListener('input', calculateCommission);
-commEjare.addEventListener('input', calculateCommission);
-
 })();
 </script>
 <script>
 (function(){
-  var payload = JSON.stringify({page: 'calculator'});
-  if (navigator.sendBeacon) {
-    navigator.sendBeacon('/api/track', new Blob([payload], {type: 'application/json'}));
-  } else {
-    fetch('/api/track', {method:'POST', headers:{'Content-Type':'application/json'}, body: payload}).catch(function(){});
-  }
+var payload = JSON.stringify({page: 'calculator'});
+if (navigator.sendBeacon) {
+navigator.sendBeacon('/api/track', new Blob([payload], {type: 'application/json'}));
+} else {
+fetch('/api/track', {method:'POST', headers:{'Content-Type':'application/json'}, body: payload}).catch(function(){});
+}
 })();
 </script>
 </body>
