@@ -285,7 +285,7 @@ async function loadRentProperties() {
   const grid = document.getElementById('propertiesGrid');
   try {
     const res = await fetch('/api/properties?type=rent');
-    allRentProperties = await res.json();
+    allRentProperties = (await res.json()).filter(p => !p.hidden);
     populateLocationFilter(allRentProperties);
     if (currentCategory) {
       document.querySelectorAll('.cat-tab-btn').forEach(btn => {
@@ -318,4 +318,3 @@ loadRentProperties();
 </script>
 </body>
 </html>
-
