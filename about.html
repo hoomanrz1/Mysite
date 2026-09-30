@@ -73,8 +73,24 @@
 
                 <div class="hidden md:flex items-center gap-10 text-lg">
                     <a href="index.html" class="nav-link font-medium hover:text-amber-400">خانه</a>
-                    <a href="sale.html" class="nav-link font-medium hover:text-amber-400">فروش</a>
-                    <a href="rent.html" class="nav-link font-medium hover:text-amber-400">اجاره</a>
+                    <div class="relative group">
+                    <a href="sale.html" class="nav-link font-medium hover:text-amber-400 inline-flex items-center gap-1">فروش <i class="fas fa-chevron-down text-[10px] mt-0.5"></i></a>
+                    <div class="absolute top-full right-0 pt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden min-w-[130px] shadow-xl">
+                    <a href="sale.html?category=residential" class="block px-5 py-3 text-sm hover:bg-zinc-800 hover:text-amber-400">مسکونی</a>
+                    <a href="sale.html?category=commercial" class="block px-5 py-3 text-sm hover:bg-zinc-800 hover:text-amber-400">اداری</a>
+                    </div>
+                    </div>
+                    </div>
+                    <div class="relative group">
+                    <a href="rent.html" class="nav-link font-medium hover:text-amber-400 inline-flex items-center gap-1">اجاره <i class="fas fa-chevron-down text-[10px] mt-0.5"></i></a>
+                    <div class="absolute top-full right-0 pt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden min-w-[130px] shadow-xl">
+                    <a href="rent.html?category=residential" class="block px-5 py-3 text-sm hover:bg-zinc-800 hover:text-amber-400">مسکونی</a>
+                    <a href="rent.html?category=commercial" class="block px-5 py-3 text-sm hover:bg-zinc-800 hover:text-amber-400">اداری</a>
+                    </div>
+                    </div>
+                    </div>
                     <a href="calculator.html" class="nav-link font-medium hover:text-amber-400">محاسبه گر املاک</a>
                     <a href="commission.html" class="nav-link font-medium hover:text-amber-400">کمیسیون</a>
                     <a href="about.html" class="nav-link font-medium text-amber-400">درباره ما</a>
@@ -95,7 +111,11 @@
             <div id="mobileMenu" class="hidden md:hidden flex flex-col gap-1 pb-6 px-2 text-lg">
                 <a href="index.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">خانه</a>
                 <a href="sale.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">فروش</a>
+                <a href="sale.html?category=residential" class="py-2 px-8 rounded-xl hover:bg-zinc-900 text-sm text-zinc-400 block">‣ مسکونی</a>
+                <a href="sale.html?category=commercial" class="py-2 px-8 rounded-xl hover:bg-zinc-900 text-sm text-zinc-400 block">‣ اداری</a>
                 <a href="rent.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">اجاره</a>
+                <a href="rent.html?category=residential" class="py-2 px-8 rounded-xl hover:bg-zinc-900 text-sm text-zinc-400 block">‣ مسکونی</a>
+                <a href="rent.html?category=commercial" class="py-2 px-8 rounded-xl hover:bg-zinc-900 text-sm text-zinc-400 block">‣ اداری</a>
                 <a href="calculator.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">محاسبه گر املاک</a>
                 <a href="commission.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">کمیسیون</a>
                 <a href="about.html" class="py-3 px-4 rounded-xl text-amber-400">درباره ما</a>
