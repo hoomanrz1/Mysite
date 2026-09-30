@@ -116,6 +116,13 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
         </select>
       </div>
       <div>
+        <label class="block text-amber-400 text-sm mb-2">دسته ملک</label>
+        <select id="p_category" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
+          <option value="residential">مسکونی</option>
+          <option value="commercial">اداری</option>
+        </select>
+      </div>
+      <div>
         <label class="block text-amber-400 text-sm mb-2">برچسب (مثلا: مستغلات فروش)</label>
         <input id="p_badge" type="text" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
       </div>
@@ -837,6 +844,7 @@ function clearExtraFields() {
 function fillForm(p) {
   document.getElementById('p_type').value = p.type;
   toggleFields();
+  document.getElementById('p_category').value = p.category || 'residential';
   document.getElementById('p_badge').value = p.badge || '';
   document.getElementById('p_title').value = p.title || '';
   document.getElementById('p_location').value = p.location || '';
@@ -883,6 +891,7 @@ function fillForm(p) {
 function clearForm() {
   document.querySelectorAll('#tabProperties input[type=text], #tabProperties input[type=number]').forEach(i => i.value = '');
   document.getElementById('p_type').value = 'sale';
+  document.getElementById('p_category').value = 'residential';
   document.getElementById('p_divisible').checked = false;
   toggleDivisible();
   currentImages = [];
@@ -922,6 +931,7 @@ function buildPropertyObject() {
   const type = document.getElementById('p_type').value;
   return {
     type: type,
+    category: document.getElementById('p_category').value,
     badge: document.getElementById('p_badge').value,
     title: document.getElementById('p_title').value,
     location: document.getElementById('p_location').value,
@@ -1020,6 +1030,7 @@ function renderPropertiesList() {
       <div class="flex justify-between items-center">
         <div>
           <span class="text-xs text-amber-400">${p.type === 'sale' ? 'فروش' : 'اجاره'}</span>
+          <span class="text-xs text-zinc-500 mr-2">${p.category === 'commercial' ? '| اداری' : '| مسکونی'}</span>
           ${p.divisible ? '<span class="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-lg mr-1">قابل تفکیک</span>' : ''}
           <h3 class="font-semibold">${p.title}</h3>
           <p class="text-zinc-500 text-sm">${p.location || ''} — ${p.type === 'sale' ? (p.price + ' میلیارد تومان') : ('ودیعه ' + formatTomanPhrase(parseToMillion(p.deposit) * 1000000) + ' / اجاره ' + formatTomanPhrase(parseToMillion(p.rentAmount) * 1000000))}</p>
