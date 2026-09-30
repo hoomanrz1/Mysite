@@ -55,8 +55,24 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 </a>
 <div class="hidden md:flex items-center gap-10 text-lg">
 <a href="index.html" class="nav-link font-medium hover:text-amber-400">خانه</a>
-<a href="sale.html" class="nav-link font-medium hover:text-amber-400">فروش</a>
-<a href="rent.html" class="nav-link font-medium hover:text-amber-400">اجاره</a>
+<div class="relative group">
+<a href="sale.html" class="nav-link font-medium hover:text-amber-400 inline-flex items-center gap-1">فروش <i class="fas fa-chevron-down text-[10px] mt-0.5"></i></a>
+<div class="absolute top-full right-0 pt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+<div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden min-w-[130px] shadow-xl">
+<a href="sale.html?category=residential" class="block px-5 py-3 text-sm hover:bg-zinc-800 hover:text-amber-400">مسکونی</a>
+<a href="sale.html?category=commercial" class="block px-5 py-3 text-sm hover:bg-zinc-800 hover:text-amber-400">اداری</a>
+</div>
+</div>
+</div>
+<div class="relative group">
+<a href="rent.html" class="nav-link font-medium hover:text-amber-400 inline-flex items-center gap-1">اجاره <i class="fas fa-chevron-down text-[10px] mt-0.5"></i></a>
+<div class="absolute top-full right-0 pt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+<div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden min-w-[130px] shadow-xl">
+<a href="rent.html?category=residential" class="block px-5 py-3 text-sm hover:bg-zinc-800 hover:text-amber-400">مسکونی</a>
+<a href="rent.html?category=commercial" class="block px-5 py-3 text-sm hover:bg-zinc-800 hover:text-amber-400">اداری</a>
+</div>
+</div>
+</div>
 <a href="calculator.html" class="nav-link font-medium hover:text-amber-400">محاسبه گر املاک</a>
 <a href="commission.html" class="nav-link font-medium hover:text-amber-400">کمیسیون</a>  
 <a href="about.html" class="nav-link font-medium hover:text-amber-400">درباره ما</a>
@@ -74,7 +90,11 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 <div id="mobileMenu" class="hidden md:hidden flex flex-col gap-1 pb-6 px-2 text-lg">
 <a href="index.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">خانه</a>
 <a href="sale.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">فروش</a>
+<a href="sale.html?category=residential" class="py-2 px-8 rounded-xl hover:bg-zinc-900 text-sm text-zinc-400 block">‣ مسکونی</a>
+<a href="sale.html?category=commercial" class="py-2 px-8 rounded-xl hover:bg-zinc-900 text-sm text-zinc-400 block">‣ اداری</a>
 <a href="rent.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">اجاره</a>
+<a href="rent.html?category=residential" class="py-2 px-8 rounded-xl hover:bg-zinc-900 text-sm text-zinc-400 block">‣ مسکونی</a>
+<a href="rent.html?category=commercial" class="py-2 px-8 rounded-xl hover:bg-zinc-900 text-sm text-zinc-400 block">‣ اداری</a>
 <a href="calculator.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">محاسبه گر املاک</a>
 <a href="commission.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">کمیسیون</a> 
 <a href="about.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">درباره ما</a>
@@ -88,6 +108,15 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 <section class="pt-40 pb-10 bg-zinc-950 text-center">
 <h1 class="text-5xl md:text-6xl font-black mb-4">املاک <span class="gold-gradient">برای فروش</span></h1>
 <p class="text-xl text-zinc-400 max-w-2xl mx-auto">مجموعه‌ای از بهترین املاک لوکس آماده فروش</p>
+</section>
+
+<!-- Category Tabs -->
+<section class="pb-4 px-6">
+<div class="max-w-6xl mx-auto flex gap-3" id="categoryTabs">
+<button type="button" data-cat="" onclick="setCategory('')" class="cat-tab-btn px-6 py-2.5 rounded-xl border border-zinc-700 text-sm font-medium bg-amber-400 text-black border-amber-400">همه</button>
+<button type="button" data-cat="residential" onclick="setCategory('residential')" class="cat-tab-btn px-6 py-2.5 rounded-xl border border-zinc-700 text-sm font-medium text-zinc-300">مسکونی</button>
+<button type="button" data-cat="commercial" onclick="setCategory('commercial')" class="cat-tab-btn px-6 py-2.5 rounded-xl border border-zinc-700 text-sm font-medium text-zinc-300">اداری</button>
+</div>
 </section>
 
 <!-- Filters -->
@@ -142,6 +171,21 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 
 <script>
 let allSaleProperties = [];
+let currentCategory = new URLSearchParams(window.location.search).get('category') || '';
+
+function setCategory(cat) {
+  currentCategory = cat;
+  document.querySelectorAll('.cat-tab-btn').forEach(btn => {
+    if (btn.getAttribute('data-cat') === cat) {
+      btn.classList.add('bg-amber-400', 'text-black', 'border-amber-400');
+      btn.classList.remove('text-zinc-300');
+    } else {
+      btn.classList.remove('bg-amber-400', 'text-black', 'border-amber-400');
+      btn.classList.add('text-zinc-300');
+    }
+  });
+  applyFilters();
+}
 
 function renderCards(properties) {
   const grid = document.getElementById('propertiesGrid');
@@ -213,10 +257,11 @@ function applyFilters() {
   let filtered = allSaleProperties.filter(p => {
     const matchesSearch = !search || (p.title || '').toLowerCase().includes(search) || (p.location || '').toLowerCase().includes(search) || (p.badge || '').toLowerCase().includes(search);
     const matchesLocation = !location || p.location === location;
+    const matchesCategory = !currentCategory || p.category === currentCategory;
     const propertyArea = parseFloat(p.area);
     const matchesAreaMin = isNaN(minArea) || (!isNaN(propertyArea) && propertyArea >= minArea);
     const matchesAreaMax = isNaN(maxArea) || (!isNaN(propertyArea) && propertyArea <= maxArea);
-    return matchesSearch && matchesLocation && matchesAreaMin && matchesAreaMax;
+    return matchesSearch && matchesLocation && matchesCategory && matchesAreaMin && matchesAreaMax;
   });
 
   renderCards(filtered);
@@ -228,7 +273,18 @@ async function loadSaleProperties() {
     const res = await fetch('/api/properties?type=sale');
     allSaleProperties = await res.json();
     populateLocationFilter(allSaleProperties);
-    renderCards(allSaleProperties);
+    if (currentCategory) {
+      document.querySelectorAll('.cat-tab-btn').forEach(btn => {
+        if (btn.getAttribute('data-cat') === currentCategory) {
+          btn.classList.add('bg-amber-400', 'text-black', 'border-amber-400');
+          btn.classList.remove('text-zinc-300');
+        } else {
+          btn.classList.remove('bg-amber-400', 'text-black', 'border-amber-400');
+          btn.classList.add('text-zinc-300');
+        }
+      });
+    }
+    applyFilters();
   } catch (err) {
     grid.innerHTML = '<p class="text-red-400 col-span-full text-center">خطا در بارگذاری املاک</p>';
   }
