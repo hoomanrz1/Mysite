@@ -122,6 +122,10 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
           <option value="commercial">اداری</option>
         </select>
       </div>
+      <div class="flex items-center gap-2 pt-6">
+        <input type="checkbox" id="p_hidden" class="w-5 h-5">
+        <label for="p_hidden" class="text-sm text-zinc-300">مخفی از سایت (فروخته شد / اجاره رفت)</label>
+      </div>
       <div>
         <label class="block text-amber-400 text-sm mb-2">برچسب (مثلا: مستغلات فروش)</label>
         <input id="p_badge" type="text" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4">
@@ -845,6 +849,7 @@ function fillForm(p) {
   document.getElementById('p_type').value = p.type;
   toggleFields();
   document.getElementById('p_category').value = p.category || 'residential';
+  document.getElementById('p_hidden').checked = !!p.hidden;
   document.getElementById('p_badge').value = p.badge || '';
   document.getElementById('p_title').value = p.title || '';
   document.getElementById('p_location').value = p.location || '';
@@ -892,6 +897,7 @@ function clearForm() {
   document.querySelectorAll('#tabProperties input[type=text], #tabProperties input[type=number]').forEach(i => i.value = '');
   document.getElementById('p_type').value = 'sale';
   document.getElementById('p_category').value = 'residential';
+  document.getElementById('p_hidden').checked = false;
   document.getElementById('p_divisible').checked = false;
   toggleDivisible();
   currentImages = [];
@@ -932,6 +938,7 @@ function buildPropertyObject() {
   return {
     type: type,
     category: document.getElementById('p_category').value,
+    hidden: document.getElementById('p_hidden').checked,
     badge: document.getElementById('p_badge').value,
     title: document.getElementById('p_title').value,
     location: document.getElementById('p_location').value,
@@ -1000,6 +1007,16 @@ async function deleteProperty(id) {
   loadProperties();
 }
 
+async function toggleVisibility(id) {
+  const p = allProperties.find(x => x.id === id);
+  if (!p) return;
+  p.hidden = !p.hidden;
+  await fetch('/api/properties/' + id, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(p)
+  });
+  loadProperties();
+}
+
 async function loadProperties() {
   const res = await fetch('/api/properties');
   allProperties = await res.json();
@@ -1031,12 +1048,16 @@ function renderPropertiesList() {
         <div>
           <span class="text-xs text-amber-400">${p.type === 'sale' ? 'فروش' : 'اجاره'}</span>
           <span class="text-xs text-zinc-500 mr-2">${p.category === 'commercial' ? '| اداری' : '| مسکونی'}</span>
+          ${p.hidden ? '<span class="text-xs bg-red-500/20 text-red-300 px-2 py-0.5 rounded-lg mr-1">مخفی از سایت</span>' : ''}
           ${p.divisible ? '<span class="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-lg mr-1">قابل تفکیک</span>' : ''}
           <h3 class="font-semibold">${p.title}</h3>
           <p class="text-zinc-500 text-sm">${p.location || ''} — ${p.type === 'sale' ? (p.price + ' میلیارد تومان') : ('ودیعه ' + formatTomanPhrase(parseToMillion(p.deposit) * 1000000) + ' / اجاره ' + formatTomanPhrase(parseToMillion(p.rentAmount) * 1000000))}</p>
           ${p.divisible && p.totalFloors && p.areaPerFloor ? `<p class="text-blue-300 text-xs mt-1">کلاً ${parseFloat(p.area || 0).toLocaleString('fa-IR')} متر (${p.totalFloors} طبقه × ${parseFloat(p.areaPerFloor).toLocaleString('fa-IR')} متر) — می‌توان ۱ تا ${p.totalFloors} طبقه جداگانه پیشنهاد داد</p>` : ''}
         </div>
         <div class="flex gap-4">
+          <button onclick="toggleVisibility('${p.id}')" class="${p.hidden ? 'text-zinc-500 hover:text-zinc-300' : 'text-emerald-400 hover:text-emerald-300'}" title="${p.hidden ? 'نمایش دوباره در سایت' : 'مخفی کردن از سایت'}">
+            <i class="fas ${p.hidden ? 'fa-eye-slash' : 'fa-eye'}"></i>
+          </button>
           <button onclick="toggleOwnerPanel('${p.id}')" class="text-purple-400 hover:text-purple-300" title="مالک ملک">
             <i class="fas fa-id-card"></i>
           </button>
