@@ -271,7 +271,7 @@ async function loadSaleProperties() {
   const grid = document.getElementById('propertiesGrid');
   try {
     const res = await fetch('/api/properties?type=sale');
-    allSaleProperties = await res.json();
+    allSaleProperties = (await res.json()).filter(p => !p.hidden);
     populateLocationFilter(allSaleProperties);
     if (currentCategory) {
       document.querySelectorAll('.cat-tab-btn').forEach(btn => {
