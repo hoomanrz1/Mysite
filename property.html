@@ -5,6 +5,13 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="جزئیات کامل ملک - املاک راد">
+<meta property="og:title" content="جزئیات ملک | املاک راد">
+<meta property="og:description" content="جزئیات کامل ملک - املاک راد">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://realestaterezaei.ir/favicon.svg">
+<meta property="og:url" content="https://realestaterezaei.ir/property.html">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://realestaterezaei.ir/property.html">
 <title>جزئیات ملک | املاک راد</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
@@ -43,6 +50,8 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 .protected-image-wrap {
   position: relative;
 }
+@keyframes pulse2 { 0%,100% { opacity: 1; } 50% { opacity: .5; } }
+.skel { animation: pulse2 1.5s ease-in-out infinite; background: #27272a; border-radius: 1rem; }
 </style>
 </head>
 <body class="bg-zinc-950 text-zinc-200">
@@ -56,9 +65,26 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 </a>
 <div class="hidden md:flex items-center gap-10 text-lg">
 <a href="index.html" class="nav-link font-medium hover:text-amber-400">خانه</a>
-<a href="sale.html" class="nav-link font-medium hover:text-amber-400">فروش</a>
-<a href="rent.html" class="nav-link font-medium hover:text-amber-400">اجاره</a>
+<div class="relative group">
+<a href="sale.html" class="nav-link font-medium hover:text-amber-400 inline-flex items-center gap-1">فروش <i class="fas fa-chevron-down text-[10px] mt-0.5"></i></a>
+<div class="absolute top-full right-0 pt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+<div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden min-w-[130px] shadow-xl">
+<a href="sale.html?category=residential" class="block px-5 py-3 text-sm hover:bg-zinc-800 hover:text-amber-400">مسکونی</a>
+<a href="sale.html?category=commercial" class="block px-5 py-3 text-sm hover:bg-zinc-800 hover:text-amber-400">اداری</a>
+</div>
+</div>
+</div>
+<div class="relative group">
+<a href="rent.html" class="nav-link font-medium hover:text-amber-400 inline-flex items-center gap-1">اجاره <i class="fas fa-chevron-down text-[10px] mt-0.5"></i></a>
+<div class="absolute top-full right-0 pt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+<div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden min-w-[130px] shadow-xl">
+<a href="rent.html?category=residential" class="block px-5 py-3 text-sm hover:bg-zinc-800 hover:text-amber-400">مسکونی</a>
+<a href="rent.html?category=commercial" class="block px-5 py-3 text-sm hover:bg-zinc-800 hover:text-amber-400">اداری</a>
+</div>
+</div>
+</div>
 <a href="calculator.html" class="nav-link font-medium hover:text-amber-400">محاسبه گر املاک</a>
+<a href="commission.html" class="nav-link font-medium hover:text-amber-400">کمیسیون</a>
 <a href="about.html" class="nav-link font-medium hover:text-amber-400">درباره ما</a>
 </div>
 <div class="flex items-center gap-4">
@@ -74,8 +100,13 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 <div id="mobileMenu" class="hidden md:hidden flex flex-col gap-1 pb-6 px-2 text-lg">
 <a href="index.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">خانه</a>
 <a href="sale.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">فروش</a>
+<a href="sale.html?category=residential" class="py-2 px-8 rounded-xl hover:bg-zinc-900 text-sm text-zinc-400 block">‣ مسکونی</a>
+<a href="sale.html?category=commercial" class="py-2 px-8 rounded-xl hover:bg-zinc-900 text-sm text-zinc-400 block">‣ اداری</a>
 <a href="rent.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">اجاره</a>
+<a href="rent.html?category=residential" class="py-2 px-8 rounded-xl hover:bg-zinc-900 text-sm text-zinc-400 block">‣ مسکونی</a>
+<a href="rent.html?category=commercial" class="py-2 px-8 rounded-xl hover:bg-zinc-900 text-sm text-zinc-400 block">‣ اداری</a>
 <a href="calculator.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">محاسبه گر املاک</a>
+<a href="commission.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">کمیسیون</a>
 <a href="about.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">درباره ما</a>
 <a href="tel:09124096970" class="mt-2 bg-amber-400 text-black text-center py-3 rounded-xl font-semibold">
 <i class="fas fa-phone ml-2"></i> تماس با ما
@@ -86,7 +117,12 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 <!-- Property Detail -->
 <section class="pt-32 pb-24 px-6">
 <div id="propertyContent" class="max-w-5xl mx-auto">
-<p class="text-zinc-500 text-center py-20">در حال بارگذاری اطلاعات ملک...</p>
+<div class="skel w-full h-96 mb-8"></div>
+<div class="skel w-2/3 h-8 mb-4"></div>
+<div class="skel w-1/3 h-6 mb-10"></div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-5">
+<div class="skel h-20"></div><div class="skel h-20"></div><div class="skel h-20"></div><div class="skel h-20"></div>
+</div>
 </div>
 </section>
 
@@ -185,6 +221,74 @@ function formatTomanPhrase(toman) {
   return parts.join(' و ') + ' تومان';
 }
 
+function setMeta(selector, attr, value) {
+  const el = document.querySelector(selector);
+  if (el) el.setAttribute(attr, value);
+}
+
+function updatePageSeo(p, images, id) {
+  const typeLabel = p.type === 'sale' ? 'فروش' : 'اجاره';
+  const areaText = p.area ? (p.area + ' متر') : '';
+  const locationText = p.location || '';
+  const priceText = p.type === 'sale'
+    ? (p.price ? (p.price + ' میلیارد تومان') : '')
+    : (p.deposit || p.rentAmount ? ('ودیعه ' + formatTomanPhrase(p.deposit) + ' / اجاره ' + formatTomanPhrase(p.rentAmount)) : '');
+
+  const descParts = [typeLabel + ' ' + (p.title || 'ملک'), locationText, areaText, priceText].filter(Boolean);
+  const description = descParts.join(' | ') + ' - املاک راد';
+  const pageTitle = (p.title || 'جزئیات ملک') + ' | ' + typeLabel + ' در ' + (locationText || 'تهران') + ' | املاک راد';
+  const pageUrl = window.location.origin + '/property.html?id=' + id;
+  const mainImg = images[0] || 'https://realestaterezaei.ir/favicon.svg';
+
+  document.title = pageTitle;
+  setMeta('meta[name="description"]', 'content', description);
+  setMeta('meta[property="og:title"]', 'content', pageTitle);
+  setMeta('meta[property="og:description"]', 'content', description);
+  setMeta('meta[property="og:image"]', 'content', mainImg);
+  setMeta('meta[property="og:url"]', 'content', pageUrl);
+  setMeta('link[rel="canonical"]', 'href', pageUrl);
+
+  // داده ساختاریافته برای گوگل: جزئیات ملک + مسیر صفحه
+  const priceNumeric = p.type === 'sale'
+    ? Math.round((parseFloat(p.price) || 0) * 1000000000 * 10) // میلیارد تومان -> ریال
+    : Math.round(normalizeMoneyForConversion(p.rentAmount) * 10); // تومان -> ریال
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": p.title || 'ملک',
+    "description": description,
+    "image": images.length ? images : [mainImg],
+    "url": pageUrl,
+    "offers": {
+      "@type": "Offer",
+      "url": pageUrl,
+      "priceCurrency": "IRR",
+      "price": priceNumeric > 0 ? priceNumeric : undefined,
+      "availability": "https://schema.org/InStock",
+      "seller": { "@type": "RealEstateAgent", "name": "املاک راد" }
+    }
+  };
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "خانه", "item": "https://realestaterezaei.ir/index.html" },
+      { "@type": "ListItem", "position": 2, "name": typeLabel, "item": "https://realestaterezaei.ir/" + (p.type === 'sale' ? 'sale.html' : 'rent.html') },
+      { "@type": "ListItem", "position": 3, "name": p.title || 'ملک', "item": pageUrl }
+    ]
+  };
+
+  document.querySelectorAll('script[data-dynamic-ld]').forEach(s => s.remove());
+  [jsonLd, breadcrumbLd].forEach(obj => {
+    const s = document.createElement('script');
+    s.type = 'application/ld+json';
+    s.setAttribute('data-dynamic-ld', '1');
+    s.textContent = JSON.stringify(obj);
+    document.head.appendChild(s);
+  });
+}
+
 async function loadProperty() {
   const id = getIdFromUrl();
   const container = document.getElementById('propertyContent');
@@ -201,7 +305,9 @@ async function loadProperty() {
       return;
     }
     const p = await res.json();
-    document.title = p.title + ' | املاک راد';
+
+    const images = (p.images && p.images.length) ? p.images : (p.image ? [p.image] : []);
+    updatePageSeo(p, images, id);
 
     const priceBlock = p.type === 'sale'
       ? `<span class="text-4xl font-bold text-amber-400">${p.price}</span><span class="text-lg block text-zinc-400">میلیارد تومان</span>`
@@ -222,7 +328,6 @@ async function loadProperty() {
       maxConvertibleToDepositGlobal = maxConvertibleToDepositToman;
     }
 
-    const images = (p.images && p.images.length) ? p.images : (p.image ? [p.image] : []);
     const mainImage = images[0] || 'https://via.placeholder.com/1000x600?text=بدون+عکس';
 
     const thumbsHtml = images.length > 1 ? `
@@ -406,4 +511,3 @@ loadProperty();
 
 </body>
 </html>
-
