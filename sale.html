@@ -158,9 +158,7 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 <!-- Sale Properties -->
 <section class="py-8 bg-zinc-950">
 <div class="max-w-7xl mx-auto px-8">
-<div id="propertiesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-<p class="text-zinc-500 col-span-full text-center">در حال بارگذاری املاک...</p>
-</div>
+<div id="propertiesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"></div>
 </div>
 </section>
 
@@ -195,6 +193,32 @@ function setCategory(cat) {
     }
   });
   applyFilters();
+}
+
+function renderSkeletons(count) {
+  const grid = document.getElementById('propertiesGrid');
+  grid.innerHTML = Array.from({ length: count }).map(() => `
+    <div class="bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 animate-pulse">
+      <div class="w-full h-80 bg-zinc-800"></div>
+      <div class="p-8">
+        <div class="flex justify-between gap-4">
+          <div class="flex-1">
+            <div class="h-6 bg-zinc-800 rounded-lg w-3/4 mb-3"></div>
+            <div class="h-4 bg-zinc-800 rounded-lg w-1/2"></div>
+          </div>
+          <div class="w-24">
+            <div class="h-7 bg-zinc-800 rounded-lg w-full"></div>
+          </div>
+        </div>
+        <div class="flex gap-4 mt-8">
+          <div class="h-4 bg-zinc-800 rounded-lg w-14"></div>
+          <div class="h-4 bg-zinc-800 rounded-lg w-14"></div>
+          <div class="h-4 bg-zinc-800 rounded-lg w-14"></div>
+        </div>
+        <div class="h-12 bg-zinc-800 rounded-xl mt-6"></div>
+      </div>
+    </div>
+  `).join('');
 }
 
 function renderCards(properties) {
@@ -279,6 +303,7 @@ function applyFilters() {
 
 async function loadSaleProperties() {
   const grid = document.getElementById('propertiesGrid');
+  renderSkeletons(6);
   try {
     const res = await fetch('/api/properties?type=sale');
     allSaleProperties = (await res.json()).filter(p => !p.hidden);
