@@ -32,7 +32,9 @@ function getPageName(pathname) {
     '/about.html': 'about',
     '/about': 'about',
     '/calculator.html': 'calculator',
-    '/calculator': 'calculator'
+    '/calculator': 'calculator',
+    '/commission.html': 'commission',
+    '/commission': 'commission'
   };
   return map[pathname] || null;
 }
@@ -180,6 +182,72 @@ async function handleApi(request, env, url) {
     } catch (err) {
       return new Response(JSON.stringify({ success: false }), { headers: cors });
     }
+  }
+
+  // ثبت درخواست تماس از فرم عمومی سایت (بدون نیاز به ورود - هرکسی می‌تونه بفرسته)
+  if (url.pathname === '/api/leads' && request.method === 'POST') {
+    try {
+      const body = await request.json().catch(() => ({}));
+      const name = (body.name || '').toString().trim().slice(0, 100);
+      const phone = (body.phone || '').toString().trim().slice(0, 30);
+      const message = (body.message || '').toString().trim().slice(0, 1000);
+      const page = (body.page || '').toString().slice(0, 50);
+
+      if (!name || !phone) {
+        return new Response(JSON.stringify({ error: 'نام و شماره تماس الزامی است' }), { status: 400, headers: cors });
+      }
+
+      const leads = (await env.PROPERTIES_KV.get('leads', 'json')) || [];
+      leads.unshift({
+        id: Date.now().toString(),
+        name, phone, message, page,
+        createdAt: new Date().toISOString(),
+        read: false
+      });
+      // حداکثر ۵۰۰ درخواست اخیر نگه داشته می‌شود
+      if (leads.length > 500) leads.length = 500;
+      await env.PROPERTIES_KV.put('leads', JSON.stringify(leads));
+
+      return new Response(JSON.stringify({ success: true }), { headers: cors });
+    } catch (err) {
+      return new Response(JSON.stringify({ error: 'خطا در ثبت درخواست' }), { status: 500, headers: cors });
+    }
+  }
+
+  // دریافت لیست درخواست‌های تماس (فقط ادمین)
+  if (url.pathname === '/api/leads' && request.method === 'GET') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const leads = (await env.PROPERTIES_KV.get('leads', 'json')) || [];
+    return new Response(JSON.stringify(leads), { headers: cors });
+  }
+
+  // علامت‌گذاری یک درخواست تماس به‌عنوان خوانده‌شده (فقط ادمین)
+  if (url.pathname.startsWith('/api/leads/') && request.method === 'PUT') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const id = url.pathname.split('/').pop();
+    let leads = (await env.PROPERTIES_KV.get('leads', 'json')) || [];
+    const index = leads.findIndex(l => l.id === id);
+    if (index !== -1) {
+      leads[index].read = true;
+      await env.PROPERTIES_KV.put('leads', JSON.stringify(leads));
+    }
+    return new Response(JSON.stringify({ success: true }), { headers: cors });
+  }
+
+  // حذف یک درخواست تماس (فقط ادمین)
+  if (url.pathname.startsWith('/api/leads/') && request.method === 'DELETE') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const id = url.pathname.split('/').pop();
+    let leads = (await env.PROPERTIES_KV.get('leads', 'json')) || [];
+    leads = leads.filter(l => l.id !== id);
+    await env.PROPERTIES_KV.put('leads', JSON.stringify(leads));
+    return new Response(JSON.stringify({ success: true }), { headers: cors });
   }
 
   // آمار بازدید سایت (فقط ادمین)
