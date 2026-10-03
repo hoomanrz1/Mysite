@@ -66,6 +66,14 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
     </div>
   </div>
 
+  <!-- Contact Leads (پیام‌های فرم تماس سایت) -->
+  <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 mb-8">
+    <h2 class="text-xl font-bold mb-6"><i class="fas fa-envelope text-amber-400 ml-2"></i>پیام‌های تماس سایت</h2>
+    <div id="leadsList" class="space-y-3">
+      <p class="text-zinc-500 text-sm">در حال بارگذاری...</p>
+    </div>
+  </div>
+
   <!-- Change Password -->
   <div id="passwordCard" class="hidden bg-zinc-900 border border-zinc-800 rounded-3xl p-8 mb-8">
     <h2 class="text-xl font-bold mb-6">تغییر رمز عبور</h2>
@@ -510,6 +518,63 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 
 <script>
 // ---------- Site Stats ----------
+function timeAgoFa(isoString) {
+  const diffMs = Date.now() - new Date(isoString).getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return 'همین الان';
+  if (mins < 60) return mins.toLocaleString('fa-IR') + ' دقیقه پیش';
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return hours.toLocaleString('fa-IR') + ' ساعت پیش';
+  const days = Math.floor(hours / 24);
+  return days.toLocaleString('fa-IR') + ' روز پیش';
+}
+
+async function loadLeads() {
+  const container = document.getElementById('leadsList');
+  try {
+    const res = await fetch('/api/leads');
+    if (!res.ok) { container.innerHTML = '<p class="text-zinc-500 text-sm">خطا در بارگذاری پیام‌ها</p>'; return; }
+    const leads = await res.json();
+    if (leads.length === 0) {
+      container.innerHTML = '<p class="text-zinc-500 text-sm">هنوز پیامی از فرم سایت ثبت نشده.</p>';
+      return;
+    }
+    container.innerHTML = leads.map(l => `
+      <div class="bg-zinc-950 border ${l.read ? 'border-zinc-800' : 'border-amber-400/50'} rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex-1">
+          <div class="flex items-center gap-2">
+            ${!l.read ? '<span class="w-2 h-2 bg-amber-400 rounded-full"></span>' : ''}
+            <span class="font-semibold">${l.name}</span>
+            <a href="tel:${l.phone}" class="text-amber-400 text-sm" dir="ltr">${l.phone}</a>
+          </div>
+          ${l.message ? `<p class="text-zinc-400 text-sm mt-2">${l.message}</p>` : ''}
+          <p class="text-zinc-600 text-xs mt-2">${timeAgoFa(l.createdAt)}${l.page ? ' — از صفحه‌ی ' + l.page : ''}</p>
+        </div>
+        <div class="flex gap-3 flex-shrink-0">
+          <a href="https://wa.me/${l.phone.replace(/^0/, '98')}" target="_blank" class="text-green-400 hover:text-green-300" title="پاسخ در واتساپ">
+            <i class="fab fa-whatsapp text-lg"></i>
+          </a>
+          ${!l.read ? `<button onclick="markLeadRead('${l.id}')" class="text-amber-400 hover:text-amber-300" title="خوانده شد"><i class="fas fa-check"></i></button>` : ''}
+          <button onclick="deleteLead('${l.id}')" class="text-red-400 hover:text-red-300" title="حذف"><i class="fas fa-trash"></i></button>
+        </div>
+      </div>
+    `).join('');
+  } catch (err) {
+    container.innerHTML = '<p class="text-zinc-500 text-sm">خطا در بارگذاری پیام‌ها</p>';
+  }
+}
+
+async function markLeadRead(id) {
+  await fetch('/api/leads/' + id, { method: 'PUT' });
+  loadLeads();
+}
+
+async function deleteLead(id) {
+  if (!confirm('این پیام حذف بشه؟')) return;
+  await fetch('/api/leads/' + id, { method: 'DELETE' });
+  loadLeads();
+}
+
 async function loadStats() {
   try {
     const res = await fetch('/api/stats');
@@ -1737,6 +1802,7 @@ async function checkAuth() {
     loadCustomers();
     loadOwners();
     loadStats();
+    loadLeads();
   }
 }
 
@@ -1753,6 +1819,7 @@ async function login() {
     loadCustomers();
     loadOwners();
     loadStats();
+    loadLeads();
   } else {
     document.getElementById('loginError').classList.remove('hidden');
   }
