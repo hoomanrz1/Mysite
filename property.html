@@ -5,12 +5,6 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="جزئیات کامل ملک - املاک راد">
-<meta property="og:title" content="جزئیات ملک | املاک راد">
-<meta property="og:description" content="جزئیات کامل ملک - املاک راد">
-<meta property="og:type" content="website">
-<meta property="og:image" content="https://realestaterezaei.ir/favicon.svg">
-<meta property="og:url" content="https://realestaterezaei.ir/property.html">
-<meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://realestaterezaei.ir/property.html">
 <title>جزئیات ملک | املاک راد</title>
 <script src="https://cdn.tailwindcss.com"></script>
@@ -240,12 +234,12 @@ function updatePageSeo(p, images, id) {
   const pageUrl = window.location.origin + '/property.html?id=' + id;
   const mainImg = images[0] || 'https://realestaterezaei.ir/favicon.svg';
 
+  // توجه: تگ‌های og:title / og:description / og:image سمت سرور توسط Cloudflare Worker
+  // (تابع handlePropertyPage) ساخته می‌شن که دقیقاً همین‌جوری برای واتساپ/تلگرام هم کار می‌کنه.
+  // اینجا فقط مواردی که Worker نمی‌سازه (تایتل تب مرورگر، canonical، داده ساختاریافته) رو اضافه می‌کنیم
+  // تا تگ تکراری ساخته نشه.
   document.title = pageTitle;
   setMeta('meta[name="description"]', 'content', description);
-  setMeta('meta[property="og:title"]', 'content', pageTitle);
-  setMeta('meta[property="og:description"]', 'content', description);
-  setMeta('meta[property="og:image"]', 'content', mainImg);
-  setMeta('meta[property="og:url"]', 'content', pageUrl);
   setMeta('link[rel="canonical"]', 'href', pageUrl);
 
   // داده ساختاریافته برای گوگل: جزئیات ملک + مسیر صفحه
@@ -509,5 +503,10 @@ document.addEventListener('dragstart', function(e) {
 loadProperty();
 </script>
 
+<a href="https://wa.me/989124096970?text=سلام، سوالی درباره ملک دارم" target="_blank"
+   class="whatsapp-float-btn fixed bottom-6 left-6 z-[60] w-16 h-16 bg-green-600 hover:bg-green-500 text-white rounded-full shadow-2xl shadow-black/50 flex items-center justify-center text-3xl transition-transform hover:scale-110"
+   aria-label="تماس در واتساپ">
+<i class="fab fa-whatsapp"></i>
+</a>
 </body>
 </html>
