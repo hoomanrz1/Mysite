@@ -387,8 +387,8 @@ async function loadProperty() {
               <div id="convRent" class="text-2xl font-bold text-amber-400 mt-1">—</div>
             </div>
           </div>
-          <input id="convSlider" type="range" min="-100" max="100" value="0" class="w-full accent-amber-400" oninput="updateConversion()">
-          <div class="flex justify-between text-zinc-500 text-xs mt-2">
+          <input id="convSlider" type="range" min="-100" max="100" value="0" dir="ltr" style="direction: ltr;" class="w-full accent-amber-400" oninput="updateConversion()">
+          <div class="flex justify-between text-zinc-500 text-xs mt-2" dir="ltr">
             <span>${maxConvertibleToDepositToman > 0 ? '← افزایش ودیعه (رهن کامل‌تر)' : ''}</span>
             <span>${maxConvertibleToman > 0 ? 'افزایش اجاره →' : ''}</span>
           </div>
