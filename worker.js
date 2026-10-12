@@ -6,7 +6,7 @@ export default {
       return handleApi(request, env, url);
     }
 
-    if (url.pathname === '/property.html' || url.pathname === '/property') {
+    if (url.pathname === '/property.html' || url.pathname === '/property' || url.pathname.startsWith('/property/')) {
       const response = await handlePropertyPage(request, env, url);
       ctx.waitUntil(trackVisit(env, 'property'));
       return response;
@@ -60,6 +60,18 @@ async function trackVisit(env, page) {
   }
 }
 
+// ساخت بخش فارسی آدرس از رو عنوان ملک (برای /property/عنوان-آیدی)
+function slugify(str) {
+  return (str || 'ملک')
+    .toString()
+    .trim()
+    .replace(/[\s\u200c]+/g, '-')
+    .replace(/[^\u0600-\u06FFa-zA-Z0-9\-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 60);
+}
+
 function escapeHtml(str) {
   return String(str || '')
     .replace(/&/g, '&amp;')
@@ -70,8 +82,35 @@ function escapeHtml(str) {
 }
 
 async function handlePropertyPage(request, env, url) {
-  const assetResponse = await env.ASSETS.fetch(request);
-  const id = url.searchParams.get('id');
+  // آیدی ملک رو یا از ?id= قدیمی می‌خونیم، یا از آدرس زیبای جدید /property/عنوان-آیدی
+  const isOldFormat = url.searchParams.has('id');
+  let id = url.searchParams.get('id');
+  if (!id && url.pathname.startsWith('/property/')) {
+    const match = url.pathname.match(/-(\d+)\/?$/);
+    if (match) id = match[1];
+  }
+
+  // اگه با فرمت قدیمی (?id=) اومده و ملک پیدا بشه، همیشه به آدرس زیبا ریدایرکت می‌کنیم
+  if (isOldFormat && id) {
+    const allData = (await env.PROPERTIES_KV.get('properties', 'json')) || [];
+    const found = allData.find(p => p.id === id);
+    if (found) {
+      const target = new URL(`https://realestaterezaei.ir/property/${slugify(found.title)}-${id}`);
+      url.searchParams.forEach((value, key) => {
+        if (key !== 'id') target.searchParams.append(key, value);
+      });
+      return Response.redirect(target.toString(), 301);
+    }
+  }
+
+  // چون آدرس زیبا فایل واقعی نداره، برای گرفتن خودِ property.html باید مسیر درخواست رو موقتاً عوض کنیم
+  let assetRequest = request;
+  if (url.pathname.startsWith('/property/')) {
+    const assetUrl = new URL(request.url);
+    assetUrl.pathname = '/property.html';
+    assetRequest = new Request(assetUrl.toString(), request);
+  }
+  const assetResponse = await env.ASSETS.fetch(assetRequest);
   if (!id) return assetResponse;
 
   try {
@@ -86,7 +125,8 @@ async function handlePropertyPage(request, env, url) {
       : `ودیعه ${property.deposit || ''} / اجاره ${property.rentAmount || ''}`;
     const description = `${property.location || ''} — ${priceText}`.trim();
     const title = `${property.title || 'ملک'} | املاک راد`;
-    const pageUrl = `https://realestaterezaei.ir/property.html?id=${id}`;
+    // همیشه نسخه‌ی زیبای آدرس رو به‌عنوان نسخه‌ی اصلی (canonical) معرفی می‌کنیم
+    const pageUrl = `https://realestaterezaei.ir/property/${slugify(property.title)}-${id}`;
 
     const rewriter = new HTMLRewriter()
       .on('title', {
@@ -97,6 +137,11 @@ async function handlePropertyPage(request, env, url) {
       .on('meta[name="description"]', {
         element(el) {
           el.setAttribute('content', description);
+        }
+      })
+      .on('link[rel="canonical"]', {
+        element(el) {
+          el.setAttribute('href', pageUrl);
         }
       })
       .on('head', {
