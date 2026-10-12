@@ -93,20 +93,47 @@ async function fetchPropertyAsset(request, env, url) {
   return res;
 }
 
+// لینک‌های نسبی (مثل index.html یا sale.html) رو مطلق می‌کنه تا توی آدرس /property/... هم درست کار کنن
+function addRelativeUrlFixes(rewriter) {
+  const fix = (attr) => ({
+    element(el) {
+      const v = el.getAttribute(attr);
+      if (!v) return;
+      // آدرس‌های مطلق، لینک‌های داخلی صفحه (#)، کوئری (?) و پروتکل‌دار (https:, tel:, mailto:, ...) دست نمی‌خورن
+      if (/^(\/|#|\?|[a-z][a-z0-9+.\-]*:)/i.test(v)) return;
+      el.setAttribute(attr, '/' + v);
+    }
+  });
+  return rewriter
+    .on('a[href]', fix('href'))
+    .on('link[href]', fix('href'))
+    .on('script[src]', fix('src'))
+    .on('img[src]', fix('src'))
+    .on('source[src]', fix('src'));
+}
+
 async function handlePropertyPage(request, env, url) {
   const isSlugUrl = url.pathname.startsWith('/property/');
   const assetResponse = isSlugUrl
     ? await fetchPropertyAsset(request, env, url)
     : await env.ASSETS.fetch(request);
 
+  const rewriter = new HTMLRewriter();
+  if (isSlugUrl) addRelativeUrlFixes(rewriter);
+
   const id = url.searchParams.get('id') || (isSlugUrl ? extractIdFromPath(url.pathname) : null);
-  if (!id) return assetResponse;
 
-  try {
-    const data = (await env.PROPERTIES_KV.get('properties', 'json')) || [];
-    const property = data.find(p => p.id === id);
-    if (!property) return assetResponse;
+  let property = null;
+  if (id) {
+    try {
+      const data = (await env.PROPERTIES_KV.get('properties', 'json')) || [];
+      property = data.find(p => p.id === id) || null;
+    } catch (err) {
+      property = null;
+    }
+  }
 
+  if (property) {
     const images = (property.images && property.images.length) ? property.images : (property.image ? [property.image] : []);
     const image = images[0] || '';
     const priceText = property.type === 'sale'
@@ -118,7 +145,7 @@ async function handlePropertyPage(request, env, url) {
       ? `https://realestaterezaei.ir${url.pathname}`
       : `https://realestaterezaei.ir/property.html?id=${id}`;
 
-    const rewriter = new HTMLRewriter()
+    rewriter
       .on('title', {
         element(el) {
           el.setInnerContent(title);
@@ -155,7 +182,12 @@ async function handlePropertyPage(request, env, url) {
           el.append(tags, { html: true });
         }
       });
+  }
 
+  // آدرس قدیمی بدون ملک پیدا شده نیازی به تغییر ندارد
+  if (!isSlugUrl && !property) return assetResponse;
+
+  try {
     return rewriter.transform(assetResponse);
   } catch (err) {
     return assetResponse;
