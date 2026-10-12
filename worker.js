@@ -6,7 +6,12 @@ export default {
       return handleApi(request, env, url);
     }
 
-    if (url.pathname === '/property.html' || url.pathname === '/property') {
+    // صفحه ملک: هم آدرس قدیمی (/property.html?id=...) هم آدرس جدید (/property/اسم-ملک-شناسه)
+    if (
+      url.pathname === '/property.html' ||
+      url.pathname === '/property' ||
+      url.pathname.startsWith('/property/')
+    ) {
       const response = await handlePropertyPage(request, env, url);
       ctx.waitUntil(trackVisit(env, 'property'));
       return response;
@@ -67,9 +72,34 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
+// شناسه ملک رو از آخر آدرس درمیاره: /property/5000متر-شیخ-بهایی-1791810668073  ->  1791810668073
+function extractIdFromPath(pathname) {
+  let decoded = pathname;
+  try {
+    decoded = decodeURIComponent(pathname);
+  } catch (e) {
+    // اگه decode نشد، همون مسیر خام استفاده می‌شه
+  }
+  const match = decoded.match(/(\d{10,})\/?$/);
+  return match ? match[1] : null;
+}
+
+// فایل property.html رو از دارایی‌های سایت می‌گیره (حتی اگه ریدایرکت بده، دنبالش می‌ره)
+async function fetchPropertyAsset(request, env, url) {
+  let res = await env.ASSETS.fetch(new Request(new URL('/property', url).toString(), request));
+  if (res.status >= 300 && res.status < 400 && res.headers.get('Location')) {
+    res = await env.ASSETS.fetch(new Request(new URL(res.headers.get('Location'), url).toString(), request));
+  }
+  return res;
+}
+
 async function handlePropertyPage(request, env, url) {
-  const assetResponse = await env.ASSETS.fetch(request);
-  const id = url.searchParams.get('id');
+  const isSlugUrl = url.pathname.startsWith('/property/');
+  const assetResponse = isSlugUrl
+    ? await fetchPropertyAsset(request, env, url)
+    : await env.ASSETS.fetch(request);
+
+  const id = url.searchParams.get('id') || (isSlugUrl ? extractIdFromPath(url.pathname) : null);
   if (!id) return assetResponse;
 
   try {
@@ -84,7 +114,9 @@ async function handlePropertyPage(request, env, url) {
       : `ودیعه ${property.deposit || ''} / اجاره ${property.rentAmount || ''}`;
     const description = `${property.location || ''} — ${priceText}`.trim();
     const title = `${property.title || 'ملک'} | املاک راد`;
-    const pageUrl = `https://realestaterezaei.ir/property.html?id=${id}`;
+    const pageUrl = isSlugUrl
+      ? `https://realestaterezaei.ir${url.pathname}`
+      : `https://realestaterezaei.ir/property.html?id=${id}`;
 
     const rewriter = new HTMLRewriter()
       .on('title', {
@@ -99,6 +131,14 @@ async function handlePropertyPage(request, env, url) {
       })
       .on('head', {
         element(el) {
+          // برای آدرس‌های جدید: شناسه ملک رو به آدرس مرورگر اضافه می‌کنه تا کد صفحه بتونه پیداش کنه
+          if (isSlugUrl) {
+            el.prepend(
+              `<script>try{var u=new URL(location.href);if(!u.searchParams.get('id')){u.searchParams.set('id','${escapeHtml(id)}');history.replaceState(null,'',u.pathname+u.search+u.hash);}}catch(e){}</script>`,
+              { html: true }
+            );
+          }
+
           let tags = `
 <meta property="og:title" content="${escapeHtml(title)}">
 <meta property="og:description" content="${escapeHtml(description)}">
