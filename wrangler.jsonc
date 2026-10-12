@@ -5,7 +5,7 @@
   "assets": {
     "directory": "./",
     "binding": "ASSETS",
-    "run_worker_first": ["/api/*", "/property.html", "/property"]
+    "run_worker_first": ["/api/*", "/property.html", "/property", "/property/*"]
   },
   "kv_namespaces": [
     {
