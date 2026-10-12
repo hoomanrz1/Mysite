@@ -198,7 +198,24 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 <script>
 function getIdFromUrl() {
   const params = new URLSearchParams(window.location.search);
-  return params.get('id');
+  if (params.get('id')) return params.get('id');
+  // فرمت جدید: /property/عنوان-ملک-آیدی
+  const match = window.location.pathname.match(/\/property\/.*-(\d+)\/?$/);
+  return match ? match[1] : null;
+}
+
+function slugify(title) {
+  return (title || 'ملک')
+    .toString().trim()
+    .replace(/[\s\u200c]+/g, '-')
+    .replace(/[^\u0600-\u06FFa-zA-Z0-9\-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 60);
+}
+
+function propertyUrl(id, title) {
+  return window.location.origin + '/property/' + slugify(title) + '-' + id;
 }
 
 function buildVisitTemplate(title) {
@@ -268,7 +285,7 @@ function updatePageSeo(p, images, id) {
   const descParts = [typeLabel + ' ' + (p.title || 'ملک'), locationText, areaText, priceText].filter(Boolean);
   const description = descParts.join(' | ') + ' - املاک راد';
   const pageTitle = (p.title || 'جزئیات ملک') + ' | ' + typeLabel + ' در ' + (locationText || 'تهران') + ' | املاک راد';
-  const pageUrl = window.location.origin + '/property.html?id=' + id;
+  const pageUrl = propertyUrl(id, p.title);
   const mainImg = images[0] || 'https://realestaterezaei.ir/favicon.svg';
 
   // توجه: تگ‌های og:title / og:description / og:image سمت سرور توسط Cloudflare Worker
@@ -505,7 +522,7 @@ function updateConversion() {
 }
 
 async function shareProperty(id, title) {
-  const url = window.location.origin + '/property.html?id=' + id;
+  const url = propertyUrl(id, title);
   if (navigator.share) {
     try {
       await navigator.share({ title: title, url: url });
