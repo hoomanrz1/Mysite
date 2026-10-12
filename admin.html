@@ -1083,6 +1083,19 @@ async function toggleVisibility(id) {
   loadProperties();
 }
 
+function slugify(title) {
+  return (title || 'ملک')
+    .toString().trim()
+    .replace(/[\s\u200c]+/g, '-')
+    .replace(/[^\u0600-\u06FFa-zA-Z0-9\-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 60);
+}
+function propertyUrl(id, title) {
+  return 'property/' + slugify(title) + '-' + id;
+}
+
 async function loadProperties() {
   const res = await fetch('/api/properties');
   allProperties = await res.json();
@@ -1130,7 +1143,7 @@ function renderPropertiesList() {
           <button onclick="togglePropertyMatches('${p.id}')" class="text-green-400 hover:text-green-300" title="مشتریان متناسب">
             <i class="fas fa-user-check"></i>
           </button>
-          <a href="property.html?id=${p.id}" target="_blank" class="text-zinc-400 hover:text-white" title="مشاهده صفحه اختصاصی">
+          <a href="${propertyUrl(p.id, p.title)}" target="_blank" class="text-zinc-400 hover:text-white" title="مشاهده صفحه اختصاصی">
             <i class="fas fa-up-right-from-square"></i>
           </a>
           <button onclick="startEdit('${p.id}')" class="text-amber-400 hover:text-amber-300">
@@ -1424,7 +1437,7 @@ function toggleSuggestions(customerId) {
       panel.innerHTML = '<p class="text-zinc-500 text-sm p-3">ملک متناسبی (با تلرانس فعلی) پیدا نشد.</p>';
     } else {
       panel.innerHTML = matches.map(({ property: p, note }) => `
-        <a href="property.html?id=${p.id}" target="_blank" class="block text-sm p-3 border-b border-zinc-800 last:border-0 hover:bg-zinc-800 rounded-lg">
+        <a href="${propertyUrl(p.id, p.title)}" target="_blank" class="block text-sm p-3 border-b border-zinc-800 last:border-0 hover:bg-zinc-800 rounded-lg">
           <span class="font-semibold text-amber-400">${p.title}</span>
           — ${p.location || '—'}،
           ${p.type === 'sale' ? (p.price + ' میلیارد تومان') : ('ودیعه ' + formatTomanPhrase(parseToMillion(p.deposit) * 1000000) + ' / اجاره ' + formatTomanPhrase(parseToMillion(p.rentAmount) * 1000000))}
