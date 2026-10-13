@@ -336,6 +336,73 @@ function stripPrivateFields(property) {
   return rest;
 }
 
+// اعداد فارسی و عربی رو به انگلیسی تبدیل می‌کنه (برای شماره تلفن)
+function normalizeDigits(str) {
+  return String(str || '')
+    .replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+    .replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
+}
+
+// ثبت پیام فرم «تماس با ما» (عمومی)
+async function handleLeadCreate(request, env, headers) {
+  const reply = (obj, status) => new Response(JSON.stringify(obj), { status: status || 200, headers });
+
+  let raw = '';
+  try {
+    raw = await request.text();
+  } catch (err) {
+    raw = '';
+  }
+  if (raw.length > 5000) return reply({ success: false, error: 'پیام خیلی طولانی است' }, 413);
+
+  let body = {};
+  try {
+    body = JSON.parse(raw);
+  } catch (err) {
+    return reply({ success: false, error: 'اطلاعات نامعتبر است' }, 400);
+  }
+
+  // فیلد مخفی ضدِ ربات: آدم‌ها هیچ‌وقت پرش نمی‌کنن. موفقیت نمایشی می‌دیم ولی چیزی ذخیره نمی‌کنیم.
+  if (body.website) return reply({ success: true });
+
+  const name = String(body.name || '').trim().slice(0, 80);
+  const phone = normalizeDigits(body.phone).replace(/[^0-9]/g, '');
+  const message = String(body.message || '').trim().slice(0, 1000);
+  const page = String(body.page || '').trim().slice(0, 50);
+
+  if (!name) return reply({ success: false, error: 'لطفاً نام را وارد کنید' }, 400);
+  if (phone.length < 10 || phone.length > 14) {
+    return reply({ success: false, error: 'شماره تماس معتبر نیست' }, 400);
+  }
+
+  // محدودیت: حداکثر ۵ پیام در ساعت از هر کاربر
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  const rlKey = 'lead_rl:' + ip;
+  try {
+    const rl = (await env.PROPERTIES_KV.get(rlKey, 'json')) || { count: 0 };
+    if (rl.count >= 5) {
+      return reply({ success: false, error: 'تعداد درخواست‌ها زیاد است، کمی بعد دوباره تلاش کنید' }, 429);
+    }
+    await env.PROPERTIES_KV.put(rlKey, JSON.stringify({ count: rl.count + 1 }), { expirationTtl: 3600 });
+  } catch (err) {
+    // خطای محدودکننده نباید جلوی ثبت پیام رو بگیره
+  }
+
+  // متن‌ها قبل از ذخیره HTML-escape می‌شن، چون پنل ادمین اون‌ها رو مستقیم توی صفحه نشون می‌ده
+  const leads = (await env.PROPERTIES_KV.get('leads', 'json')) || [];
+  leads.unshift({
+    id: Date.now().toString(),
+    name: escapeHtml(name),
+    phone,
+    message: escapeHtml(message),
+    page: escapeHtml(page),
+    read: false,
+    createdAt: new Date().toISOString()
+  });
+  await env.PROPERTIES_KV.put('leads', JSON.stringify(leads.slice(0, 500)));
+  return reply({ success: true });
+}
+
 async function handleApi(request, env, url) {
   const cors = {
     'Content-Type': 'application/json'
@@ -422,6 +489,48 @@ async function handleApi(request, env, url) {
     } catch (err) {
       return new Response(JSON.stringify({ error: 'خطا در دریافت قیمت‌ها', debug: err.message, hasKey: !!env.BRSAPI_KEY }), { status: 502, headers: cors });
     }
+  }
+
+  // ---------- پیام‌های فرم تماس ----------
+  // ثبت پیام جدید (عمومی)
+  if (url.pathname === '/api/leads' && request.method === 'POST') {
+    return handleLeadCreate(request, env, cors);
+  }
+
+  // لیست پیام‌ها (فقط ادمین)
+  if (url.pathname === '/api/leads' && request.method === 'GET') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const leads = (await env.PROPERTIES_KV.get('leads', 'json')) || [];
+    return new Response(JSON.stringify(leads), { headers: cors });
+  }
+
+  // علامت‌گذاری «خوانده شد» (فقط ادمین)
+  if (url.pathname.startsWith('/api/leads/') && request.method === 'PUT') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const id = url.pathname.split('/').pop();
+    const leads = (await env.PROPERTIES_KV.get('leads', 'json')) || [];
+    const index = leads.findIndex(l => l.id === id);
+    if (index === -1) {
+      return new Response(JSON.stringify({ error: 'پیام پیدا نشد' }), { status: 404, headers: cors });
+    }
+    leads[index].read = true;
+    await env.PROPERTIES_KV.put('leads', JSON.stringify(leads));
+    return new Response(JSON.stringify({ success: true }), { headers: cors });
+  }
+
+  // حذف پیام (فقط ادمین)
+  if (url.pathname.startsWith('/api/leads/') && request.method === 'DELETE') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const id = url.pathname.split('/').pop();
+    const leads = ((await env.PROPERTIES_KV.get('leads', 'json')) || []).filter(l => l.id !== id);
+    await env.PROPERTIES_KV.put('leads', JSON.stringify(leads));
+    return new Response(JSON.stringify({ success: true }), { headers: cors });
   }
 
   // ورود ادمین
