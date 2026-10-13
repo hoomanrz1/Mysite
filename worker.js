@@ -184,6 +184,17 @@ async function handlePropertyPage(request, env, url) {
       });
   }
 
+  // آدرس‌های /property/...: مبنای همه‌ی لینک‌های نسبی رو ریشه‌ی سایت می‌کنه (حتی لینک‌هایی که بعداً با جاوااسکریپت ساخته می‌شن)
+  if (isSlugUrl) {
+    const clickFixScript = `<script>document.addEventListener('click',function(e){try{var a=e.target&&e.target.closest?e.target.closest('a[href]'):null;if(!a)return;var h=a.getAttribute('href');if(!h)return;if(h.charAt(0)==='#'){a.setAttribute('href',location.pathname+location.search+h);return;}if(/^(\\/|\\?|[a-z][a-z0-9+.\\-]*:)/i.test(h))return;a.setAttribute('href','/'+h);}catch(err){}},true);</script>`;
+    rewriter.on('head', {
+      element(el) {
+        el.prepend(clickFixScript, { html: true });
+        el.prepend('<base href="/">', { html: true });
+      }
+    });
+  }
+
   // آدرس قدیمی بدون ملک پیدا شده نیازی به تغییر ندارد
   if (!isSlugUrl && !property) return assetResponse;
 
