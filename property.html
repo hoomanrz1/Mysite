@@ -195,6 +195,7 @@ body { font-family: 'Vazirmatn', system-ui, sans-serif; }
 </div>
 </footer>
 
+<script src="/favorites.js"></script>
 <script>
 function getIdFromUrl() {
   const params = new URLSearchParams(window.location.search);
@@ -496,8 +497,10 @@ async function loadProperty() {
           class="sm:w-48 flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white font-semibold py-5 rounded-2xl transition">
           <i class="fas fa-share-nodes"></i> اشتراک‌گذاری
         </button>
+        ${RRFav.heartButton(id, 'fav-wide px-6 py-5 text-base font-semibold', true)}
       </div>
     `;
+    RRFav.refresh();
 
     if (hasAnyConversion) {
       updateConversion();
