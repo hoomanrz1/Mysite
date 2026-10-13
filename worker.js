@@ -133,6 +133,10 @@ async function handlePropertyPage(request, env, url) {
     }
   }
 
+  // هرچی باید بالای <head> (درست زیر meta charset) بشینه؛ ربات‌های واتساپ و تلگرام فقط ابتدای صفحه رو می‌خونن،
+  // پس تگ‌های پیش‌نمایش (og:...) باید اول از همه باشن.
+  let headTop = '';
+
   if (property) {
     const images = (property.images && property.images.length) ? property.images : (property.image ? [property.image] : []);
     const image = images[0] || '';
@@ -145,6 +149,26 @@ async function handlePropertyPage(request, env, url) {
       ? `https://realestaterezaei.ir${url.pathname}`
       : `https://realestaterezaei.ir/property.html?id=${id}`;
 
+    headTop += `
+<meta property="og:title" content="${escapeHtml(title)}">
+<meta property="og:description" content="${escapeHtml(description)}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="املاک راد">
+<meta property="og:locale" content="fa_IR">
+<meta property="og:url" content="${escapeHtml(pageUrl)}">
+<meta name="twitter:title" content="${escapeHtml(title)}">
+<meta name="twitter:description" content="${escapeHtml(description)}">`;
+    if (image) {
+      headTop += `
+<meta property="og:image" content="${escapeHtml(image)}">
+<meta property="og:image:alt" content="${escapeHtml(property.title || 'ملک')}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="${escapeHtml(image)}">`;
+    } else {
+      headTop += `
+<meta name="twitter:card" content="summary">`;
+    }
+
     rewriter
       .on('title', {
         element(el) {
@@ -156,30 +180,10 @@ async function handlePropertyPage(request, env, url) {
           el.setAttribute('content', description);
         }
       })
-      .on('head', {
+      // آدرس اصلی (canonical) هر ملک باید خودِ همون ملک باشه، نه صفحه‌ی کلی /property.html
+      .on('link[rel="canonical"]', {
         element(el) {
-          // برای آدرس‌های جدید: شناسه ملک رو به آدرس مرورگر اضافه می‌کنه تا کد صفحه بتونه پیداش کنه
-          if (isSlugUrl) {
-            el.prepend(
-              `<script>try{var u=new URL(location.href);if(!u.searchParams.get('id')){u.searchParams.set('id','${escapeHtml(id)}');history.replaceState(null,'',u.pathname+u.search+u.hash);}}catch(e){}</script>`,
-              { html: true }
-            );
-          }
-
-          let tags = `
-<meta property="og:title" content="${escapeHtml(title)}">
-<meta property="og:description" content="${escapeHtml(description)}">
-<meta property="og:type" content="website">
-<meta property="og:url" content="${escapeHtml(pageUrl)}">
-<meta name="twitter:title" content="${escapeHtml(title)}">
-<meta name="twitter:description" content="${escapeHtml(description)}">`;
-          if (image) {
-            tags += `
-<meta property="og:image" content="${escapeHtml(image)}">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="${escapeHtml(image)}">`;
-          }
-          el.append(tags, { html: true });
+          el.setAttribute('href', pageUrl);
         }
       });
   }
@@ -187,10 +191,18 @@ async function handlePropertyPage(request, env, url) {
   // آدرس‌های /property/...: مبنای همه‌ی لینک‌های نسبی رو ریشه‌ی سایت می‌کنه (حتی لینک‌هایی که بعداً با جاوااسکریپت ساخته می‌شن)
   if (isSlugUrl) {
     const clickFixScript = `<script>document.addEventListener('click',function(e){try{var a=e.target&&e.target.closest?e.target.closest('a[href]'):null;if(!a)return;var h=a.getAttribute('href');if(!h)return;if(h.charAt(0)==='#'){a.setAttribute('href',location.pathname+location.search+h);return;}if(/^(\\/|\\?|[a-z][a-z0-9+.\\-]*:)/i.test(h))return;a.setAttribute('href','/'+h);}catch(err){}},true);</script>`;
-    rewriter.on('head', {
+    headTop += '\n<base href="/">';
+    if (property) {
+      // شناسه ملک رو به آدرس مرورگر اضافه می‌کنه تا کد صفحه بتونه پیداش کنه
+      headTop += `\n<script>try{var u=new URL(location.href);if(!u.searchParams.get('id')){u.searchParams.set('id','${escapeHtml(id)}');history.replaceState(null,'',u.pathname+u.search+u.hash);}}catch(e){}</script>`;
+    }
+    headTop += '\n' + clickFixScript;
+  }
+
+  if (headTop) {
+    rewriter.on('meta[charset]', {
       element(el) {
-        el.prepend(clickFixScript, { html: true });
-        el.prepend('<base href="/">', { html: true });
+        el.after(headTop, { html: true });
       }
     });
   }
