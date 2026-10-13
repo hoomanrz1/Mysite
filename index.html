@@ -336,7 +336,6 @@ class="whatsapp-btn inline-flex items-center gap-3 bg-green-600 hover:bg-green-5
 </div>
 </section>
 
-<!-- Footer -->
 <!-- Contact Info -->
 <section class="py-24 bg-zinc-900">
 <div class="max-w-6xl mx-auto px-8">
@@ -388,8 +387,42 @@ class="flex items-center gap-5 bg-zinc-950 border border-zinc-800 rounded-2xl p-
 </div>
 </div>
 </div>
+</div>
 </section>
 
+<!-- Contact Form -->
+<section class="py-20 bg-zinc-950">
+<div class="max-w-2xl mx-auto px-8">
+<div class="text-center mb-10">
+<h2 class="text-3xl font-bold">برای ما <span class="gold-gradient">پیام بگذارید</span></h2>
+<p class="text-zinc-400 mt-3">فرم زیر رو پر کنید، در اسرع وقت با شما تماس می‌گیریم</p>
+</div>
+<form id="homeContactForm" class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 space-y-5">
+<div>
+<label class="block text-sm text-zinc-400 mb-2">نام شما</label>
+<input type="text" id="homeContactName" required maxlength="80" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4 outline-none focus:border-amber-400 transition">
+</div>
+<div>
+<label class="block text-sm text-zinc-400 mb-2">شماره تماس</label>
+<input type="tel" id="homeContactPhone" required class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4 outline-none focus:border-amber-400 transition" dir="ltr" placeholder="09xxxxxxxxx">
+</div>
+<div>
+<label class="block text-sm text-zinc-400 mb-2">پیام شما (اختیاری)</label>
+<textarea id="homeContactMessage" rows="4" maxlength="1000" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4 outline-none focus:border-amber-400 transition resize-none"></textarea>
+</div>
+<!-- فیلد مخفی ضدِ ربات: کاربر واقعی هیچ‌وقت پرش نمی‌کنه -->
+<div style="position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;" aria-hidden="true">
+<input type="text" id="homeContactWebsite" tabindex="-1" autocomplete="off">
+</div>
+<button type="submit" id="homeContactSubmitBtn" class="w-full luxury-btn bg-amber-400 text-black font-bold py-4 rounded-xl">
+ارسال پیام
+</button>
+<p id="homeContactResultMsg" class="text-center text-sm"></p>
+</form>
+</div>
+</section>
+
+<!-- Footer -->
 <footer class="bg-black py-20 border-t border-zinc-900">
 <div class="max-w-7xl mx-auto px-8">
 <div class="flex flex-col md:flex-row justify-between items-center gap-8">
@@ -498,7 +531,7 @@ function slugify(title) {
     .slice(0, 60);
 }
 function propertyUrl(id, title) {
-  return 'property/' + slugify(title) + '-' + id;
+  return '/property/' + slugify(title) + '-' + id;
 }
 
 function renderRandomCard(p) {
@@ -581,6 +614,49 @@ function buildMarquee() {
 // این تابع فقط یک‌بار در کل عمر صفحه اجرا می‌شه و هیچ‌وقت دوباره ساخته نمی‌شه
 // (قبلاً موقع تغییر سایز صفحه در گوشی، دوباره ساخته می‌شد و باعث قطع‌شدن مداوم می‌شد)
 buildMarquee();
+</script>
+
+<script>
+// فرم «پیام بگذارید» پایین صفحه
+document.getElementById('homeContactForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  var btn = document.getElementById('homeContactSubmitBtn');
+  var msg = document.getElementById('homeContactResultMsg');
+  var name = document.getElementById('homeContactName').value.trim();
+  var phone = document.getElementById('homeContactPhone').value.trim();
+  var message = document.getElementById('homeContactMessage').value.trim();
+  var website = document.getElementById('homeContactWebsite').value;
+  if (!name || !phone) return;
+
+  btn.disabled = true;
+  btn.textContent = 'در حال ارسال...';
+  msg.textContent = '';
+  msg.className = 'text-center text-sm';
+
+  try {
+    var res = await fetch('/api/leads', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name, phone: phone, message: message, website: website, page: 'index' })
+    });
+    if (!res.ok) {
+      var data = {};
+      try { data = await res.json(); } catch (parseErr) {}
+      var failure = new Error('failed');
+      failure.serverMessage = data.error || '';
+      throw failure;
+    }
+    document.getElementById('homeContactForm').reset();
+    msg.className = 'text-center text-sm text-green-400';
+    msg.textContent = 'پیام شما ارسال شد ✓ به‌زودی با شما تماس می‌گیریم.';
+  } catch (err) {
+    msg.className = 'text-center text-sm text-red-400';
+    msg.textContent = err.serverMessage || 'خطا در ارسال پیام. لطفاً دوباره امتحان کنید یا مستقیم تماس بگیرید.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'ارسال پیام';
+  }
+});
 </script>
 <script>
 (function(){
