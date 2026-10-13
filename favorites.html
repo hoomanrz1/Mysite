@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<meta name="description" content="ملک‌های ذخیره‌شده و مقایسه‌ی چند ملک کنار هم - املاک راد">
+<title>علاقه‌مندی‌ها و مقایسه‌ی املاک | املاک راد</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+body { font-family: 'Vazirmatn', system-ui, sans-serif; }
+.gold-gradient {
+  background: linear-gradient(135deg, #d4af37, #f5e8c7, #d4af37);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.nav-link { position: relative; }
+.nav-link:after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -6px;
+  right: 0;
+  background: linear-gradient(to left, #d4af37, #f5e8c7);
+  transition: all 0.3s ease;
+}
+.nav-link:hover:after { width: 100%; right: auto; left: 0; }
+.luxury-btn { transition: all 0.4s ease; }
+.luxury-btn:hover { background: #d4af37; color: #111827; transform: translateY(-3px); }
+.compare-table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 560px; }
+.compare-table th, .compare-table td { padding: 14px 16px; border-bottom: 1px solid #27272a; vertical-align: top; text-align: right; }
+.compare-table th.row-label {
+  position: sticky; right: 0; background: #18181b; color: #d4af37; font-weight: 600;
+  white-space: nowrap; z-index: 2; border-left: 1px solid #27272a;
+}
+.compare-table td.best { color: #4ade80; font-weight: 700; }
+.compare-table tr:last-child th, .compare-table tr:last-child td { border-bottom: 0; }
+.pick-box { width: 22px; height: 22px; accent-color: #d4af37; cursor: pointer; }
+</style>
+</head>
+<body class="bg-zinc-950 text-zinc-200">
+
+<!-- Navbar -->
+<nav class="bg-black/90 backdrop-blur-lg border-b border-zinc-800 fixed w-full z-50">
+<div class="max-w-7xl mx-auto px-8">
+<div class="flex justify-between items-center py-6">
+<a href="/index.html" class="flex items-center gap-4">
+<div><span class="text-3xl font-bold tracking-tighter">املاک راد</span></div>
+</a>
+<div class="hidden md:flex items-center gap-10 text-lg">
+<a href="/index.html" class="nav-link font-medium hover:text-amber-400">خانه</a>
+<div class="relative group">
+<a href="/sale.html" class="nav-link font-medium hover:text-amber-400 inline-flex items-center gap-1">فروش <i class="fas fa-chevron-down text-[10px] mt-0.5"></i></a>
+<div class="absolute top-full right-0 pt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+<div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden min-w-[130px] shadow-xl">
+<a href="/sale.html?category=residential" class="block px-5 py-3 text-sm hover:bg-zinc-800 hover:text-amber-400">مسکونی</a>
+<a href="/sale.html?category=commercial" class="block px-5 py-3 text-sm hover:bg-zinc-800 hover:text-amber-400">اداری</a>
+</div>
+</div>
+</div>
+<div class="relative group">
+<a href="/rent.html" class="nav-link font-medium hover:text-amber-400 inline-flex items-center gap-1">اجاره <i class="fas fa-chevron-down text-[10px] mt-0.5"></i></a>
+<div class="absolute top-full right-0 pt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+<div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden min-w-[130px] shadow-xl">
+<a href="/rent.html?category=residential" class="block px-5 py-3 text-sm hover:bg-zinc-800 hover:text-amber-400">مسکونی</a>
+<a href="/rent.html?category=commercial" class="block px-5 py-3 text-sm hover:bg-zinc-800 hover:text-amber-400">اداری</a>
+</div>
+</div>
+</div>
+<a href="/calculator.html" class="nav-link font-medium hover:text-amber-400">محاسبه گر املاک</a>
+<a href="/commission.html" class="nav-link font-medium hover:text-amber-400">کمیسیون</a>
+<a href="/about.html" class="nav-link font-medium hover:text-amber-400">درباره ما</a>
+</div>
+<div class="flex items-center gap-4">
+<a href="tel:09124096970" class="hidden sm:flex luxury-btn bg-amber-400 text-black px-8 py-3.5 rounded-2xl font-semibold items-center gap-2">
+<i class="fas fa-phone"></i> تماس با ما
+</a>
+<button onclick="document.getElementById('mobileMenu').classList.toggle('hidden')" class="md:hidden w-11 h-11 flex items-center justify-center rounded-full border border-zinc-700 text-xl">
+<i class="fas fa-bars"></i>
+</button>
+</div>
+</div>
+</div>
+<div id="mobileMenu" class="hidden md:hidden flex flex-col gap-1 pb-6 px-2 text-lg">
+<a href="/index.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">خانه</a>
+<a href="/sale.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">فروش</a>
+<a href="/sale.html?category=residential" class="py-2 px-8 rounded-xl hover:bg-zinc-900 text-sm text-zinc-400 block">‣ مسکونی</a>
+<a href="/sale.html?category=commercial" class="py-2 px-8 rounded-xl hover:bg-zinc-900 text-sm text-zinc-400 block">‣ اداری</a>
+<a href="/rent.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">اجاره</a>
+<a href="/rent.html?category=residential" class="py-2 px-8 rounded-xl hover:bg-zinc-900 text-sm text-zinc-400 block">‣ مسکونی</a>
+<a href="/rent.html?category=commercial" class="py-2 px-8 rounded-xl hover:bg-zinc-900 text-sm text-zinc-400 block">‣ اداری</a>
+<a href="/calculator.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">محاسبه گر املاک</a>
+<a href="/commission.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">کمیسیون</a>
+<a href="/about.html" class="py-3 px-4 rounded-xl hover:bg-zinc-900">درباره ما</a>
+<a href="tel:09124096970" class="mt-2 bg-amber-400 text-black text-center py-3 rounded-xl font-semibold">
+<i class="fas fa-phone ml-2"></i> تماس با ما
+</a>
+</div>
+</nav>
+
+<!-- Header -->
+<section class="pt-40 pb-8 bg-zinc-950 text-center px-6">
+<h1 class="text-5xl md:text-6xl font-black mb-4">علاقه‌مندی‌ها و <span class="gold-gradient">مقایسه</span></h1>
+<p class="text-lg text-zinc-400 max-w-2xl mx-auto">ملک‌هایی که ذخیره کرده‌اید این‌جاست. دو تا چهار ملک هم‌نوع را انتخاب کنید و کنار هم مقایسه کنید.</p>
+<p class="text-xs text-zinc-500 mt-3">لیست علاقه‌مندی‌ها فقط روی همین مرورگر ذخیره می‌شود.</p>
+</section>
+
+<!-- Saved list -->
+<section class="pb-10 px-6">
+<div class="max-w-7xl mx-auto">
+<div id="savedGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+</div>
+</section>
+
+<!-- Compare result -->
+<section id="compareSection" class="hidden pb-40 px-6">
+<div class="max-w-7xl mx-auto">
+<div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+<h2 class="text-2xl font-bold"><i class="fas fa-scale-balanced text-amber-400 ml-2"></i>مقایسه‌ی ملک‌ها</h2>
+<div class="flex gap-3">
+<button type="button" onclick="copyCompareLink()" class="bg-zinc-800 hover:bg-zinc-700 text-white px-5 py-3 rounded-2xl text-sm font-semibold">
+<i class="fas fa-link ml-2"></i> کپی لینک مقایسه
+</button>
+<button type="button" onclick="closeCompare()" class="bg-zinc-800 hover:bg-zinc-700 text-white px-5 py-3 rounded-2xl text-sm font-semibold">
+<i class="fas fa-xmark ml-2"></i> بستن
+</button>
+</div>
+</div>
+<div class="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-x-auto">
+<div id="compareTable"></div>
+</div>
+<p class="text-zinc-500 text-xs mt-3">رنگ سبز یعنی مناسب‌ترین گزینه در آن ردیف (کمترین قیمت یا بیشترین متراژ). «معادل کل» یعنی اجاره ماهانه با نسبت محاسبه‌گر سایت به ودیعه تبدیل و با ودیعه جمع شده تا ملک‌ها منصفانه مقایسه شوند.</p>
+</div>
+</section>
+
+<!-- Bottom action bar -->
+<div id="compareBar" class="hidden fixed bottom-0 inset-x-0 z-[70] bg-zinc-900/95 backdrop-blur border-t border-zinc-800 py-4 px-6">
+<div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+<div class="text-sm">
+<span id="compareCount" class="font-bold text-amber-400">۰</span> ملک برای مقایسه انتخاب شده
+<span id="compareHint" class="text-zinc-500 block text-xs mt-1"></span>
+</div>
+<button id="compareBtn" type="button" onclick="runCompareFromSelection()" class="bg-amber-400 hover:bg-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold px-8 py-3 rounded-2xl">
+مقایسه
+</button>
+</div>
+</div>
+
+<div id="toast" class="hidden fixed top-24 left-1/2 -translate-x-1/2 z-[90] bg-zinc-800 border border-zinc-700 text-sm px-5 py-3 rounded-2xl shadow-xl"></div>
+
+<!-- Footer -->
+<footer class="bg-black py-20 border-t border-zinc-900">
+<div class="max-w-7xl mx-auto px-8">
+<div class="flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="flex items-center gap-4">
+<div class="text-3xl font-bold">املاک راد</div>
+</div>
+<div class="text-center md:text-right">
+<p>تلفن تماس: <span class="text-amber-400">۰۹۱۲۴۰۹۶۹۷۰</span></p>
+<p class="text-zinc-500 text-sm mt-2">© ۱۴۰۵ املاک راد - تمامی حقوق محفوظ است</p>
+</div>
+</div>
+</div>
+</footer>
+
+<script src="/favorites.js"></script>
+<script>
+const MAX_COMPARE = 4;
+const RENT_RATIO = 0.03; // مطابق محاسبه‌گر رهن به اجاره
+let allProps = {};      // id -> property
+let selected = [];      // شناسه‌های انتخاب‌شده برای مقایسه
+
+function slugify(title) {
+  return (title || 'ملک')
+    .toString().trim()
+    .replace(/[\s\u200c]+/g, '-')
+    .replace(/[^\u0600-\u06FFa-zA-Z0-9\-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 60);
+}
+function propertyPath(p) { return '/property/' + slugify(p.title) + '-' + p.id; }
+
+// مبلغ به تومان (داده‌های قدیمی که به میلیون ذخیره شده‌اند هم درست می‌شوند)
+function toToman(val) {
+  let t = Math.round(parseFloat(val) || 0);
+  if (t > 0 && t < 1000000) t = t * 1000000;
+  return t;
+}
+function phrase(toman) {
+  toman = Math.round(toman || 0);
+  if (toman <= 0) return '—';
+  const billion = Math.floor(toman / 1000000000);
+  const million = Math.round((toman % 1000000000) / 1000000);
+  const parts = [];
+  if (billion > 0) parts.push(billion.toLocaleString('fa-IR') + ' میلیارد');
+  if (million > 0) parts.push(million.toLocaleString('fa-IR') + ' میلیون');
+  if (parts.length === 0) return toman.toLocaleString('fa-IR') + ' تومان';
+  return parts.join(' و ') + ' تومان';
+}
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function priceText(p) {
+  return p.type === 'sale'
+    ? (p.price ? esc(p.price) + ' میلیارد تومان' : '—')
+    : 'ودیعه ' + phrase(toToman(p.deposit)) + ' / اجاره ' + phrase(toToman(p.rentAmount));
+}
+function categoryText(p) { return p.category === 'commercial' ? 'اداری' : 'مسکونی'; }
+function typeText(p) { return p.type === 'sale' ? 'فروش' : 'اجاره'; }
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.classList.add('hidden'), 2600);
+}
+
+/* ---------- لیست علاقه‌مندی‌ها ---------- */
+function renderSaved() {
+  const grid = document.getElementById('savedGrid');
+  const ids = RRFav.read().filter(id => allProps[id]);
+  selected = selected.filter(id => ids.indexOf(id) !== -1 || allProps[id]);
+
+  if (ids.length === 0) {
+    grid.innerHTML = `
+      <div class="col-span-full text-center bg-zinc-900 border border-zinc-800 rounded-3xl p-12">
+        <i class="far fa-heart text-5xl text-amber-400 mb-4"></i>
+        <p class="text-xl mb-2">هنوز ملکی ذخیره نکرده‌اید</p>
+        <p class="text-zinc-400 mb-6">روی آیکون قلب هر ملک بزنید تا این‌جا نمایش داده شود.</p>
+        <div class="flex justify-center gap-4">
+          <a href="/sale.html" class="bg-amber-400 text-black font-bold px-6 py-3 rounded-2xl">املاک فروش</a>
+          <a href="/rent.html" class="bg-zinc-800 text-white font-bold px-6 py-3 rounded-2xl">املاک اجاره</a>
+        </div>
+      </div>`;
+    updateBar();
+    return;
+  }
+
+  grid.innerHTML = ids.map(id => {
+    const p = allProps[id];
+    const img = (p.images && p.images[0]) || p.image || 'https://via.placeholder.com/600x400?text=بدون+عکس';
+    const checked = selected.indexOf(id) !== -1 ? 'checked' : '';
+    return `
+    <div class="bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800">
+      <a href="${propertyPath(p)}" class="block relative">
+        <img src="${esc(img)}" class="w-full h-56 object-cover" alt="${esc(p.title)}" oncontextmenu="return false" ondragstart="return false">
+        <span class="absolute top-4 right-4 bg-black/70 text-amber-400 text-xs font-bold px-4 py-1.5 rounded-xl">${typeText(p)} ${categoryText(p)}</span>
+      </a>
+      <div class="p-6">
+        <a href="${propertyPath(p)}" class="block text-xl font-semibold hover:text-amber-400">${esc(p.title)}</a>
+        <p class="text-zinc-400 text-sm mt-1">${esc(p.location || '')}${p.area ? ' — ' + esc(p.area) + ' متر' : ''}</p>
+        <p class="text-amber-400 font-bold mt-3">${priceText(p)}</p>
+        <div class="flex items-center justify-between mt-5 pt-4 border-t border-zinc-800">
+          <label class="flex items-center gap-3 cursor-pointer text-sm">
+            <input type="checkbox" class="pick-box" ${checked} onchange="togglePick('${id}', this)">
+            انتخاب برای مقایسه
+          </label>
+          <button type="button" onclick="removeSaved('${id}')" class="text-red-400 hover:text-red-300 text-sm">
+            <i class="fas fa-trash ml-1"></i> حذف
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  updateBar();
+}
+
+function removeSaved(id) {
+  RRFav.remove(id);
+  selected = selected.filter(x => x !== id);
+  renderSaved();
+}
+
+function togglePick(id, checkbox) {
+  const i = selected.indexOf(id);
+  if (i !== -1) {
+    selected.splice(i, 1);
+  } else {
+    if (selected.length >= MAX_COMPARE) {
+      checkbox.checked = false;
+      toast('حداکثر ' + MAX_COMPARE.toLocaleString('fa-IR') + ' ملک را می‌توان هم‌زمان مقایسه کرد.');
+      return;
+    }
+    if (selected.length > 0) {
+      const first = allProps[selected[0]];
+      if (first && first.type !== allProps[id].type) {
+        checkbox.checked = false;
+        toast('فقط ملک‌های هم‌نوع قابل مقایسه‌اند (فروش با فروش، اجاره با اجاره).');
+        return;
+      }
+    }
+    selected.push(id);
+  }
+  updateBar();
+}
+
+function updateBar() {
+  const bar = document.getElementById('compareBar');
+  bar.classList.toggle('hidden', selected.length === 0);
+  document.getElementById('compareCount').textContent = selected.length.toLocaleString('fa-IR');
+  const btn = document.getElementById('compareBtn');
+  btn.disabled = selected.length < 2;
+  document.getElementById('compareHint').textContent = selected.length < 2 ? 'حداقل دو ملک انتخاب کنید' : '';
+}
+
+/* ---------- جدول مقایسه ---------- */
+function runCompareFromSelection() {
+  if (selected.length < 2) return;
+  renderCompare(selected.slice());
+  history.replaceState(null, '', '/favorites.html?compare=' + selected.join(','));
+  document.getElementById('compareSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function closeCompare() {
+  document.getElementById('compareSection').classList.add('hidden');
+  history.replaceState(null, '', '/favorites.html');
+}
+
+async function copyCompareLink() {
+  const url = location.href;
+  try {
+    await navigator.clipboard.writeText(url);
+    toast('لینک مقایسه کپی شد ✓');
+  } catch (e) {
+    prompt('لینک مقایسه:', url);
+  }
+}
+
+// بهترین مقدار هر ردیف: کمترین (مثل قیمت) یا بیشترین (مثل متراژ)
+function bestIndexes(values, mode) {
+  const valid = values.filter(v => v > 0);
+  if (valid.length < 2) return [];
+  const target = mode === 'min' ? Math.min.apply(null, valid) : Math.max.apply(null, valid);
+  if (valid.every(v => v === target)) return [];
+  return values.map((v, i) => (v === target ? i : -1)).filter(i => i !== -1);
+}
+
+function renderCompare(ids) {
+  const items = ids.map(id => allProps[id]).filter(Boolean);
+  const section = document.getElementById('compareSection');
+  if (items.length < 2) { section.classList.add('hidden'); return; }
+
+  const isSale = items[0].type === 'sale';
+  const rows = [];
+
+  // ردیف‌های عددی (با تعیین بهترین)
+  const areaVals = items.map(p => parseFloat(p.area) || 0);
+  if (isSale) {
+    const priceToman = items.map(p => Math.round((parseFloat(p.price) || 0) * 1000000000));
+    const perMeter = items.map((p, i) => (areaVals[i] > 0 && priceToman[i] > 0) ? Math.round(priceToman[i] / areaVals[i]) : 0);
+    rows.push({ label: 'قیمت کل', cells: priceToman.map(v => phrase(v)), best: bestIndexes(priceToman, 'min') });
+    rows.push({ label: 'متراژ', cells: areaVals.map(v => v > 0 ? v.toLocaleString('fa-IR') + ' متر' : '—'), best: bestIndexes(areaVals, 'max') });
+    rows.push({ label: 'قیمت هر متر', cells: perMeter.map(v => phrase(v)), best: bestIndexes(perMeter, 'min') });
+  } else {
+    const deposit = items.map(p => toToman(p.deposit));
+    const rent = items.map(p => toToman(p.rentAmount));
+    const equivalent = items.map((p, i) => Math.round(deposit[i] + rent[i] / RENT_RATIO));
+    rows.push({ label: 'ودیعه', cells: deposit.map(v => phrase(v)), best: bestIndexes(deposit, 'min') });
+    rows.push({ label: 'اجاره ماهانه', cells: rent.map(v => phrase(v)), best: bestIndexes(rent, 'min') });
+    rows.push({ label: 'معادل کل', cells: equivalent.map(v => phrase(v)), best: bestIndexes(equivalent, 'min') });
+    rows.push({ label: 'متراژ', cells: areaVals.map(v => v > 0 ? v.toLocaleString('fa-IR') + ' متر' : '—'), best: bestIndexes(areaVals, 'max') });
+    rows.push({ label: 'قابل تبدیل ودیعه و اجاره', cells: items.map(p => p.convertible ? 'بله' : 'خیر'), best: [] });
+  }
+
+  // ردیف‌های متنی
+  rows.push({ label: 'منطقه', cells: items.map(p => esc(p.location || '—')), best: [] });
+  rows.push({ label: 'دسته', cells: items.map(p => categoryText(p)), best: [] });
+  rows.push({ label: 'تعداد واحد', cells: items.map(p => esc(p.units || '—')), best: [] });
+  rows.push({ label: 'توضیح متراژ', cells: items.map(p => esc(p.floor || '—')), best: [] });
+  rows.push({ label: 'پارکینگ', cells: items.map(p => esc(p.parking || '—')), best: [] });
+  rows.push({
+    label: 'قابل تفکیک',
+    cells: items.map(p => (p.divisible && p.totalFloors && p.areaPerFloor)
+      ? 'بله (' + esc(p.totalFloors) + ' طبقه × ' + parseFloat(p.areaPerFloor).toLocaleString('fa-IR') + ' متر)'
+      : 'خیر'),
+    best: []
+  });
+
+  const head = `
+    <tr>
+      <th class="row-label"></th>
+      ${items.map(p => {
+        const img = (p.images && p.images[0]) || p.image || 'https://via.placeholder.com/400x300?text=بدون+عکس';
+        return `<th class="min-w-[200px]">
+          <a href="${propertyPath(p)}" class="block">
+            <img src="${esc(img)}" class="w-full h-32 object-cover rounded-2xl mb-3" alt="${esc(p.title)}" oncontextmenu="return false" ondragstart="return false">
+            <span class="text-white font-semibold hover:text-amber-400">${esc(p.title)}</span>
+          </a>
+        </th>`;
+      }).join('')}
+    </tr>`;
+
+  const body = rows.map(r => `
+    <tr>
+      <th class="row-label">${r.label}</th>
+      ${r.cells.map((c, i) => `<td class="${r.best.indexOf(i) !== -1 ? 'best' : ''}">${c}</td>`).join('')}
+    </tr>`).join('');
+
+  document.getElementById('compareTable').innerHTML = `<table class="compare-table">${head}${body}</table>`;
+  section.classList.remove('hidden');
+}
+
+/* ---------- شروع ---------- */
+async function init() {
+  const grid = document.getElementById('savedGrid');
+  grid.innerHTML = '<p class="text-zinc-500 col-span-full text-center">در حال بارگذاری...</p>';
+  try {
+    const res = await fetch('/api/properties');
+    const list = (await res.json()).filter(p => !p.hidden);
+    list.forEach(p => { allProps[p.id] = p; });
+  } catch (e) {
+    grid.innerHTML = '<p class="text-red-400 col-span-full text-center">خطا در بارگذاری املاک</p>';
+    return;
+  }
+
+  // ملک‌هایی که حذف یا مخفی شده‌اند از علاقه‌مندی‌ها پاک می‌شوند
+  if (Object.keys(allProps).length > 0) RRFav.keepOnly(Object.keys(allProps));
+  renderSaved();
+
+  // لینک اشتراکی مقایسه: /favorites.html?compare=id1,id2,...
+  const compareParam = new URLSearchParams(location.search).get('compare');
+  if (compareParam) {
+    const ids = compareParam.split(',').map(s => s.trim()).filter(id => allProps[id]).slice(0, MAX_COMPARE);
+    if (ids.length >= 2) {
+      selected = ids.filter(id => RRFav.has(id));
+      renderCompare(ids);
+      updateBar();
+    }
+  }
+}
+init();
+</script>
+<script>
+(function(){
+  var payload = JSON.stringify({page: 'favorites'});
+  if (navigator.sendBeacon) {
+    navigator.sendBeacon('/api/track', new Blob([payload], {type: 'application/json'}));
+  } else {
+    fetch('/api/track', {method:'POST', headers:{'Content-Type':'application/json'}, body: payload}).catch(function(){});
+  }
+})();
+</script>
+<a href="https://wa.me/989124096970?text=سلام، سوالی درباره ملک دارم" target="_blank"
+   class="whatsapp-float-btn fixed bottom-24 left-6 z-[60] w-16 h-16 bg-green-600 hover:bg-green-500 text-white rounded-full shadow-2xl shadow-black/50 flex items-center justify-center text-3xl transition-transform hover:scale-110"
+   aria-label="تماس در واتساپ">
+<i class="fab fa-whatsapp"></i>
+</a>
+</body>
+</html>
