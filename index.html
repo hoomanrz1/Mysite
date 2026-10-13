@@ -77,12 +77,14 @@ animation: floatBadge 3.2s ease-in-out infinite;
 
 /* ---- مارکی متحرک ---- */
 .marquee-section {
+direction: ltr; /* نوار متحرک باید از ریشه LTR باشد (توضیح بالا در .marquee-row) */
 overflow: hidden;
 background: #09090b;
 padding: 70px 0;
 position: relative;
 }
 .marquee-bg {
+direction: ltr;
 position: absolute;
 inset: 0;
 z-index: 0;
@@ -98,6 +100,8 @@ display: flex;
 white-space: nowrap;
 width: max-content;
 will-change: transform;
+/* صفحه راست‌به‌چینه؛ بدون این خط نوار متحرک بعد از مدتی خالی می‌شد (در حالت RTL جهتِ حرکت و نقطه‌ی شروع نوار با هم جور نبود) */
+direction: ltr;
 }
 .marquee-half {
 display: flex;
@@ -411,7 +415,7 @@ class="flex items-center gap-5 bg-zinc-950 border border-zinc-800 rounded-2xl p-
 <textarea id="homeContactMessage" rows="4" maxlength="1000" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 px-4 outline-none focus:border-amber-400 transition resize-none"></textarea>
 </div>
 <!-- فیلد مخفی ضدِ ربات: کاربر واقعی هیچ‌وقت پرش نمی‌کنه -->
-<div style="position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;" aria-hidden="true">
+<div class="sr-only" aria-hidden="true">
 <input type="text" id="homeContactWebsite" tabindex="-1" autocomplete="off">
 </div>
 <button type="submit" id="homeContactSubmitBtn" class="w-full luxury-btn bg-amber-400 text-black font-bold py-4 rounded-xl">
