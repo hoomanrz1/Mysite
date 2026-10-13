@@ -1,3 +1,7 @@
+// اگه true باشه، عکس پیش‌نمایش لینک (برای واتساپ) از روی یه نسخه‌ی JPEG سبک ساخته می‌شه.
+// false = همون عکس اصلی ملک (همون رفتاری که پیامک و تلگرام باهاش درست کار می‌کردن).
+const USE_JPEG_OG_IMAGE = false;
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -224,9 +228,11 @@ async function handlePropertyPage(request, env, url) {
     const rawImage = images[0] || '';
     // نسخه‌ی JPEG سبک؛ بخش ?v= باعث می‌شه با عوض شدن عکس اصلی، پیش‌نمایش هم تازه بشه
     const imageVersion = rawImage.split('/').pop().split('?')[0].replace(/\.[a-z0-9]+$/i, '').replace(/[^0-9A-Za-z_-]/g, '').slice(0, 40);
-    const image = rawImage
-      ? `https://realestaterezaei.ir/api/og/${encodeURIComponent(id)}.jpg?v=${imageVersion || '1'}`
-      : '';
+    const image = !rawImage
+      ? ''
+      : (USE_JPEG_OG_IMAGE
+          ? `https://realestaterezaei.ir/api/og/${encodeURIComponent(id)}.jpg?v=${imageVersion || '1'}`
+          : rawImage);
     const priceText = property.type === 'sale'
       ? `${property.price || ''} میلیارد تومان`
       : `ودیعه ${property.deposit || ''} / اجاره ${property.rentAmount || ''}`;
@@ -248,10 +254,10 @@ async function handlePropertyPage(request, env, url) {
     if (image) {
       headTop += `
 <meta property="og:image" content="${escapeHtml(image)}">
-<meta property="og:image:type" content="image/jpeg">
+${USE_JPEG_OG_IMAGE ? `<meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="${escapeHtml(property.title || 'ملک')}">
+` : ''}<meta property="og:image:alt" content="${escapeHtml(property.title || 'ملک')}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="${escapeHtml(image)}">`;
     } else {
