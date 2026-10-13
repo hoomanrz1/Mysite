@@ -2,6 +2,11 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
+    // عکس پیش‌نمایش (واتساپ webp و عکس‌های سنگین رو قبول نمی‌کنه، پس یه نسخه‌ی JPEG سبک می‌سازیم)
+    if (url.pathname.startsWith('/api/og/') && request.method === 'GET') {
+      return handleOgImage(request, env, ctx, url);
+    }
+
     if (url.pathname.startsWith('/api/')) {
       return handleApi(request, env, url);
     }
@@ -93,6 +98,83 @@ async function fetchPropertyAsset(request, env, url) {
   return res;
 }
 
+// نسخه‌ی JPEG و سبکِ (۱۲۰۰×۶۳۰) عکس اصلی ملک برای پیش‌نمایش لینک در واتساپ و بقیه
+async function handleOgImage(request, env, ctx, url) {
+  const m = url.pathname.match(/^\/api\/og\/([0-9A-Za-z_-]+)\.jpg$/);
+  if (!m) return new Response('Not found', { status: 404 });
+
+  const cache = caches.default;
+  const cacheKey = new Request(url.origin + url.pathname + url.search, { method: 'GET' });
+  const debug = url.searchParams.get('debug') === '1';
+  if (!debug) {
+    const cached = await cache.match(cacheKey);
+    if (cached) return cached;
+  }
+
+  let src = '';
+  try {
+    const data = (await env.PROPERTIES_KV.get('properties', 'json')) || [];
+    const p = data.find(x => x.id === m[1]);
+    if (p) {
+      const imgs = (p.images && p.images.length) ? p.images : (p.image ? [p.image] : []);
+      src = imgs[0] || '';
+    }
+  } catch (err) {
+    src = '';
+  }
+  if (!src) return new Response('Not found', { status: 404 });
+
+  let srcUrl;
+  try {
+    srcUrl = new URL(src);
+  } catch (err) {
+    return new Response('Not found', { status: 404 });
+  }
+  // فقط عکس‌های خودِ سایت پردازش می‌شن (جلوگیری از سوءاستفاده)؛ عکس بیرونی همون‌طور که هست هدایت می‌شه
+  const host = srcUrl.hostname;
+  if (srcUrl.protocol !== 'https:' || !(host === 'realestaterezaei.ir' || host.endsWith('.realestaterezaei.ir'))) {
+    return Response.redirect(srcUrl.toString(), 302);
+  }
+
+  let res = null;
+  let converted = false;
+  try {
+    res = await fetch(srcUrl.toString(), {
+      cf: { image: { width: 1200, height: 630, fit: 'cover', quality: 70, format: 'jpeg' } }
+    });
+    const ct = (res.headers.get('Content-Type') || '').toLowerCase();
+    converted = res.ok && ct.includes('image/jpeg');
+  } catch (err) {
+    res = null;
+  }
+  if (!res || !res.ok) {
+    try {
+      res = await fetch(srcUrl.toString());
+    } catch (err) {
+      return new Response('Bad gateway', { status: 502 });
+    }
+    if (!res.ok) return new Response('Not found', { status: 404 });
+    converted = false;
+  }
+
+  const contentType = res.headers.get('Content-Type') || 'image/jpeg';
+  if (debug) {
+    return new Response(JSON.stringify({ source: srcUrl.toString(), contentType, converted }, null, 2), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  const response = new Response(res.body, {
+    status: 200,
+    headers: {
+      'Content-Type': contentType,
+      'Cache-Control': 'public, max-age=86400'
+    }
+  });
+  ctx.waitUntil(cache.put(cacheKey, response.clone()));
+  return response;
+}
+
 // لینک‌های نسبی (مثل index.html یا sale.html) رو مطلق می‌کنه تا توی آدرس /property/... هم درست کار کنن
 function addRelativeUrlFixes(rewriter) {
   const fix = (attr) => ({
@@ -139,7 +221,12 @@ async function handlePropertyPage(request, env, url) {
 
   if (property) {
     const images = (property.images && property.images.length) ? property.images : (property.image ? [property.image] : []);
-    const image = images[0] || '';
+    const rawImage = images[0] || '';
+    // نسخه‌ی JPEG سبک؛ بخش ?v= باعث می‌شه با عوض شدن عکس اصلی، پیش‌نمایش هم تازه بشه
+    const imageVersion = rawImage.split('/').pop().split('?')[0].replace(/\.[a-z0-9]+$/i, '').replace(/[^0-9A-Za-z_-]/g, '').slice(0, 40);
+    const image = rawImage
+      ? `https://realestaterezaei.ir/api/og/${encodeURIComponent(id)}.jpg?v=${imageVersion || '1'}`
+      : '';
     const priceText = property.type === 'sale'
       ? `${property.price || ''} میلیارد تومان`
       : `ودیعه ${property.deposit || ''} / اجاره ${property.rentAmount || ''}`;
@@ -161,6 +248,9 @@ async function handlePropertyPage(request, env, url) {
     if (image) {
       headTop += `
 <meta property="og:image" content="${escapeHtml(image)}">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="${escapeHtml(property.title || 'ملک')}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="${escapeHtml(image)}">`;
