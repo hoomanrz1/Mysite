@@ -1,0 +1,786 @@
+// اگه true باشه، عکس پیش‌نمایش لینک (برای واتساپ) از روی یه نسخه‌ی JPEG سبک ساخته می‌شه.
+// false = همون عکس اصلی ملک (همون رفتاری که پیامک و تلگرام باهاش درست کار می‌کردن).
+const USE_JPEG_OG_IMAGE = false;
+
+export default {
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+
+    // عکس پیش‌نمایش (واتساپ webp و عکس‌های سنگین رو قبول نمی‌کنه، پس یه نسخه‌ی JPEG سبک می‌سازیم)
+    if (url.pathname.startsWith('/api/og/') && request.method === 'GET') {
+      return handleOgImage(request, env, ctx, url);
+    }
+
+    if (url.pathname.startsWith('/api/')) {
+      return handleApi(request, env, url);
+    }
+
+    // صفحه ملک: هم آدرس قدیمی (/property.html?id=...) هم آدرس جدید (/property/اسم-ملک-شناسه)
+    if (
+      url.pathname === '/property.html' ||
+      url.pathname === '/property' ||
+      url.pathname.startsWith('/property/')
+    ) {
+      const response = await handlePropertyPage(request, env, url);
+      ctx.waitUntil(trackVisit(env, 'property'));
+      return response;
+    }
+
+    const page = getPageName(url.pathname);
+    if (page && request.method === 'GET') {
+      ctx.waitUntil(trackVisit(env, page));
+    }
+
+    return env.ASSETS.fetch(request);
+  }
+};
+
+function getPageName(pathname) {
+  const map = {
+    '/': 'home',
+    '/index.html': 'home',
+    '/sale.html': 'sale',
+    '/sale': 'sale',
+    '/rent.html': 'rent',
+    '/rent': 'rent',
+    '/about.html': 'about',
+    '/about': 'about',
+    '/calculator.html': 'calculator',
+    '/calculator': 'calculator'
+  };
+  return map[pathname] || null;
+}
+
+async function trackVisit(env, page) {
+  try {
+    const stats = (await env.PROPERTIES_KV.get('site_stats', 'json')) || { total: 0, daily: {}, pages: {} };
+    stats.total = (stats.total || 0) + 1;
+
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Tehran' }); // YYYY-MM-DD به وقت تهران
+    stats.daily[today] = (stats.daily[today] || 0) + 1;
+    stats.pages[page] = (stats.pages[page] || 0) + 1;
+
+    // فقط ۳۰ روز اخیر رو نگه می‌داریم که حجم داده زیاد نشه
+    const dates = Object.keys(stats.daily).sort();
+    if (dates.length > 30) {
+      dates.slice(0, dates.length - 30).forEach(d => delete stats.daily[d]);
+    }
+
+    await env.PROPERTIES_KV.put('site_stats', JSON.stringify(stats));
+  } catch (err) {
+    // ثبت آمار هیچ‌وقت نباید باعث خرابی سایت بشه، پس خطاش رو نادیده می‌گیریم
+  }
+}
+
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// شناسه ملک رو از آخر آدرس درمیاره: /property/5000متر-شیخ-بهایی-1791810668073  ->  1791810668073
+function extractIdFromPath(pathname) {
+  let decoded = pathname;
+  try {
+    decoded = decodeURIComponent(pathname);
+  } catch (e) {
+    // اگه decode نشد، همون مسیر خام استفاده می‌شه
+  }
+  const match = decoded.match(/(\d{10,})\/?$/);
+  return match ? match[1] : null;
+}
+
+// فایل property.html رو از دارایی‌های سایت می‌گیره (حتی اگه ریدایرکت بده، دنبالش می‌ره)
+async function fetchPropertyAsset(request, env, url) {
+  let res = await env.ASSETS.fetch(new Request(new URL('/property', url).toString(), request));
+  if (res.status >= 300 && res.status < 400 && res.headers.get('Location')) {
+    res = await env.ASSETS.fetch(new Request(new URL(res.headers.get('Location'), url).toString(), request));
+  }
+  return res;
+}
+
+// نسخه‌ی JPEG و سبکِ (۱۲۰۰×۶۳۰) عکس اصلی ملک برای پیش‌نمایش لینک در واتساپ و بقیه
+async function handleOgImage(request, env, ctx, url) {
+  const m = url.pathname.match(/^\/api\/og\/([0-9A-Za-z_-]+)\.jpg$/);
+  if (!m) return new Response('Not found', { status: 404 });
+
+  const cache = caches.default;
+  const cacheKey = new Request(url.origin + url.pathname + url.search, { method: 'GET' });
+  const debug = url.searchParams.get('debug') === '1';
+  if (!debug) {
+    const cached = await cache.match(cacheKey);
+    if (cached) return cached;
+  }
+
+  let src = '';
+  try {
+    const data = (await env.PROPERTIES_KV.get('properties', 'json')) || [];
+    const p = data.find(x => x.id === m[1]);
+    if (p) {
+      const imgs = (p.images && p.images.length) ? p.images : (p.image ? [p.image] : []);
+      src = imgs[0] || '';
+    }
+  } catch (err) {
+    src = '';
+  }
+  if (!src) return new Response('Not found', { status: 404 });
+
+  let srcUrl;
+  try {
+    srcUrl = new URL(src);
+  } catch (err) {
+    return new Response('Not found', { status: 404 });
+  }
+  // فقط عکس‌های خودِ سایت پردازش می‌شن (جلوگیری از سوءاستفاده)؛ عکس بیرونی همون‌طور که هست هدایت می‌شه
+  const host = srcUrl.hostname;
+  if (srcUrl.protocol !== 'https:' || !(host === 'realestaterezaei.ir' || host.endsWith('.realestaterezaei.ir'))) {
+    return Response.redirect(srcUrl.toString(), 302);
+  }
+
+  let res = null;
+  let converted = false;
+  try {
+    res = await fetch(srcUrl.toString(), {
+      cf: { image: { width: 1200, height: 630, fit: 'cover', quality: 70, format: 'jpeg' } }
+    });
+    const ct = (res.headers.get('Content-Type') || '').toLowerCase();
+    converted = res.ok && ct.includes('image/jpeg');
+  } catch (err) {
+    res = null;
+  }
+  if (!res || !res.ok) {
+    try {
+      res = await fetch(srcUrl.toString());
+    } catch (err) {
+      return new Response('Bad gateway', { status: 502 });
+    }
+    if (!res.ok) return new Response('Not found', { status: 404 });
+    converted = false;
+  }
+
+  const contentType = res.headers.get('Content-Type') || 'image/jpeg';
+  if (debug) {
+    return new Response(JSON.stringify({ source: srcUrl.toString(), contentType, converted }, null, 2), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  const response = new Response(res.body, {
+    status: 200,
+    headers: {
+      'Content-Type': contentType,
+      'Cache-Control': 'public, max-age=86400'
+    }
+  });
+  ctx.waitUntil(cache.put(cacheKey, response.clone()));
+  return response;
+}
+
+// لینک‌های نسبی (مثل index.html یا sale.html) رو مطلق می‌کنه تا توی آدرس /property/... هم درست کار کنن
+function addRelativeUrlFixes(rewriter) {
+  const fix = (attr) => ({
+    element(el) {
+      const v = el.getAttribute(attr);
+      if (!v) return;
+      // آدرس‌های مطلق، لینک‌های داخلی صفحه (#)، کوئری (?) و پروتکل‌دار (https:, tel:, mailto:, ...) دست نمی‌خورن
+      if (/^(\/|#|\?|[a-z][a-z0-9+.\-]*:)/i.test(v)) return;
+      el.setAttribute(attr, '/' + v);
+    }
+  });
+  return rewriter
+    .on('a[href]', fix('href'))
+    .on('link[href]', fix('href'))
+    .on('script[src]', fix('src'))
+    .on('img[src]', fix('src'))
+    .on('source[src]', fix('src'));
+}
+
+async function handlePropertyPage(request, env, url) {
+  const isSlugUrl = url.pathname.startsWith('/property/');
+  const assetResponse = isSlugUrl
+    ? await fetchPropertyAsset(request, env, url)
+    : await env.ASSETS.fetch(request);
+
+  const rewriter = new HTMLRewriter();
+  if (isSlugUrl) addRelativeUrlFixes(rewriter);
+
+  const id = url.searchParams.get('id') || (isSlugUrl ? extractIdFromPath(url.pathname) : null);
+
+  let property = null;
+  if (id) {
+    try {
+      const data = (await env.PROPERTIES_KV.get('properties', 'json')) || [];
+      property = data.find(p => p.id === id) || null;
+    } catch (err) {
+      property = null;
+    }
+  }
+
+  // هرچی باید بالای <head> (درست زیر meta charset) بشینه؛ ربات‌های واتساپ و تلگرام فقط ابتدای صفحه رو می‌خونن،
+  // پس تگ‌های پیش‌نمایش (og:...) باید اول از همه باشن.
+  let headTop = '';
+
+  if (property) {
+    const images = (property.images && property.images.length) ? property.images : (property.image ? [property.image] : []);
+    const rawImage = images[0] || '';
+    // نسخه‌ی JPEG سبک؛ بخش ?v= باعث می‌شه با عوض شدن عکس اصلی، پیش‌نمایش هم تازه بشه
+    const imageVersion = rawImage.split('/').pop().split('?')[0].replace(/\.[a-z0-9]+$/i, '').replace(/[^0-9A-Za-z_-]/g, '').slice(0, 40);
+    const image = !rawImage
+      ? ''
+      : (USE_JPEG_OG_IMAGE
+          ? `https://realestaterezaei.ir/api/og/${encodeURIComponent(id)}.jpg?v=${imageVersion || '1'}`
+          : rawImage);
+    const priceText = property.type === 'sale'
+      ? `${property.price || ''} میلیارد تومان`
+      : `ودیعه ${property.deposit || ''} / اجاره ${property.rentAmount || ''}`;
+    const description = `${property.location || ''} — ${priceText}`.trim();
+    const title = `${property.title || 'ملک'} | املاک راد`;
+    const pageUrl = isSlugUrl
+      ? `https://realestaterezaei.ir${url.pathname}`
+      : `https://realestaterezaei.ir/property.html?id=${id}`;
+
+    headTop += `
+<meta property="og:title" content="${escapeHtml(title)}">
+<meta property="og:description" content="${escapeHtml(description)}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="املاک راد">
+<meta property="og:locale" content="fa_IR">
+<meta property="og:url" content="${escapeHtml(pageUrl)}">
+<meta name="twitter:title" content="${escapeHtml(title)}">
+<meta name="twitter:description" content="${escapeHtml(description)}">`;
+    if (image) {
+      headTop += `
+<meta property="og:image" content="${escapeHtml(image)}">
+${USE_JPEG_OG_IMAGE ? `<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+` : ''}<meta property="og:image:alt" content="${escapeHtml(property.title || 'ملک')}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="${escapeHtml(image)}">`;
+    } else {
+      headTop += `
+<meta name="twitter:card" content="summary">`;
+    }
+
+    rewriter
+      .on('title', {
+        element(el) {
+          el.setInnerContent(title);
+        }
+      })
+      .on('meta[name="description"]', {
+        element(el) {
+          el.setAttribute('content', description);
+        }
+      })
+      // آدرس اصلی (canonical) هر ملک باید خودِ همون ملک باشه، نه صفحه‌ی کلی /property.html
+      .on('link[rel="canonical"]', {
+        element(el) {
+          el.setAttribute('href', pageUrl);
+        }
+      });
+  }
+
+  // آدرس‌های /property/...: مبنای همه‌ی لینک‌های نسبی رو ریشه‌ی سایت می‌کنه (حتی لینک‌هایی که بعداً با جاوااسکریپت ساخته می‌شن)
+  if (isSlugUrl) {
+    const clickFixScript = `<script>document.addEventListener('click',function(e){try{var a=e.target&&e.target.closest?e.target.closest('a[href]'):null;if(!a)return;var h=a.getAttribute('href');if(!h)return;if(h.charAt(0)==='#'){a.setAttribute('href',location.pathname+location.search+h);return;}if(/^(\\/|\\?|[a-z][a-z0-9+.\\-]*:)/i.test(h))return;a.setAttribute('href','/'+h);}catch(err){}},true);</script>`;
+    headTop += '\n<base href="/">';
+    if (property) {
+      // شناسه ملک رو به آدرس مرورگر اضافه می‌کنه تا کد صفحه بتونه پیداش کنه
+      headTop += `\n<script>try{var u=new URL(location.href);if(!u.searchParams.get('id')){u.searchParams.set('id','${escapeHtml(id)}');history.replaceState(null,'',u.pathname+u.search+u.hash);}}catch(e){}</script>`;
+    }
+    headTop += '\n' + clickFixScript;
+  }
+
+  if (headTop) {
+    rewriter.on('meta[charset]', {
+      element(el) {
+        el.after(headTop, { html: true });
+      }
+    });
+  }
+
+  // آدرس قدیمی بدون ملک پیدا شده نیازی به تغییر ندارد
+  if (!isSlugUrl && !property) return assetResponse;
+
+  try {
+    return rewriter.transform(assetResponse);
+  } catch (err) {
+    return assetResponse;
+  }
+}
+
+async function hashPassword(pw) {
+  const data = new TextEncoder().encode(pw);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function getCurrentPasswordHash(env) {
+  let hash = await env.PROPERTIES_KV.get('admin_password_hash');
+  if (!hash) {
+    hash = await hashPassword(env.ADMIN_PASSWORD);
+    await env.PROPERTIES_KV.put('admin_password_hash', hash);
+  }
+  return hash;
+}
+
+async function isAuthed(request, env) {
+  const cookie = request.headers.get('Cookie') || '';
+  const match = cookie.match(/admin_token=([a-f0-9]+)/);
+  if (!match) return false;
+  const currentHash = await getCurrentPasswordHash(env);
+  return match[1] === currentHash;
+}
+
+// اطلاعات خصوصی (مثل مالک ملک) هرگز نباید به بازدیدکننده‌ی عمومی سایت برسه
+function stripPrivateFields(property) {
+  const { ownerId, ...rest } = property;
+  return rest;
+}
+
+// اعداد فارسی و عربی رو به انگلیسی تبدیل می‌کنه (برای شماره تلفن)
+function normalizeDigits(str) {
+  return String(str || '')
+    .replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+    .replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
+}
+
+// ثبت پیام فرم «تماس با ما» (عمومی)
+async function handleLeadCreate(request, env, headers) {
+  const reply = (obj, status) => new Response(JSON.stringify(obj), { status: status || 200, headers });
+
+  let raw = '';
+  try {
+    raw = await request.text();
+  } catch (err) {
+    raw = '';
+  }
+  if (raw.length > 5000) return reply({ success: false, error: 'پیام خیلی طولانی است' }, 413);
+
+  let body = {};
+  try {
+    body = JSON.parse(raw);
+  } catch (err) {
+    return reply({ success: false, error: 'اطلاعات نامعتبر است' }, 400);
+  }
+
+  // فیلد مخفی ضدِ ربات: آدم‌ها هیچ‌وقت پرش نمی‌کنن. موفقیت نمایشی می‌دیم ولی چیزی ذخیره نمی‌کنیم.
+  if (body.website) return reply({ success: true });
+
+  const name = String(body.name || '').trim().slice(0, 80);
+  const phone = normalizeDigits(body.phone).replace(/[^0-9]/g, '');
+  const message = String(body.message || '').trim().slice(0, 1000);
+  const page = String(body.page || '').trim().slice(0, 50);
+
+  if (!name) return reply({ success: false, error: 'لطفاً نام را وارد کنید' }, 400);
+  if (phone.length < 10 || phone.length > 14) {
+    return reply({ success: false, error: 'شماره تماس معتبر نیست' }, 400);
+  }
+
+  // محدودیت: حداکثر ۵ پیام در ساعت از هر کاربر
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  const rlKey = 'lead_rl:' + ip;
+  try {
+    const rl = (await env.PROPERTIES_KV.get(rlKey, 'json')) || { count: 0 };
+    if (rl.count >= 5) {
+      return reply({ success: false, error: 'تعداد درخواست‌ها زیاد است، کمی بعد دوباره تلاش کنید' }, 429);
+    }
+    await env.PROPERTIES_KV.put(rlKey, JSON.stringify({ count: rl.count + 1 }), { expirationTtl: 3600 });
+  } catch (err) {
+    // خطای محدودکننده نباید جلوی ثبت پیام رو بگیره
+  }
+
+  // متن‌ها قبل از ذخیره HTML-escape می‌شن، چون پنل ادمین اون‌ها رو مستقیم توی صفحه نشون می‌ده
+  const leads = (await env.PROPERTIES_KV.get('leads', 'json')) || [];
+  leads.unshift({
+    id: Date.now().toString(),
+    name: escapeHtml(name),
+    phone,
+    message: escapeHtml(message),
+    page: escapeHtml(page),
+    read: false,
+    createdAt: new Date().toISOString()
+  });
+  await env.PROPERTIES_KV.put('leads', JSON.stringify(leads.slice(0, 500)));
+  return reply({ success: true });
+}
+
+async function handleApi(request, env, url) {
+  const cors = {
+    'Content-Type': 'application/json'
+  };
+
+  // ثبت بازدید صفحه (عمومی - هرکسی که سایت رو باز کنه، یه بار درخواست می‌فرسته)
+  if (url.pathname === '/api/track' && request.method === 'POST') {
+    try {
+      const body = await request.json().catch(() => ({}));
+      const page = (body.page || 'unknown').toString().slice(0, 50);
+      const today = new Date().toISOString().slice(0, 10);
+
+      const stats = (await env.PROPERTIES_KV.get('site_stats', 'json')) || { total: 0, daily: {}, pages: {} };
+      stats.total = (stats.total || 0) + 1;
+      stats.daily = stats.daily || {};
+      stats.daily[today] = (stats.daily[today] || 0) + 1;
+      stats.pages = stats.pages || {};
+      stats.pages[page] = (stats.pages[page] || 0) + 1;
+
+      const dailyKeys = Object.keys(stats.daily).sort();
+      if (dailyKeys.length > 90) {
+        dailyKeys.slice(0, dailyKeys.length - 90).forEach(k => delete stats.daily[k]);
+      }
+
+      await env.PROPERTIES_KV.put('site_stats', JSON.stringify(stats));
+      return new Response(JSON.stringify({ success: true }), { headers: cors });
+    } catch (err) {
+      return new Response(JSON.stringify({ success: false }), { headers: cors });
+    }
+  }
+
+  // آمار بازدید سایت (فقط ادمین)
+  if (url.pathname === '/api/stats' && request.method === 'GET') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const stats = (await env.PROPERTIES_KV.get('site_stats', 'json')) || { total: 0, daily: {}, pages: {} };
+    return new Response(JSON.stringify(stats), { headers: cors });
+  }
+
+  // قیمت‌های لحظه‌ای (دلار، یورو، طلا، سکه) - با کش ۲ دقیقه‌ای برای صرفه‌جویی در سهمیه API
+  if (url.pathname === '/api/prices' && request.method === 'GET') {
+    try {
+      const cached = await env.PROPERTIES_KV.get('prices_cache', 'json');
+      if (cached && (Date.now() - cached.fetchedAt) < 2 * 60 * 1000) {
+        return new Response(JSON.stringify(cached.data), { headers: cors });
+      }
+
+      const apiRes = await fetch('https://img.realestaterezaei.ir/prices');
+      const raw = await apiRes.json();
+
+      if (url.searchParams.get('debug') === '1') {
+        return new Response(JSON.stringify(raw, null, 2), { headers: cors });
+      }
+
+      const currencyList = raw.currency || raw.Currency || [];
+      const goldList = raw.gold || raw.Gold || [];
+
+      function findItem(list, matchers) {
+        return list.find(item => {
+          const text = `${item.symbol || ''} ${item.name || ''} ${item.name_en || ''}`.toLowerCase();
+          return matchers.some(m => text.includes(m.toLowerCase()));
+        });
+      }
+
+      const usd = findItem(currencyList, ['usd', 'دلار']);
+      const eur = findItem(currencyList, ['eur', 'یورو']);
+      const gold18 = findItem(goldList, ['18', 'هجده']);
+      const sekkeh = goldList.find(item => {
+        const text = `${item.name || ''}`;
+        return text.includes('سکه') && !text.includes('نیم') && !text.includes('ربع') && !text.includes('گرمی');
+      });
+
+      const result = {
+        usd: usd ? { price: usd.price, change: usd.change_percent } : null,
+        eur: eur ? { price: eur.price, change: eur.change_percent } : null,
+        gold18: gold18 ? { price: gold18.price, change: gold18.change_percent } : null,
+        sekkeh: sekkeh ? { price: sekkeh.price, change: sekkeh.change_percent } : null,
+        updatedAt: Date.now()
+      };
+
+      await env.PROPERTIES_KV.put('prices_cache', JSON.stringify({ data: result, fetchedAt: Date.now() }));
+      return new Response(JSON.stringify(result), { headers: cors });
+    } catch (err) {
+      return new Response(JSON.stringify({ error: 'خطا در دریافت قیمت‌ها', debug: err.message, hasKey: !!env.BRSAPI_KEY }), { status: 502, headers: cors });
+    }
+  }
+
+  // ---------- پیام‌های فرم تماس ----------
+  // ثبت پیام جدید (عمومی)
+  if (url.pathname === '/api/leads' && request.method === 'POST') {
+    return handleLeadCreate(request, env, cors);
+  }
+
+  // لیست پیام‌ها (فقط ادمین)
+  if (url.pathname === '/api/leads' && request.method === 'GET') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const leads = (await env.PROPERTIES_KV.get('leads', 'json')) || [];
+    return new Response(JSON.stringify(leads), { headers: cors });
+  }
+
+  // علامت‌گذاری «خوانده شد» (فقط ادمین)
+  if (url.pathname.startsWith('/api/leads/') && request.method === 'PUT') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const id = url.pathname.split('/').pop();
+    const leads = (await env.PROPERTIES_KV.get('leads', 'json')) || [];
+    const index = leads.findIndex(l => l.id === id);
+    if (index === -1) {
+      return new Response(JSON.stringify({ error: 'پیام پیدا نشد' }), { status: 404, headers: cors });
+    }
+    leads[index].read = true;
+    await env.PROPERTIES_KV.put('leads', JSON.stringify(leads));
+    return new Response(JSON.stringify({ success: true }), { headers: cors });
+  }
+
+  // حذف پیام (فقط ادمین)
+  if (url.pathname.startsWith('/api/leads/') && request.method === 'DELETE') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const id = url.pathname.split('/').pop();
+    const leads = ((await env.PROPERTIES_KV.get('leads', 'json')) || []).filter(l => l.id !== id);
+    await env.PROPERTIES_KV.put('leads', JSON.stringify(leads));
+    return new Response(JSON.stringify({ success: true }), { headers: cors });
+  }
+
+  // ورود ادمین
+  if (url.pathname === '/api/login' && request.method === 'POST') {
+    const body = await request.json();
+    const currentHash = await getCurrentPasswordHash(env);
+    const inputHash = await hashPassword(body.password);
+    if (inputHash === currentHash) {
+      return new Response(JSON.stringify({ success: true }), {
+        headers: {
+          ...cors,
+          'Set-Cookie': `admin_token=${currentHash}; Path=/; HttpOnly; Max-Age=86400; SameSite=Strict`
+        }
+      });
+    }
+    return new Response(JSON.stringify({ success: false, error: 'رمز اشتباه است' }), { status: 401, headers: cors });
+  }
+
+  // تغییر رمز عبور (فقط ادمین وارد شده)
+  if (url.pathname === '/api/change-password' && request.method === 'POST') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const { oldPassword, newPassword } = await request.json();
+    if (!newPassword || newPassword.length < 4) {
+      return new Response(JSON.stringify({ error: 'رمز جدید باید حداقل ۴ کاراکتر باشد' }), { status: 400, headers: cors });
+    }
+    const currentHash = await getCurrentPasswordHash(env);
+    const oldHash = await hashPassword(oldPassword || '');
+    if (oldHash !== currentHash) {
+      return new Response(JSON.stringify({ error: 'رمز فعلی اشتباه است' }), { status: 401, headers: cors });
+    }
+    const newHash = await hashPassword(newPassword);
+    await env.PROPERTIES_KV.put('admin_password_hash', newHash);
+    return new Response(JSON.stringify({ success: true }), {
+      headers: {
+        ...cors,
+        'Set-Cookie': `admin_token=${newHash}; Path=/; HttpOnly; Max-Age=86400; SameSite=Strict`
+      }
+    });
+  }
+
+  // خروج از پنل مدیریت
+  if (url.pathname === '/api/logout' && request.method === 'POST') {
+    return new Response(JSON.stringify({ success: true }), {
+      headers: {
+        ...cors,
+        'Set-Cookie': `admin_token=; Path=/; HttpOnly; Max-Age=0; SameSite=Strict`
+      }
+    });
+  }
+
+  // بررسی وضعیت ورود
+  if (url.pathname === '/api/check-auth' && request.method === 'GET') {
+    return new Response(JSON.stringify({ authed: await isAuthed(request, env) }), { headers: cors });
+  }
+
+  // آپلود عکس (فقط ادمین) - پروکسی امن به سمت VPS
+  if (url.pathname === '/api/upload' && request.method === 'POST') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    try {
+      const contentType = request.headers.get('Content-Type') || '';
+      const uploadRes = await fetch('https://img.realestaterezaei.ir/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': contentType,
+          'x-upload-secret': env.VPS_UPLOAD_SECRET
+        },
+        body: request.body
+      });
+      const result = await uploadRes.json();
+      return new Response(JSON.stringify(result), { status: uploadRes.status, headers: cors });
+    } catch (err) {
+      return new Response(JSON.stringify({ error: 'خطا در اتصال به سرور عکس' }), { status: 502, headers: cors });
+    }
+  }
+
+  // دریافت لیست املاک (عمومی - همه می‌تونن ببینن)
+  if (url.pathname === '/api/properties' && request.method === 'GET') {
+    const type = url.searchParams.get('type');
+    const data = (await env.PROPERTIES_KV.get('properties', 'json')) || [];
+    const filtered = type ? data.filter(p => p.type === type) : data;
+    const authed = await isAuthed(request, env);
+    const output = authed ? filtered : filtered.map(stripPrivateFields);
+    return new Response(JSON.stringify(output), { headers: cors });
+  }
+
+  // دریافت یک ملک با شناسه (برای صفحه اختصاصی آگهی)
+  if (url.pathname.startsWith('/api/properties/') && request.method === 'GET') {
+    const id = url.pathname.split('/').pop();
+    const data = (await env.PROPERTIES_KV.get('properties', 'json')) || [];
+    const property = data.find(p => p.id === id);
+    if (!property) {
+      return new Response(JSON.stringify({ error: 'ملک پیدا نشد' }), { status: 404, headers: cors });
+    }
+    const authed = await isAuthed(request, env);
+    return new Response(JSON.stringify(authed ? property : stripPrivateFields(property)), { headers: cors });
+  }
+
+  // افزودن ملک جدید (فقط ادمین)
+  if (url.pathname === '/api/properties' && request.method === 'POST') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const newProperty = await request.json();
+    const data = (await env.PROPERTIES_KV.get('properties', 'json')) || [];
+    newProperty.id = Date.now().toString();
+    data.unshift(newProperty);
+    await env.PROPERTIES_KV.put('properties', JSON.stringify(data));
+    return new Response(JSON.stringify({ success: true, id: newProperty.id }), { headers: cors });
+  }
+
+  // ویرایش ملک (فقط ادمین)
+  if (url.pathname.startsWith('/api/properties/') && request.method === 'PUT') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const id = url.pathname.split('/').pop();
+    const updates = await request.json();
+    let data = (await env.PROPERTIES_KV.get('properties', 'json')) || [];
+    const index = data.findIndex(p => p.id === id);
+    if (index === -1) {
+      return new Response(JSON.stringify({ error: 'ملک پیدا نشد' }), { status: 404, headers: cors });
+    }
+    data[index] = { ...data[index], ...updates, id };
+    await env.PROPERTIES_KV.put('properties', JSON.stringify(data));
+    return new Response(JSON.stringify({ success: true }), { headers: cors });
+  }
+
+  // حذف ملک (فقط ادمین)
+  if (url.pathname.startsWith('/api/properties/') && request.method === 'DELETE') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const id = url.pathname.split('/').pop();
+    let data = (await env.PROPERTIES_KV.get('properties', 'json')) || [];
+    data = data.filter(p => p.id !== id);
+    await env.PROPERTIES_KV.put('properties', JSON.stringify(data));
+    return new Response(JSON.stringify({ success: true }), { headers: cors });
+  }
+
+  // دریافت لیست مشتری‌ها (فقط ادمین - اطلاعات خصوصی)
+  if (url.pathname === '/api/customers' && request.method === 'GET') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const customers = (await env.PROPERTIES_KV.get('customers', 'json')) || [];
+    return new Response(JSON.stringify(customers), { headers: cors });
+  }
+
+  // افزودن مشتری جدید (فقط ادمین)
+  if (url.pathname === '/api/customers' && request.method === 'POST') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const newCustomer = await request.json();
+    const customers = (await env.PROPERTIES_KV.get('customers', 'json')) || [];
+    newCustomer.id = Date.now().toString();
+    customers.unshift(newCustomer);
+    await env.PROPERTIES_KV.put('customers', JSON.stringify(customers));
+    return new Response(JSON.stringify({ success: true, id: newCustomer.id }), { headers: cors });
+  }
+
+  // ویرایش مشتری (فقط ادمین)
+  if (url.pathname.startsWith('/api/customers/') && request.method === 'PUT') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const id = url.pathname.split('/').pop();
+    const updates = await request.json();
+    let customers = (await env.PROPERTIES_KV.get('customers', 'json')) || [];
+    const index = customers.findIndex(c => c.id === id);
+    if (index === -1) {
+      return new Response(JSON.stringify({ error: 'مشتری پیدا نشد' }), { status: 404, headers: cors });
+    }
+    customers[index] = { ...customers[index], ...updates, id };
+    await env.PROPERTIES_KV.put('customers', JSON.stringify(customers));
+    return new Response(JSON.stringify({ success: true }), { headers: cors });
+  }
+
+  // حذف مشتری (فقط ادمین)
+  if (url.pathname.startsWith('/api/customers/') && request.method === 'DELETE') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const id = url.pathname.split('/').pop();
+    let customers = (await env.PROPERTIES_KV.get('customers', 'json')) || [];
+    customers = customers.filter(c => c.id !== id);
+    await env.PROPERTIES_KV.put('customers', JSON.stringify(customers));
+    return new Response(JSON.stringify({ success: true }), { headers: cors });
+  }
+
+  // دریافت لیست مالکین (فقط ادمین - کاملاً خصوصی)
+  if (url.pathname === '/api/owners' && request.method === 'GET') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const owners = (await env.PROPERTIES_KV.get('owners', 'json')) || [];
+    return new Response(JSON.stringify(owners), { headers: cors });
+  }
+
+  // افزودن مالک جدید (فقط ادمین)
+  if (url.pathname === '/api/owners' && request.method === 'POST') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const newOwner = await request.json();
+    const owners = (await env.PROPERTIES_KV.get('owners', 'json')) || [];
+    newOwner.id = Date.now().toString();
+    owners.unshift(newOwner);
+    await env.PROPERTIES_KV.put('owners', JSON.stringify(owners));
+    return new Response(JSON.stringify({ success: true, id: newOwner.id }), { headers: cors });
+  }
+
+  // ویرایش مالک (فقط ادمین)
+  if (url.pathname.startsWith('/api/owners/') && request.method === 'PUT') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const id = url.pathname.split('/').pop();
+    const updates = await request.json();
+    let owners = (await env.PROPERTIES_KV.get('owners', 'json')) || [];
+    const index = owners.findIndex(o => o.id === id);
+    if (index === -1) {
+      return new Response(JSON.stringify({ error: 'مالک پیدا نشد' }), { status: 404, headers: cors });
+    }
+    owners[index] = { ...owners[index], ...updates, id };
+    await env.PROPERTIES_KV.put('owners', JSON.stringify(owners));
+    return new Response(JSON.stringify({ success: true }), { headers: cors });
+  }
+
+  // حذف مالک (فقط ادمین)
+  if (url.pathname.startsWith('/api/owners/') && request.method === 'DELETE') {
+    if (!(await isAuthed(request, env))) {
+      return new Response(JSON.stringify({ error: 'ابتدا وارد شوید' }), { status: 401, headers: cors });
+    }
+    const id = url.pathname.split('/').pop();
+    let owners = (await env.PROPERTIES_KV.get('owners', 'json')) || [];
+    owners = owners.filter(o => o.id !== id);
+    await env.PROPERTIES_KV.put('owners', JSON.stringify(owners));
+    return new Response(JSON.stringify({ success: true }), { headers: cors });
+  }
+
+  return new Response(JSON.stringify({ error: 'مسیر پیدا نشد' }), { status: 404, headers: cors });
+}
