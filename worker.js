@@ -6,7 +6,12 @@ export default {
       return handleApi(request, env, url);
     }
 
-    if (url.pathname === '/property.html' || url.pathname === '/property') {
+    // صفحه ملک: هم آدرس قدیمی (/property.html?id=...) هم آدرس جدید (/property/اسم-ملک-شناسه)
+    if (
+      url.pathname === '/property.html' ||
+      url.pathname === '/property' ||
+      url.pathname.startsWith('/property/')
+    ) {
       const response = await handlePropertyPage(request, env, url);
       ctx.waitUntil(trackVisit(env, 'property'));
       return response;
@@ -67,16 +72,68 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
-async function handlePropertyPage(request, env, url) {
-  const assetResponse = await env.ASSETS.fetch(request);
-  const id = url.searchParams.get('id');
-  if (!id) return assetResponse;
-
+// شناسه ملک رو از آخر آدرس درمیاره: /property/5000متر-شیخ-بهایی-1791810668073  ->  1791810668073
+function extractIdFromPath(pathname) {
+  let decoded = pathname;
   try {
-    const data = (await env.PROPERTIES_KV.get('properties', 'json')) || [];
-    const property = data.find(p => p.id === id);
-    if (!property) return assetResponse;
+    decoded = decodeURIComponent(pathname);
+  } catch (e) {
+    // اگه decode نشد، همون مسیر خام استفاده می‌شه
+  }
+  const match = decoded.match(/(\d{10,})\/?$/);
+  return match ? match[1] : null;
+}
 
+// فایل property.html رو از دارایی‌های سایت می‌گیره (حتی اگه ریدایرکت بده، دنبالش می‌ره)
+async function fetchPropertyAsset(request, env, url) {
+  let res = await env.ASSETS.fetch(new Request(new URL('/property', url).toString(), request));
+  if (res.status >= 300 && res.status < 400 && res.headers.get('Location')) {
+    res = await env.ASSETS.fetch(new Request(new URL(res.headers.get('Location'), url).toString(), request));
+  }
+  return res;
+}
+
+// لینک‌های نسبی (مثل index.html یا sale.html) رو مطلق می‌کنه تا توی آدرس /property/... هم درست کار کنن
+function addRelativeUrlFixes(rewriter) {
+  const fix = (attr) => ({
+    element(el) {
+      const v = el.getAttribute(attr);
+      if (!v) return;
+      // آدرس‌های مطلق، لینک‌های داخلی صفحه (#)، کوئری (?) و پروتکل‌دار (https:, tel:, mailto:, ...) دست نمی‌خورن
+      if (/^(\/|#|\?|[a-z][a-z0-9+.\-]*:)/i.test(v)) return;
+      el.setAttribute(attr, '/' + v);
+    }
+  });
+  return rewriter
+    .on('a[href]', fix('href'))
+    .on('link[href]', fix('href'))
+    .on('script[src]', fix('src'))
+    .on('img[src]', fix('src'))
+    .on('source[src]', fix('src'));
+}
+
+async function handlePropertyPage(request, env, url) {
+  const isSlugUrl = url.pathname.startsWith('/property/');
+  const assetResponse = isSlugUrl
+    ? await fetchPropertyAsset(request, env, url)
+    : await env.ASSETS.fetch(request);
+
+  const rewriter = new HTMLRewriter();
+  if (isSlugUrl) addRelativeUrlFixes(rewriter);
+
+  const id = url.searchParams.get('id') || (isSlugUrl ? extractIdFromPath(url.pathname) : null);
+
+  let property = null;
+  if (id) {
+    try {
+      const data = (await env.PROPERTIES_KV.get('properties', 'json')) || [];
+      property = data.find(p => p.id === id) || null;
+    } catch (err) {
+      property = null;
+    }
+  }
+
+  if (property) {
     const images = (property.images && property.images.length) ? property.images : (property.image ? [property.image] : []);
     const image = images[0] || '';
     const priceText = property.type === 'sale'
@@ -84,9 +141,11 @@ async function handlePropertyPage(request, env, url) {
       : `ودیعه ${property.deposit || ''} / اجاره ${property.rentAmount || ''}`;
     const description = `${property.location || ''} — ${priceText}`.trim();
     const title = `${property.title || 'ملک'} | املاک راد`;
-    const pageUrl = `https://realestaterezaei.ir/property.html?id=${id}`;
+    const pageUrl = isSlugUrl
+      ? `https://realestaterezaei.ir${url.pathname}`
+      : `https://realestaterezaei.ir/property.html?id=${id}`;
 
-    const rewriter = new HTMLRewriter()
+    rewriter
       .on('title', {
         element(el) {
           el.setInnerContent(title);
@@ -99,6 +158,14 @@ async function handlePropertyPage(request, env, url) {
       })
       .on('head', {
         element(el) {
+          // برای آدرس‌های جدید: شناسه ملک رو به آدرس مرورگر اضافه می‌کنه تا کد صفحه بتونه پیداش کنه
+          if (isSlugUrl) {
+            el.prepend(
+              `<script>try{var u=new URL(location.href);if(!u.searchParams.get('id')){u.searchParams.set('id','${escapeHtml(id)}');history.replaceState(null,'',u.pathname+u.search+u.hash);}}catch(e){}</script>`,
+              { html: true }
+            );
+          }
+
           let tags = `
 <meta property="og:title" content="${escapeHtml(title)}">
 <meta property="og:description" content="${escapeHtml(description)}">
@@ -115,7 +182,23 @@ async function handlePropertyPage(request, env, url) {
           el.append(tags, { html: true });
         }
       });
+  }
 
+  // آدرس‌های /property/...: مبنای همه‌ی لینک‌های نسبی رو ریشه‌ی سایت می‌کنه (حتی لینک‌هایی که بعداً با جاوااسکریپت ساخته می‌شن)
+  if (isSlugUrl) {
+    const clickFixScript = `<script>document.addEventListener('click',function(e){try{var a=e.target&&e.target.closest?e.target.closest('a[href]'):null;if(!a)return;var h=a.getAttribute('href');if(!h)return;if(h.charAt(0)==='#'){a.setAttribute('href',location.pathname+location.search+h);return;}if(/^(\\/|\\?|[a-z][a-z0-9+.\\-]*:)/i.test(h))return;a.setAttribute('href','/'+h);}catch(err){}},true);</script>`;
+    rewriter.on('head', {
+      element(el) {
+        el.prepend(clickFixScript, { html: true });
+        el.prepend('<base href="/">', { html: true });
+      }
+    });
+  }
+
+  // آدرس قدیمی بدون ملک پیدا شده نیازی به تغییر ندارد
+  if (!isSlugUrl && !property) return assetResponse;
+
+  try {
     return rewriter.transform(assetResponse);
   } catch (err) {
     return assetResponse;
